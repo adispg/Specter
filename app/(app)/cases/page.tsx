@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
-import { TabBar, relTime } from "@/components/ui";
+import { TabBar } from "@/components/ui";
+import { relTime } from "@/lib/reltime";
 import { Avatar } from "@/components/Persona";
 import type { CaseSummary } from "@/lib/data/types";
 

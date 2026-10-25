@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { INTENSITIES, INTENSITY_LABELS, PERSONAS, personaList, type Intensity, type PersonaId } from "@/lib/personas/config";
 import type { Reply } from "@/lib/consult/schema";
+import { relTime } from "@/lib/reltime";
 import { useApp } from "./AppProvider";
 import { Avatar } from "./Persona";
 import { IconAlert, IconBookmark, IconCase, IconConsult, IconDial, IconMic, IconSend, IconStop, IconWifiOff } from "./Icons";
@@ -409,19 +410,6 @@ export function useThinkingLine(persona: PersonaId, active: boolean): string {
     return () => clearInterval(t);
   }, [active, lines.length, persona]);
   return lines[i] ?? lines[0]!;
-}
-
-export function relTime(iso: string, now = Date.now()): string {
-  const d = new Date(iso).getTime();
-  const s = Math.max(0, Math.round((now - d) / 1000));
-  if (s < 60) return "now";
-  const m = Math.round(s / 60);
-  if (m < 60) return `${m}m`;
-  const h = Math.round(m / 60);
-  if (h < 24) return `${h}h`;
-  const days = Math.round(h / 24);
-  if (days < 7) return `${days}d`;
-  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
 export function useRelTime(iso: string): string {
