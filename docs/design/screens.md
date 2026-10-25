@@ -17,7 +17,7 @@ Version 1.2. v1.1 fixed the founder's review (sans type system, new brand, geome
 - **Loading**: skeletons that match the final layout. Spinners only inside buttons (three dots).
 - **Persona naming** (design-system section 10): full name on hero surfaces only (home hero, result hero, persona sheet, onboarding cards); first name everywhere else. Each persona has exactly one `role` (overline, for example "The closer") and one `tagline` (for example "Finds the leverage."), used identically on every screen (N2).
 - **Intensity** (design-system 6.16): always its own pill with a dial icon reading "Intensity: Sharp". On Home under the talk button, in voice mode while listening, and in Settings. Hidden in care mode.
-- **Pause marks** (B1): rendered as baseline beats (one small pill for a beat, two for a long pause), never as bars. Saved lines, copied text, shares and notifications always strip the marks.
+- **Pause marks** (B1): `|` = single beat dot, `||` = two beat dots; see CSS `.beat` and `.beat--long`. Marks render as small circular dots on the baseline, never as bars or dashes. Saved lines, copied text, shares and notifications always strip the marks.
 - **Text size** (N12): type tokens are in rem; every screen must work at 200% browser zoom and iOS Larger Text. The line card wraps without clipping and the talk label wraps rather than truncating.
 - **Mock data**: sample user "Sam", sam@example.com. Never real people.
 - **Copy**: no em dashes or en dashes. In plain text the product is always written "Specter" (capital S, no trailing underscore).

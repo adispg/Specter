@@ -186,10 +186,11 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .w { transition: opacity .18s var(--ease-standard); }
 .performing .w { opacity: .34; }
 .performing .w.lit { opacity: 1; }
-/* v1.2 pause marks: baseline beats, one pill = beat, two pills = long pause (never a bar) */
-.pause { display: inline-flex; gap: .16em; margin: 0 .34em; vertical-align: baseline; }
-.pause i { display: block; width: .22em; height: .13em; border-radius: 1em; background: var(--dim); transition: background .2s, box-shadow .2s; }
-.pause.on i { background: var(--accent); box-shadow: 0 0 .4em var(--accent); }
+/* B1 fix v1.3: pause marks as circular baseline beat dots — one dot = beat, two = long pause */
+.beat { display: inline-flex; align-items: center; gap: .18em; margin: 0 .3em; vertical-align: .08em; line-height: 1; }
+.beat::before { content: ""; display: block; width: .22em; height: .22em; border-radius: 50%; background: var(--dim); transition: background .2s, box-shadow .2s; }
+.beat--long::after { content: ""; display: block; width: .22em; height: .22em; border-radius: 50%; background: var(--dim); transition: background .2s, box-shadow .2s; }
+.beat.on::before, .beat.on::after { background: var(--accent); box-shadow: 0 0 .35em var(--accent); }
 .nb { white-space: nowrap; }
 .player { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--hair); padding-top: 12px; margin-top: 2px; }
 .play { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex: none; }
@@ -197,14 +198,14 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .play.sm { width: 32px; height: 32px; } .play.sm svg { width: 13px; height: 13px; }
 .wave { display: flex; align-items: center; gap: 3px; height: 22px; }
 .wave i { width: 3px; height: 4px; border-radius: 2px; background: var(--accent); opacity: .5; }
-.beat { font: 600 10px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); opacity: 0; }
-.beat.on { opacity: 1; }
+.beat-lbl { font: 600 10px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); opacity: 0; }
+.beat-lbl.on { opacity: 1; }
 .player .meta { margin-left: auto; text-align: right; }
 .thinking { position: absolute; inset: 0; border-radius: 22px; display: grid; place-items: center; text-align: center; padding: 20px;
   background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 2; }
 .thinking p { margin: 0; font: 600 22px/1.2 var(--display); letter-spacing: -0.02em; }
 .thinking p.small { font: 400 13px/1.45 var(--sans); letter-spacing: 0; color: var(--muted); }
-.thinking small { display: block; margin-top: 8px; font: 600 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.thinking small { display: block; margin-top: 8px; font: 400 13px/1.45 var(--sans); letter-spacing: 0; color: var(--muted); }
 .dots { display: inline-flex; gap: 5px; margin-top: 12px; }
 .dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: dot 1.2s ease-in-out infinite; }
 .dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
@@ -539,8 +540,8 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
           <div class="body" style="display:flex;flex-direction:column;padding-top:20px">
             <article class="take" data-animate>
               <p class="eyebrow">Say less</p>
-              <p class="line spoken">The room decides in ten seconds. || Spend the first five | listening.</p>
-              <div class="player"><span class="play"><svg><use href="#i-play"/></svg></span><div class="wave" data-bars="7"></div><span class="beat">Pause</span><span class="meta">Demo</span></div>
+              <p class="line spoken">The room decides in ten seconds.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>Spend the first five<span class="beat" aria-hidden="true" data-len="short"></span>listening.</p>
+              <div class="player"><span class="play"><svg><use href="#i-play"/></svg></span><div class="wave" data-bars="7"></div><span class="beat-lbl">Pause</span><span class="meta">Demo</span></div>
             </article>
             <div style="flex:1"></div>
             <h2 class="t1 hero-xl">Bring the situation. Leave with the line.</h2>
@@ -753,7 +754,6 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <p class="echo"><span class="tag">You</span><span style="overflow:hidden;text-overflow:ellipsis">So my cofounder wants to bring in his college friend as CTO...</span></p>
             <div style="height:40px"></div>
             <span class="av xxl breathe"></span>
-            <span class="vstate">Thinking</span>
             <div class="vtext" style="text-align:center;margin-top:44px">
               <p class="t2" style="font-size:26px">Finding the leverage.</p>
               <div class="dots"><i></i><i></i><i></i></div>
@@ -777,8 +777,8 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <span class="vstate glow">Pause</span>
             <div class="vtext performing" style="margin-top:30px">
               <p class="eyebrow" style="margin-bottom:12px">Process beats politics</p>
-              <p class="vline spoken" data-lit="6" data-on="0">You don't have a hiring problem. || You have a partner who stopped asking. | Fix that first.</p>
-              <p class="follow spoken" data-lit="0" style="margin-top:16px">Tell him you'll back any CTO who clears the bar you'd set for a stranger. || If his friend is good, | he loses nothing.</p>
+              <p class="vline spoken" data-lit="6" data-on="0">You don't have a hiring problem.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>You have a partner who stopped asking.<span class="beat" aria-hidden="true" data-len="short"></span>Fix that first.</p>
+              <p class="follow spoken" data-lit="0" style="margin-top:16px">Tell him you'll back any CTO who clears the bar you'd set for a stranger.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>If his friend is good,<span class="beat" aria-hidden="true" data-len="short"></span>he loses nothing.</p>
             </div>
           </div>
           <div class="vwave held" data-bars="28"></div>
@@ -799,9 +799,9 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <article class="take">
               <span class="save on"><svg class="i"><use href="#i-bmf"/></svg></span>
               <p class="eyebrow">Process beats politics</p>
-              <p class="line spoken">You don't have a hiring problem. || You have a partner who stopped asking. | Fix that first.</p>
-              <p class="follow spoken">Tell him you'll back any CTO who clears the bar you'd set for a stranger. || If his friend is good, | he loses nothing.</p>
-              <div class="player"><span class="play"><svg><use href="#i-play"/></svg></span><div class="wave" data-bars="7"></div><span class="beat">Pause</span><span class="meta">0.3 hrs billed</span></div>
+              <p class="line spoken">You don't have a hiring problem.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>You have a partner who stopped asking.<span class="beat" aria-hidden="true" data-len="short"></span>Fix that first.</p>
+              <p class="follow spoken">Tell him you'll back any CTO who clears the bar you'd set for a stranger.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>If his friend is good,<span class="beat" aria-hidden="true" data-len="short"></span>he loses nothing.</p>
+              <div class="player"><span class="play"><svg><use href="#i-play"/></svg></span><div class="wave" data-bars="7"></div><span class="beat-lbl">Pause</span><span class="meta">0.3 hrs billed</span></div>
             </article>
             <div class="moment">
               <div class="q"><svg class="i" style="width:16px;height:16px"><use href="#i-clock"/></svg>When is it happening?</div>
@@ -848,7 +848,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <div style="display:flex;align-items:center;gap:12px"><span class="av lg"></span><div><p class="t2">Harvey Specter</p><p class="small">Finds the leverage.</p></div></div>
             <article class="take">
               <p class="eyebrow">Process beats politics</p>
-              <p class="line spoken">You don't have a hiring problem. || You have a partner who stopped asking. | Fix that first.</p>
+              <p class="line spoken">You don't have a hiring problem.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>You have a partner who stopped asking.<span class="beat" aria-hidden="true" data-len="short"></span>Fix that first.</p>
             </article>
           </div>
           <div class="scrim"></div>
@@ -932,14 +932,14 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <div class="bubble"><div class="via"><svg><use href="#i-mic"/></svg>SPOKEN</div>My team lead keeps booking meetings over my lunch break and I don't want to be the difficult one.</div>
             <div class="tcard" data-persona="donna">
               <div class="who2"><span class="av xs"></span>Donna<span class="eyebrow">Available is a choice</span></div>
-              <p class="t3 spoken">You're not difficult. || You're just available. | Starting Monday, | be a little less available.</p>
+              <p class="t3 spoken">You're not difficult.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>You're just available.<span class="beat" aria-hidden="true" data-len="short"></span>Starting Monday,<span class="beat" aria-hidden="true" data-len="short"></span>be a little less available.</p>
               <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">Donna doesn't bill</span><span class="textbtn">Show more</span></div>
             </div>
             <div class="bubble">What if she books over the block anyway?</div>
             <div class="divider" data-persona="mike"><span class="av xs" style="margin-right:-4px"></span>ASKED MIKE</div>
             <div class="tcard" data-persona="mike">
               <div class="who2"><span class="av xs"></span>Mike<span class="eyebrow">Make it official</span></div>
-              <p class="t3 spoken">Most calendars show busy to everyone. || So make your busy | look like a meeting.</p>
+              <p class="t3 spoken">Most calendars show busy to everyone.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>So make your busy<span class="beat" aria-hidden="true" data-len="short"></span>look like a meeting.</p>
               <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">0.2 hrs, billed to Harvey</span><span class="textbtn">Show more</span></div>
             </div>
             <div class="row-actions">
@@ -1022,7 +1022,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <div class="sp24"></div>
             <span class="meta" style="letter-spacing:.18em;color:var(--accent)">RESETS MONDAY</span>
             <div class="sp16"></div>
-            <h2 class="t1 spoken hero-xl" style="text-wrap:balance">Even I clock out. || Eventually.</h2>
+            <h2 class="t1 spoken hero-xl" style="text-wrap:balance">Even I clock out.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>Eventually.</h2>
             <div class="sp16"></div>
             <p class="bodytext" style="max-width:310px">You've used your 3 free consults this week. They reset on Monday. Your cases and saved lines are all still here.</p>
             <div class="sp8"></div>
@@ -1089,7 +1089,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <div class="secthead" style="margin-top:16px"><p class="label">Try one</p><span class="small" style="font-size:12px">Your first consult is on us</span></div>
             <article class="take compact">
               <p class="you" style="font-size:12.5px"><span class="tag">Example</span><span>First time presenting to the board.</span></p>
-              <p class="line spoken">Boards don't read decks. | They read you. || So know slide nine cold.</p>
+              <p class="line spoken">Boards don't read decks.<span class="beat" aria-hidden="true" data-len="short"></span>They read you.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>So know slide nine cold.</p>
               <div class="player" style="padding-top:10px"><span class="play sm"><svg><use href="#i-play"/></svg></span><div class="wave" data-bars="7"></div><span class="meta">0.4 hrs, billed to Harvey</span></div>
             </article>
           </div>
@@ -1143,7 +1143,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <div class="bubble">My team lead keeps booking meetings over my lunch break and I don't want to be the difficult one.</div>
             <div class="tcard" data-persona="donna">
               <div class="who2"><span class="av xs"></span>Donna<span class="eyebrow">Available is a choice</span></div>
-              <p class="t3 spoken">You're not difficult. || You're just available. | Starting Monday, | be a little less available.</p>
+              <p class="t3 spoken">You're not difficult.<span class="beat beat--long" aria-hidden="true" data-len="long"></span>You're just available.<span class="beat" aria-hidden="true" data-len="short"></span>Starting Monday,<span class="beat" aria-hidden="true" data-len="short"></span>be a little less available.</p>
               <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">Donna doesn't bill</span><span class="textbtn">Show more</span></div>
             </div>
             <div class="bubble">She booked over my block again today. Now what?</div>
@@ -1264,27 +1264,29 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     av.insertAdjacentHTML("afterbegin", '<svg class="gl" aria-hidden="true"><use href="#g-' + p + '"/></svg>');
   });
 
-  // Render "|" and "||" pause markup into word spans and pause marks (same rules as the prototype)
+  // B1 fix: process pre-rendered .beat/.beat--long spans and wrap text runs into word spans for lighting
   function build(el) {
-    const parts = el.textContent.split(/\s*(\|\|?)\s*/);
-    el.textContent = "";
+    const nodes = Array.from(el.childNodes);
+    el.innerHTML = "";
     const words = [], pauses = [];
-    parts.forEach((part) => {
-      if (part === "|" || part === "||") {
+    nodes.forEach((node) => {
+      if (node.nodeType === 3) { // text node
+        const t = node.textContent.replace(/\s+/g, " ").trim(); if (!t) return;
+        t.split(" ").forEach((w, i, arr) => {
+          if (!w) return;
+          if (el.lastChild && el.lastChild.nodeType !== 3) el.append(document.createTextNode(" "));
+          const s = document.createElement("span"); s.className = "w"; s.textContent = w; el.append(s); words.push(s);
+        });
+      } else if (node.nodeType === 1 && node.classList.contains("beat")) {
+        const isLong = node.classList.contains("beat--long");
         const p = document.createElement("span");
-        p.className = "pause"; p.dataset.len = part === "||" ? "long" : "short"; p.setAttribute("aria-hidden", "true"); p.innerHTML = part === "||" ? "<i></i><i></i>" : "<i></i>";
-        // keep the mark attached to the word before it so a pause never starts a line
+        p.className = "beat" + (isLong ? " beat--long" : ""); p.dataset.len = isLong ? "long" : "short"; p.setAttribute("aria-hidden", "true");
+        // keep beat attached to the word before it so a mark never starts a line
         const prev = words[words.length - 1];
         if (prev) { const nb = document.createElement("span"); nb.className = "nb"; prev.before(nb); nb.append(prev, p); }
         else el.append(p);
-        el.append(document.createTextNode(" ")); pauses.push({ el: p, after: words.length });
-        return;
+        pauses.push({ el: p, after: words.length });
       }
-      const t = part.trim(); if (!t) return;
-      t.split(/\s+/).forEach((w) => {
-        if (el.lastChild && el.lastChild.nodeType === 1) el.append(document.createTextNode(" "));
-        const s = document.createElement("span"); s.className = "w"; s.textContent = w; el.append(s); words.push(s);
-      });
     });
     return { words, pauses };
   }
@@ -1317,7 +1319,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.querySelectorAll("[data-animate]").forEach((card) => {
     if (reduce) return;
-    const el = card.querySelector(".spoken"), b = built.get(el), beat = card.querySelector(".beat");
+    const el = card.querySelector(".spoken"), b = built.get(el), beat = card.querySelector(".beat-lbl");
     const bars = card.querySelectorAll(".wave i");
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const wave = (on) => bars.forEach((x, i) => { x.style.opacity = on ? .95 : .5; x.style.transition = "height .2s"; });
