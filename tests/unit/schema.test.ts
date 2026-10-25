@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { ConsultError, generateReply } from "@/lib/consult/engine";
 import type { CompletionRequest, LlmClient } from "@/lib/consult/llm";
 import { MockLlmClient } from "@/lib/consult/mock";
-import { ConsultRequestSchema, extractJson, normalizeReply, parseReply, ReplySchema } from "@/lib/consult/schema";
+import { readFileSync } from "node:fs";
+import { ConsultRequestSchema, extractJson, MODES, normalizeReply, parseReply, ReplySchema } from "@/lib/consult/schema";
 import { PERSONAS, PERSONA_PACKS } from "@/lib/personas/config";
 import { hasForbiddenDash } from "@/lib/text";
 
@@ -53,6 +54,20 @@ describe("ReplySchema", () => {
   it("lets care mode carry one to three safety steps and no principle", () => {
     const care = { ...good, mode: "care", line: "You matter.", followup: "Call someone now.", play: ["Call a crisis line now."], principle: "", avoid: "", hours: 0.1 };
     expect(ReplySchema.safeParse(care).success).toBe(true);
+  });
+
+  // MODES and the consults.mode check constraint drifted once: meta and
+  // clarify passed validation and then violated the constraint on insert, so
+  // the modes added to stop those inputs failing would have 500'd instead.
+  it("keeps MODES in step with the consults.mode database constraint", () => {
+    const sql = ["supabase/migrations/20261025000000_init.sql", "supabase/migrations/20261026000000_widen_consults_mode.sql"]
+      .map((f) => readFileSync(f, "utf8"))
+      .join("\n");
+    // The last mode check wins, so read them all and take the final one.
+    const checks = [...sql.matchAll(/check\s*\(\s*mode\s+in\s*\(([^)]*)\)/gi)];
+    expect(checks.length).toBeGreaterThan(0);
+    const allowed = [...checks.at(-1)![1]!.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
+    expect([...allowed].sort()).toEqual([...MODES].sort());
   });
 
   it("lets meta mode answer with no plan at all", () => {
