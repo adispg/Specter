@@ -82,7 +82,7 @@ export default async function SavedPage() {
   const lines: SavedLine[] = session ? await session.store.listSavedLines() : [];
 
   return (
-    <div className="screen">
+    <div className="scr">
       <header style={{ padding: "16px var(--gutter-r) 0 var(--gutter-l)" }}>
         <h1 className="t1" style={{ fontSize: 20 }}>Saved</h1>
       </header>

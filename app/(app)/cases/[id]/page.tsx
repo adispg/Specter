@@ -32,7 +32,7 @@ export default async function CasePage({ params }: Props) {
   const help = helpFor(profile.country);
 
   return (
-    <div className="screen">
+    <div className="scr">
       <ResultView
         caseRow={caseData}
         consults={consults}

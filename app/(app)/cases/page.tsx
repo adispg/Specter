@@ -63,7 +63,7 @@ export default async function CasesPage() {
   const cases: CaseSummary[] = session ? await session.store.listCases(50) : [];
 
   return (
-    <div className="screen">
+    <div className="scr">
       <header style={{ padding: "16px var(--gutter-r) 0 var(--gutter-l)" }}>
         <h1 className="t1" style={{ fontSize: 20 }}>Cases</h1>
       </header>
