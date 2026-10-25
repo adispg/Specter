@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Harvey persona mark">
+  <title>Harvey persona mark</title>
+  <defs><radialGradient id="g" cx=".3" cy=".25" r=".72"><stop offset="0" stop-color="#6f89b6"/><stop offset="1" stop-color="#1c2740"/></radialGradient></defs>
+  <circle cx="128" cy="128" r="128" fill="url(#g)"/>
+  <circle cx="128" cy="128" r="127" fill="none" stroke="#fff" stroke-opacity=".10" stroke-width="2"/>
+  <g transform="translate(64 64) scale(5.3333)"><path fill="#fff" d="M12 4.2 20.2 14h-3.7L12 8.7 7.5 14H3.8z"/><path fill="#fff" d="m12 15.6 2.5 2.5-2.5 2.5-2.5-2.5z"/></g>
+</svg>
