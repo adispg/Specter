@@ -200,6 +200,9 @@ class Performer {
   private async speakBrowser(tok: number, script: SpokenScript, req: PerformRequest): Promise<PerformResult> {
     const p = PERSONAS[req.persona];
     const synth = window.speechSynthesis;
+    // Wait for the device voice list before choosing, or the pick is made
+    // against an empty array and the default voice wins.
+    await voicesReady();
     const voice = pickBrowserVoice(req.persona, req.browserVoice);
     this.source = "browser";
     this.set("speaking");
@@ -280,6 +283,33 @@ class Performer {
 export function browserVoices(): SpeechSynthesisVoice[] {
   if (typeof window === "undefined" || !window.speechSynthesis) return [];
   return window.speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang));
+}
+
+/**
+ * speechSynthesis.getVoices() is populated asynchronously. On Android it
+ * returns an empty list on the first call, so picking a voice synchronously
+ * selected nothing and every persona spoke in the device default, which is
+ * female. Resolves once the list arrives, or gives up so speech is never
+ * blocked on a browser that fires no event.
+ */
+export function voicesReady(timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return resolve([]);
+    const ready = browserVoices();
+    if (ready.length) return resolve(ready);
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      window.speechSynthesis.removeEventListener("voiceschanged", finish);
+      clearTimeout(timer);
+      resolve(browserVoices());
+    };
+    const timer = setTimeout(finish, timeoutMs);
+    window.speechSynthesis.addEventListener("voiceschanged", finish);
+    // Some engines only populate the list once getVoices has been called.
+    window.speechSynthesis.getVoices();
+  });
 }
 
 /** Pick the best device voice for a persona (prototype's scoring), unless the user chose one. */
