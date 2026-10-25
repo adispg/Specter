@@ -17,7 +17,7 @@ import { LlmError, type Completion, type CompletionRequest, type LlmClient } fro
  * popular model returns 503 "high demand" under load, so a single hardcoded
  * model makes the whole app fail for reasons nothing here controls.
  */
-const DEFAULT_MODEL_CHAIN = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"];
+const DEFAULT_MODEL_CHAIN = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"];
 
 export class GeminiClient implements LlmClient {
   private readonly client: GoogleGenerativeAI;
@@ -85,7 +85,10 @@ export class GeminiClient implements LlmClient {
       model: modelId,
       systemInstruction,
       generationConfig: {
-        maxOutputTokens: req.maxTokens ?? 1000,
+        // Gemini 3.x spends output budget on internal reasoning before emitting
+        // the answer, so a 1000 cap truncated the JSON mid-object and every reply
+        // failed schema validation as "garbled".
+        maxOutputTokens: req.maxTokens ?? 4000,
         responseMimeType: "application/json",
         responseSchema,
         ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),

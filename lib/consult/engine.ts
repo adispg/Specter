@@ -67,5 +67,15 @@ export async function generateReply(
   });
   const reparsed = parseReply(second.text);
   if (reparsed.ok) return { reply: reparsed.reply, repaired: true, raw: second.text, usage: addUsage(first.usage, second.usage) };
-  throw new ConsultError("invalid_output", `The answer came back garbled. Try again.`, 502, { detail: reparsed.error });
+  // Log the shape of the failure, never the situation text. Without this a
+  // truncated response and a genuinely malformed one look identical.
+  console.error(
+    `[consult] invalid output after repair: ${reparsed.error} | first ${first.text.length} chars, second ${second.text.length} chars`,
+  );
+  throw new ConsultError("invalid_output", `The answer came back garbled. Try again.`, 502, {
+    detail: reparsed.error,
+    parseError: String(reparsed.error).slice(0, 300),
+    firstLen: first.text.length,
+    secondLen: second.text.length,
+  });
 }
