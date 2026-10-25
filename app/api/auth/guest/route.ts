@@ -50,8 +50,11 @@ export async function POST(req: Request) {
       country: await requestCountry(),
       ...(parsed.data.persona ? { settings: { persona: parsed.data.persona } } : {}),
     });
-    jar.set(SEEN_COOKIE, "1", { sameSite: "lax", path: "/", maxAge: YEAR });
-    return NextResponse.json({ ok: true });
+    // Set seen cookie on the response directly so it is guaranteed to reach
+    // the browser even if the cookies() jar has already been flushed.
+    const res = NextResponse.json({ ok: true });
+    res.cookies.set(SEEN_COOKIE, "1", { sameSite: "lax", path: "/", maxAge: YEAR });
+    return res;
   } catch (e) {
     return errorResponse(e);
   }
