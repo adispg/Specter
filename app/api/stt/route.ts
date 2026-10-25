@@ -3,7 +3,7 @@ import { jsonError, withSession } from "@/lib/api";
 import { env } from "@/lib/env";
 import { MOCK_TRANSCRIPT } from "@/lib/consult/mock";
 import { checkQuota, windowStart } from "@/lib/ratelimit";
-import { transcribeElevenLabs } from "@/lib/tts/speech";
+import { transcribeDeepgram } from "@/lib/tts/deepgram";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,9 +33,8 @@ export const POST = withSession(async (session, req) => {
 
   const text = env.mockAI()
     ? MOCK_TRANSCRIPT
-    : await transcribeElevenLabs({
-        apiKey: env.elevenLabsKey(),
-        model: env.elevenLabsSttModel(),
+    : await transcribeDeepgram({
+        apiKey: env.deepgramKey(),
         audio,
         filename: (audio as File).name || "speech.webm",
       });

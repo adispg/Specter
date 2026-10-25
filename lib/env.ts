@@ -30,16 +30,18 @@ export const env = {
     return truthy(process.env.MOCK_AUTH) || !(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   },
 
-  anthropicKey: () => process.env.ANTHROPIC_API_KEY ?? "",
-  anthropicModel: () => process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5",
-  anthropicJudgeModel: () => process.env.ANTHROPIC_JUDGE_MODEL || process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5",
+  /** Gemini (primary LLM). Free tier: 1500 req/day, 1M tokens/min on gemini-2.0-flash. */
+  geminiKey: () => process.env.GEMINI_API_KEY ?? "",
+  geminiModel: () => process.env.GEMINI_MODEL || "gemini-2.0-flash",
 
+  /** ElevenLabs (TTS only). STT has been moved to Deepgram. */
   elevenLabsKey: () => process.env.ELEVENLABS_API_KEY ?? "",
-  /** Flash by default: about half the cost of Multilingual (PRD 11.4). */
   elevenLabsModel: () => process.env.ELEVENLABS_MODEL || "eleven_flash_v2_5",
-  elevenLabsSttModel: () => process.env.ELEVENLABS_STT_MODEL || "scribe_v1",
   ttsConfigured: () => truthy(process.env.MOCK_AI) || Boolean(process.env.ELEVENLABS_API_KEY),
-  sttConfigured: () => truthy(process.env.MOCK_AI) || Boolean(process.env.ELEVENLABS_API_KEY),
+
+  /** Deepgram (STT). Free tier: 12,000 min/year on Nova-3. */
+  deepgramKey: () => process.env.DEEPGRAM_API_KEY ?? "",
+  sttConfigured: () => truthy(process.env.MOCK_AI) || Boolean(process.env.DEEPGRAM_API_KEY),
 
   /** Free tier: billable consults per week. 0 disables the weekly quota. */
   freeConsultsPerWeek: () => int("FREE_CONSULTS_PER_WEEK", 3),
