@@ -301,7 +301,7 @@ export function Composer({
         }}
       >
         {leading}
-        {onMic && (
+        {onMic != null && (
           <button type="button" className="mic" aria-pressed={listening ? "true" : "false"} aria-label={listening ? "Finish speaking" : "Speak instead"} onClick={onMic} disabled={!online}>
             <IconMic />
           </button>

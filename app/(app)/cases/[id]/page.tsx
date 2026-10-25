@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { helpFor } from "@/lib/personas/config";
 import { ResultView } from "@/components/ResultView";
-import { TabBar } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +41,6 @@ export default async function CasePage({ params }: Props) {
         help={help}
         autoSpeak={profile.settings.speak}
       />
-      <TabBar />
     </div>
   );
 }
