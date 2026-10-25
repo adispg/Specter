@@ -186,9 +186,10 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .w { transition: opacity .18s var(--ease-standard); }
 .performing .w { opacity: .34; }
 .performing .w.lit { opacity: 1; }
-.pause { display: inline-block; vertical-align: middle; height: 2px; border-radius: 2px; background: var(--dim); margin: 0 .28em; transition: background .2s, box-shadow .2s; }
-.pause[data-len="short"] { width: .55em; } .pause[data-len="long"] { width: 1.4em; }
-.pause.on { background: var(--accent); box-shadow: var(--shadow-glow); }
+/* v1.2 pause marks: baseline beats, one pill = beat, two pills = long pause (never a bar) */
+.pause { display: inline-flex; gap: .16em; margin: 0 .34em; vertical-align: baseline; }
+.pause i { display: block; width: .22em; height: .13em; border-radius: 1em; background: var(--dim); transition: background .2s, box-shadow .2s; }
+.pause.on i { background: var(--accent); box-shadow: 0 0 .4em var(--accent); }
 .nb { white-space: nowrap; }
 .player { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--hair); padding-top: 12px; margin-top: 2px; }
 .play { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex: none; }
@@ -202,6 +203,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .thinking { position: absolute; inset: 0; border-radius: 22px; display: grid; place-items: center; text-align: center; padding: 20px;
   background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 2; }
 .thinking p { margin: 0; font: 600 22px/1.2 var(--display); letter-spacing: -0.02em; }
+.thinking p.small { font: 400 13px/1.45 var(--sans); letter-spacing: 0; color: var(--muted); }
 .thinking small { display: block; margin-top: 8px; font: 600 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .dots { display: inline-flex; gap: 5px; margin-top: 12px; }
 .dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: dot 1.2s ease-in-out infinite; }
@@ -297,9 +299,9 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .vwave i { width: 3px; border-radius: 2px; background: var(--accent); }
 .listening .vwave i { background: var(--accent-2); }
 .vwave.flat i { height: 4px !important; opacity: .5; }
-.vwave.held { gap: 0; }
+.vwave.held { gap: 6px; }
 .vwave.held i { display: none; }
-.vwave.held::before { content: ""; width: 160px; height: 2px; border-radius: 2px; background: var(--accent); box-shadow: var(--shadow-glow); }
+.vwave.held::before, .vwave.held::after { content: ""; width: 10px; height: 5px; border-radius: 5px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 .vmeta { flex: none; display: flex; justify-content: center; padding: 10px 0 12px; }
 .vhint { flex: none; text-align: center; font-size: 12.5px; color: var(--muted); padding: 4px 0 10px; }
 .vctrl { flex: none; height: 140px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 24px 34px; gap: 12px; }
@@ -357,6 +359,50 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
   padding: 10px 20px 40px; display: grid; gap: 16px; box-shadow: 0 -20px 60px -20px rgba(0,0,0,.7); }
 .grab { width: 38px; height: 4px; border-radius: 4px; background: var(--hair-2); justify-self: center; }
 
+/* ============ v1.2 components ============ */
+.iconrow.top { align-items: flex-start; line-height: 1.45; }
+.iconrow.top b { color: var(--fg); font-weight: 600; }
+.pb { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--surface-2); border: 1px solid var(--hair-2); font: 600 15px/1 var(--sans); color: var(--fg); }
+.pb.guest { color: var(--muted); }
+.chipsfade { position: relative; }
+.chipsfade::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 56px; background: linear-gradient(to right, transparent, var(--bg) 85%); pointer-events: none; }
+.chip.sm { height: 30px; font-size: 12px; padding: 0 11px; }
+.moment { display: grid; gap: 10px; padding: 2px 2px 0; }
+.moment .q { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.debrief { position: relative; display: grid; gap: 10px; padding: 14px 16px; border-radius: 16px; border: 1px solid var(--hair);
+  background: radial-gradient(90% 120% at 0% 0%, color-mix(in srgb, var(--glow) 70%, transparent), transparent 60%), var(--surface); }
+.debrief .hd { display: flex; align-items: center; gap: 8px; }
+.chips3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.chips3 .chip { justify-content: center; height: 34px; }
+.dtag { display: inline-block; font: 600 9px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 999px; padding: 3px 6px; margin-left: 8px; vertical-align: 2px; }
+.fb { display: flex; align-items: center; justify-content: space-between; padding: 12px 2px 4px; border-top: 1px solid var(--hair); margin-top: 6px; }
+.thumbs { display: flex; gap: 8px; }
+.thumbs span { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--hair); }
+.thumbs span.on { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.thumbs svg { width: 17px; height: 17px; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.duo .soft { justify-content: center; height: 42px; }
+.pinned { flex: none; display: flex; align-items: center; gap: 8px; margin: 0 16px; padding: 8px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--hair); font-size: 13px; color: var(--fg-2); }
+.pinned svg { color: var(--accent); }
+.swipewrap { position: relative; border-radius: 16px; overflow: hidden; background: var(--danger); }
+.swipewrap .rm { position: absolute; right: 0; top: 0; bottom: 0; width: 84px; display: grid; place-items: center; color: #1a0b0b; font-weight: 600; font-size: 12.5px; }
+.swipewrap .saved { transform: translateX(-84px); border-radius: 16px 0 0 16px; }
+.vlist { display: grid; gap: 9px; }
+.vlist div { display: flex; gap: 10px; align-items: center; font-size: 14.5px; color: var(--fg-2); }
+.vlist svg { color: var(--accent); width: 16px; height: 16px; }
+.plan { position: relative; display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--hair); }
+.plan.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.plan .pr { font: 650 20px/1.15 var(--display); letter-spacing: -0.015em; margin-top: 2px; }
+.radio { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--hair-2); margin-left: auto; flex: none; }
+.plan.sel .radio { border: 6px solid var(--accent); }
+.ptag { position: absolute; top: -9px; right: 14px; font: 600 9.5px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--on-accent); background: var(--accent); padding: 4px 8px; border-radius: 999px; }
+.hl { width: 100%; height: 60px; border-radius: 18px; display: flex; align-items: center; gap: 14px; padding: 0 18px; flex: none; }
+.hl.primary { background: var(--accent); color: var(--on-accent); }
+.hl.secondary { background: var(--surface-2); border: 1px solid var(--hair-2); }
+.hl .tx { display: grid; gap: 3px; text-align: left; }
+.hl b { font: 600 15px/1.2 var(--sans); }
+.hl small { font: 500 13px/1 var(--mono); opacity: .75; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
@@ -403,6 +449,15 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     <symbol id="i-sig" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></symbol>
     <symbol id="i-wifi" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.1-1.1A10.3 10.3 0 0 0 8 .6 10.3 10.3 0 0 0 .7 3.6l1.1 1.1A8.7 8.7 0 0 1 8 2.2zm0 3.3c1.5 0 2.9.6 3.9 1.6L13 6a7 7 0 0 0-10 0l1.1 1.1A5.5 5.5 0 0 1 8 5.5zm0 3.3c.6 0 1.2.2 1.6.7L8 11.2 6.4 9.5c.4-.5 1-.7 1.6-.7z"/></symbol>
     <symbol id="i-batt" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 10.5v9H4.5v-9zM7 10.5l3.6-6.3a1.6 1.6 0 0 1 3 .9l-.7 4.4h5.4a2 2 0 0 1 2 2.4l-1.3 6.4a2 2 0 0 1-2 1.7H7"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 13.5v-9H4.5v9zM7 13.5l3.6 6.3a1.6 1.6 0 0 0 3-.9l-.7-4.4h5.4a2 2 0 0 0 2-2.4l-1.3-6.4a2 2 0 0 0-2-1.7H7"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5l7 2.6v5.4c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V6.1z"/><path d="M9 12l2.2 2.2L15.5 10" stroke-linecap="round"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2M6.5 7l.8 12a1.6 1.6 0 0 0 1.6 1.5h6.2a1.6 1.6 0 0 0 1.6-1.5l.8-12"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.6 3.5 5.3 3.5 8.5s-1.1 5.9-3.5 8.5c-2.4-2.6-3.5-5.3-3.5-8.5s1.1-5.9 3.5-8.5z"/></symbol>
     <symbol id="i-dial" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4.5 16.5a7.5 7.5 0 1 1 15 0"/><path d="M12 16.5l3.6-4.6"/><circle cx="12" cy="16.5" r="1.3" fill="currentColor" stroke="none"/></symbol>
     <symbol id="g-harvey" viewBox="0 0 24 24"><path fill="#fff" d="M12 4.2 20.2 14h-3.7L12 8.7 7.5 14H3.8z"/><path fill="#fff" d="m12 15.6 2.5 2.5-2.5 2.5-2.5-2.5z"/></symbol>
     <symbol id="g-mike" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="9.9" y="3.5" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="16.3" y="3.5" width="4.2" height="4.2" rx="1" fill="#fff"/><rect x="3.5" y="9.9" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="9.9" y="9.9" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="16.3" y="9.9" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="3.5" y="16.3" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="9.9" y="16.3" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="16.3" y="16.3" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/></symbol>
@@ -424,7 +479,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     <div>
       <svg class="wordmark mark" role="img" aria-label="Specter"><use href="#logo"/></svg>
       <h1>MVP screens</h1>
-      <p>Version 1.1 design reference, revised after founder review. Every screen at 390 by 844 using the real tokens. Persona colours, names and copy come from one config so they can be swapped for original characters. All lines are original. Personas appear as geometric marks only, never likenesses.</p>
+      <p>Version 1.2 design reference, revised after founder review and design review 01. Every screen at 390 by 844 using the real tokens. Persona colours, names and copy come from one config so they can be swapped for original characters. All lines are original. Personas appear as geometric marks only, never likenesses.</p>
     </div>
     <div class="swatches">
       <div class="sw-card" data-persona="harvey"><div class="top"><span class="av md"></span><b>Harvey</b></div><div class="chipsw"><i style="background:var(--accent)"></i><i style="background:var(--accent-2)"></i><i style="background:var(--av-to)"></i></div><small>Midnight and platinum<br>#d3dbe8 / #7d9bcb</small></div>
@@ -459,7 +514,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
   <div class="row">
 
     <figure class="frame">
-      <figcaption><span class="num">01</span><span class="name">Splash</span><span class="note">Neutral tint while the session restores. Max 1.2s.</span></figcaption>
+      <figcaption><span class="num">F01</span><span class="name">Splash</span><span class="note">Neutral tint while the session restores. First launch goes to onboarding; guests and members go Home.</span></figcaption>
       <div class="phone" data-persona="neutral">
         <div class="scr center" style="padding-bottom:80px">
           <div style="display:grid;justify-items:center;gap:26px">
@@ -477,7 +532,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">02</span><span class="name">Onboarding 1: What it is</span><span class="note">The signature interaction first: a live demo card performs an original line with word lighting and a glowing pause.</span></figcaption>
+      <figcaption><span class="num">F02</span><span class="name">Onboarding 1: What it is</span><span class="note">B1: the demo performs with the new baseline beats. One pill is a beat, two pills a long pause. Nothing reads as a dash.</span></figcaption>
       <div class="phone" data-persona="neutral">
         <div class="scr">
           <div class="topbar"><div class="prog"><i class="on"></i><i></i><i></i></div><button class="textbtn" style="color:var(--muted)">Skip</button></div>
@@ -500,23 +555,50 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">03</span><span class="name">Onboarding 2: Meet the three</span><span class="note">Each card is tinted by its own persona. Selecting one re-tints the whole screen. Previews use stock voices.</span></figcaption>
+      <figcaption><span class="num">F03</span><span class="name">Onboarding 2: Before we start</span><span class="note">B2: 18+ gate and AI disclosure, with the local helpline from region config. Stores age_confirmed_at and disclosure_ack_at. Cannot be skipped.</span></figcaption>
+      <div class="phone" data-persona="neutral">
+        <div class="scr">
+          <div class="topbar"><div class="prog"><i class="on"></i><i class="on"></i><i></i></div><span></span></div>
+          <div class="body" style="display:flex;flex-direction:column;padding-top:28px">
+            <h2 class="t1 hero-xl">Before we start.</h2>
+            <div class="sp24"></div>
+            <div class="stack" style="gap:18px">
+              <div class="iconrow top"><span class="ic"><svg><use href="#i-sparkle"/></svg></span><span><b>Specter is an AI coach.</b> Not a person, a lawyer or a therapist.</span></div>
+              <div class="iconrow top"><span class="ic"><svg><use href="#i-shield"/></svg></span><span>Advice is for everyday situations. For legal, money or medical decisions, see a professional.</span></div>
+              <div class="iconrow top"><span class="ic"><svg><use href="#i-phone"/></svg></span><span>If you're ever in crisis, call <b>Tele-MANAS</b> on <span class="meta" style="font-size:13px;color:var(--fg)">14416</span>, any time.</span></div>
+            </div>
+            <div class="sp16"></div>
+            <span class="textbtn">Read our safety policy</span>
+            <div style="flex:1"></div>
+            <button class="btn primary">I'm 18 or older</button>
+            <div class="sp8"></div>
+            <button class="btn ghost">I'm under 18</button>
+            <div class="sp16"></div>
+            <p class="fine" style="text-align:center">By continuing you agree to the <u>Terms</u> and <u>Privacy Policy</u>.</p>
+            <div style="height:20px"></div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="frame">
+      <figcaption><span class="num">F04</span><span class="name">Onboarding 3: Meet the three</span><span class="note">N2: one role and one tagline per persona, from config, identical on every screen. Lands on Home as a guest (B3).</span></figcaption>
       <div class="phone" data-persona="harvey">
         <div class="scr">
-          <div class="topbar"><div class="prog"><i class="on"></i><i class="on"></i><i></i></div><button class="textbtn" style="color:var(--muted)">Skip</button></div>
+          <div class="topbar"><div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i></div><span></span></div>
           <div class="body" style="display:flex;flex-direction:column;padding-top:12px">
             <h2 class="t1">Pick who's in your corner.</h2>
             <p class="small" style="margin-top:8px">You can switch any time. Each one sees your situation differently.</p>
             <div class="sp24"></div>
             <div class="stack" style="gap:12px">
-              <div class="pcard sel" data-persona="harvey"><span class="av lg"></span><div class="tx"><span class="mode">THE CLOSER</span><p class="t3">Harvey Specter</p><p class="small">Finds the leverage. Few words, all of them sharp.</p></div><span class="play sm"><svg><use href="#i-play"/></svg></span></div>
-              <div class="pcard" data-persona="mike"><span class="av lg"></span><div class="tx"><span class="mode">THE PRODIGY</span><p class="t3">Mike Ross</p><p class="small">Finds the angle in the detail everyone skimmed.</p></div><span class="play sm"><svg><use href="#i-play"/></svg></span></div>
-              <div class="pcard" data-persona="donna"><span class="av lg"></span><div class="tx"><span class="mode">THE READER</span><p class="t3">Donna Paulsen</p><p class="small">Knows what everyone in the room is feeling. Including you.</p></div><span class="play sm"><svg><use href="#i-play"/></svg></span></div>
+              <div class="pcard sel" data-persona="harvey"><span class="av lg"></span><div class="tx"><span class="mode">THE CLOSER</span><p class="t3">Harvey Specter</p><p class="small">Finds the leverage.</p></div><span class="play sm"><svg><use href="#i-play"/></svg></span></div>
+              <div class="pcard" data-persona="mike"><span class="av lg"></span><div class="tx"><span class="mode">THE PRODIGY</span><p class="t3">Mike Ross</p><p class="small">Finds the detail.</p></div><span class="play sm"><svg><use href="#i-play"/></svg></span></div>
+              <div class="pcard" data-persona="donna"><span class="av lg"></span><div class="tx"><span class="mode">THE READER</span><p class="t3">Donna Paulsen</p><p class="small">Reads the people.</p></div><span class="play sm"><svg><use href="#i-play"/></svg></span></div>
             </div>
             <div style="flex:1"></div>
             <p class="fine">Unofficial fan project. Every line is original and written in the spirit of the characters. Voices are stock voices, not the actors.</p>
             <div class="sp16"></div>
-            <button class="btn primary">Continue with Harvey</button>
+            <button class="btn primary">Start with Harvey</button>
             <div style="height:20px"></div>
           </div>
         </div>
@@ -524,49 +606,20 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">04</span><span class="name">Onboarding 3: Voice permission</span><span class="note">Context before the OS prompt. Denial is fine: everything works by typing.</span></figcaption>
-      <div class="phone" data-persona="neutral">
-        <div class="scr">
-          <div class="topbar"><div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i></div><span></span></div>
-          <div class="body" style="display:flex;flex-direction:column;padding-top:36px">
-            <div style="display:grid;justify-items:center;gap:20px">
-              <span class="av xxl" data-persona="harvey"></span>
-              <div class="vwave flat" data-bars="20" style="height:20px"></div>
-            </div>
-            <div class="sp24"></div>
-            <h2 class="t1 hero-xl">Talk it through.</h2>
-            <div class="sp8"></div>
-            <p class="bodytext">Specter listens only while the button is lit. Audio is turned into text and not stored.</p>
-            <div class="sp24"></div>
-            <div class="stack" style="gap:12px">
-              <div class="iconrow"><span class="ic"><svg><use href="#i-tap"/></svg></span>Tap to talk, tap to finish</div>
-              <div class="iconrow"><span class="ic"><svg><use href="#i-cc"/></svg></span>Captions are always on while they speak</div>
-            </div>
-            <div style="flex:1"></div>
-            <button class="btn primary"><svg class="i"><use href="#i-mic"/></svg>Allow microphone</button>
-            <div class="sp8"></div>
-            <button class="btn ghost">Not now, I'll type</button>
-            <div style="height:20px"></div>
-          </div>
-        </div>
-      </div>
-    </figure>
-
-    <figure class="frame">
-      <figcaption><span class="num">05</span><span class="name">Sign in</span><span class="note">Google or email magic link. Field shown focused with a valid address.</span></figcaption>
+      <figcaption><span class="num">F05</span><span class="name">Sign in (returning users)</span><span class="note">Full-screen variant of the Keep this case sheet. N8: sample user is Sam.</span></figcaption>
       <div class="phone" data-persona="neutral">
         <div class="scr">
           <div class="topbar" style="justify-content:center"><svg class="wordmark" role="img" aria-label="Specter"><use href="#logo"/></svg></div>
           <div class="body" style="display:flex;flex-direction:column;padding-top:56px">
             <h2 class="t1 hero-xl">Your cases, kept private.</h2>
             <div class="sp8"></div>
-            <p class="small" style="font-size:14px">Sign in to save cases and lines across devices.</p>
+            <p class="small" style="font-size:14px">Sign in to pick up your cases and lines on any device.</p>
             <div style="height:36px"></div>
             <button class="btn google"><svg><use href="#i-google"/></svg>Continue with Google</button>
             <div style="height:22px"></div>
             <div class="divider">OR</div>
             <div style="height:22px"></div>
-            <div class="field"><span class="label">Email</span><div class="input focus">aditya@example.com<span class="caret"></span></div></div>
+            <div class="field"><span class="label">Email</span><div class="input focus">sam@example.com<span class="caret"></span></div></div>
             <div style="height:14px"></div>
             <button class="btn primary">Send me a link</button>
             <div style="flex:1"></div>
@@ -578,7 +631,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">06</span><span class="name">Sign in: link sent</span><span class="note">Success state replaces the form. Resend unlocks after 30s.</span></figcaption>
+      <figcaption><span class="num">F06</span><span class="name">Sign in: link sent</span><span class="note">On sign in the guest session is linked, so the first case is kept.</span></figcaption>
       <div class="phone" data-persona="neutral">
         <div class="scr">
           <div class="topbar"><span class="ib bare"><svg><use href="#i-back"/></svg></span><svg class="wordmark" role="img" aria-label="Specter"><use href="#logo"/></svg><span style="width:36px"></span></div>
@@ -587,7 +640,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <div class="sp24"></div>
             <h2 class="t1 hero-xl">Check your inbox.</h2>
             <div class="sp8"></div>
-            <p class="bodytext">We sent a sign-in link to <b style="color:var(--fg);font-weight:500">aditya@example.com</b>. It expires in 15 minutes.</p>
+            <p class="bodytext">We sent a sign-in link to <b style="color:var(--fg);font-weight:500">sam@example.com</b>. It expires in 15 minutes.</p>
             <div class="sp24"></div>
             <button class="btn secondary">Open mail app</button>
             <div style="display:flex;justify-content:space-between;margin-top:8px">
@@ -601,36 +654,37 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
   </div>
 
   <!-- ===================== CONSULT ===================== -->
-  <div class="section"><h2>Consult</h2><span>Home, voice mode, result</span></div>
+  <div class="section"><h2>Consult</h2><span>Home, voice mode, first reply</span></div>
   <div class="row">
 
     <figure class="frame">
-      <figcaption><span class="num">07</span><span class="name">Home</span><span class="note">Voice first. Rail re-tints the app. Full name on the hero, first name everywhere else. Intensity sits under the talk button.</span></figcaption>
+      <figcaption><span class="num">F07</span><span class="name">Home (signed in, with a debrief)</span><span class="note">B6: the moment has passed, so a debrief card asks how it went. B7: one gesture, same copy everywhere. N7: profile button replaces the sliders icon.</span></figcaption>
       <div class="phone" data-persona="harvey">
         <div class="scr">
-          <div class="topbar"><svg class="wordmark" role="img" aria-label="Specter"><use href="#logo"/></svg><span class="ib"><svg><use href="#i-settings"/></svg></span></div>
+          <div class="topbar"><svg class="wordmark" role="img" aria-label="Specter"><use href="#logo"/></svg><span class="pb" aria-label="Profile and settings">S</span></div>
           <div class="body" style="padding-bottom:12px">
             <nav class="rail">
               <span class="who sel"><span class="av lg" data-persona="harvey"></span>Harvey</span>
               <span class="who"><span class="av lg" data-persona="mike"></span>Mike</span>
               <span class="who"><span class="av lg" data-persona="donna"></span>Donna</span>
             </nav>
-            <div style="text-align:center;margin:10px 0 16px"><p class="t1">Harvey Specter</p><p class="small" style="margin-top:4px">Senior partner. Reads the room before he walks in.</p></div>
-            <div class="talk">
-              <div class="talk-ring"><span class="talk-disc"><svg><use href="#i-mic"/></svg></span></div>
-              <div class="lbl"><b>Tap to talk to Harvey</b><span>Hold to talk, release to send. Or <a href="#">type instead</a>.</span></div>
+            <div style="text-align:center;margin:8px 0 14px"><p class="t1">Harvey Specter</p><p class="small" style="margin-top:3px">Finds the leverage.</p></div>
+            <div class="talk" style="gap:10px">
+              <div class="talk-ring" style="width:116px;height:116px"><span class="talk-disc" style="width:94px;height:94px"><svg><use href="#i-mic"/></svg></span></div>
+              <div class="lbl"><b>Tap to talk to Harvey</b><span>Tap again when you're done. Or <a href="#">type instead</a>.</span></div>
               <span class="intensity" aria-label="Intensity: Sharp"><svg><use href="#i-dial"/></svg>Intensity:<b>Sharp</b></span>
             </div>
-            <div class="secthead" style="margin-top:20px"><p class="label">Quick situations</p></div>
-            <div class="chips">
+            <div class="sp16"></div>
+            <div class="debrief" data-persona="harvey">
+              <div class="hd"><span class="av xs"></span><span class="eyebrow">Debrief</span><span style="margin-left:auto;color:var(--muted)"><svg class="i" style="width:14px;height:14px"><use href="#i-close"/></svg></span></div>
+              <p class="t3" style="font-size:17px">How did it go with Cofounder's CTO pick?</p>
+              <div class="chips3"><span class="chip">Used it</span><span class="chip">Partly</span><span class="chip">Didn't</span></div>
+            </div>
+            <div class="secthead" style="margin-top:18px"><p class="label">Quick situations</p></div>
+            <div class="chips chipsfade">
               <span class="chip">They lowballed my offer</span>
               <span class="chip">My boss took credit</span>
               <span class="chip">A client wants out</span>
-            </div>
-            <div class="secthead"><p class="label">Recent cases</p><a href="#">See all</a></div>
-            <div class="group">
-              <div class="lrow"><span class="av md" data-persona="harvey"></span><div class="tx"><div class="tt">Cofounder's CTO pick</div><div class="ex">You don't have a hiring problem.</div></div><span class="tm">2h</span></div>
-              <div class="lrow"><span class="avstack"><span class="av md" data-persona="donna"></span><span class="av sm" data-persona="mike"></span></span><div class="tx"><div class="tt">Lunch meetings, again</div><div class="ex">You're not difficult. You're just available.</div></div><span class="tm">5h</span></div>
             </div>
           </div>
           <nav class="tabs"><span class="tab on"><svg><use href="#i-consult"/></svg>Consult</span><span class="tab"><svg><use href="#i-case"/></svg>Cases</span><span class="tab"><svg><use href="#i-bm"/></svg>Saved</span></nav>
@@ -639,7 +693,41 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">08</span><span class="name">Voice mode: listening</span><span class="note">Live transcript in Geist 20: final words bright, interim muted. Intensity is its own pill, never next to the name.</span></figcaption>
+      <figcaption><span class="num">F08</span><span class="name">Mic priming sheet</span><span class="note">N1: permission is asked on the first talk tap, not in onboarding. Allow triggers the OS prompt, then listening.</span></figcaption>
+      <div class="phone" data-persona="harvey">
+        <div class="scr">
+          <div class="topbar"><svg class="wordmark" role="img" aria-label="Specter"><use href="#logo"/></svg><span class="pb guest"><svg class="i" style="width:17px;height:17px"><use href="#i-user"/></svg></span></div>
+          <div class="body">
+            <nav class="rail">
+              <span class="who sel"><span class="av lg" data-persona="harvey"></span>Harvey</span>
+              <span class="who"><span class="av lg" data-persona="mike"></span>Mike</span>
+              <span class="who"><span class="av lg" data-persona="donna"></span>Donna</span>
+            </nav>
+            <div style="text-align:center;margin:8px 0 14px"><p class="t1">Harvey Specter</p><p class="small">Finds the leverage.</p></div>
+            <div class="talk"><div class="talk-ring"><span class="talk-disc"><svg><use href="#i-mic"/></svg></span></div></div>
+          </div>
+          <div class="scrim"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="display:grid;justify-items:center;gap:14px;padding-top:6px">
+              <span class="av xl" style="width:84px;height:84px"></span>
+              <div class="vwave flat" data-bars="18" style="height:14px"></div>
+            </div>
+            <h2 class="t2" style="text-align:center">Talk it through.</h2>
+            <p class="bodytext" style="text-align:center;font-size:14.5px;margin-top:-6px">Specter listens only while the button is lit. Your audio becomes text and isn't stored.</p>
+            <div class="stack" style="gap:10px">
+              <div class="iconrow"><span class="ic"><svg><use href="#i-tap"/></svg></span>Tap to talk, tap again when you're done</div>
+              <div class="iconrow"><span class="ic"><svg><use href="#i-cc"/></svg></span>Captions are always on while they speak</div>
+            </div>
+            <button class="btn primary"><svg class="i"><use href="#i-mic"/></svg>Allow microphone</button>
+            <button class="btn ghost" style="margin-top:-6px">Type instead</button>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="frame">
+      <figcaption><span class="num">F09</span><span class="name">Voice mode: listening</span><span class="note">B7: "Tap again when you're done." A pause also ends the turn. Intensity in its own pill.</span></figcaption>
       <div class="phone voice listening" data-persona="harvey">
         <div class="scr">
           <div class="vtop"><span class="ib"><svg><use href="#i-close"/></svg></span><span class="vchip"><span class="av sm"></span>Harvey</span><span class="ib"><svg><use href="#i-kbd"/></svg></span></div>
@@ -650,14 +738,14 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
           </div>
           <div class="vwave" data-bars="28" data-seed="3"></div>
           <div class="vmeta"><span class="intensity" aria-label="Intensity: Sharp"><svg><use href="#i-dial"/></svg>Intensity:<b>Sharp</b></span></div>
-          <div class="vhint">Tap to finish. Or just stop talking.</div>
+          <div class="vhint">Tap again when you're done.</div>
           <div class="vctrl"><button class="btn ghost sm l">Cancel</button><span class="vbtn"><svg><use href="#i-stop"/></svg></span><span class="r"></span></div>
         </div>
       </div>
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">09</span><span class="name">Voice mode: thinking</span><span class="note">The transcript collapses to a one-line echo. Persona thinking copy rotates every 2.4s.</span></figcaption>
+      <figcaption><span class="num">F10</span><span class="name">Voice mode: thinking</span><span class="note">N5: the status is sentence case small, "Harvey is on it", on every screen. A care reply never leaves this state for speaking (B5).</span></figcaption>
       <div class="phone voice" data-persona="harvey">
         <div class="scr">
           <div class="vtop"><span class="ib"><svg><use href="#i-close"/></svg></span><span class="vchip"><span class="av sm"></span>Harvey</span><span class="ib"><svg><use href="#i-kbd"/></svg></span></div>
@@ -669,7 +757,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             <div class="vtext" style="text-align:center;margin-top:44px">
               <p class="t2" style="font-size:26px">Finding the leverage.</p>
               <div class="dots"><i></i><i></i><i></i></div>
-              <p class="label" style="margin-top:10px">Harvey is on it</p>
+              <p class="small" style="margin-top:8px">Harvey is on it</p>
             </div>
           </div>
           <div class="vwave flat" data-bars="28"></div>
@@ -680,12 +768,12 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">10</span><span class="name">Voice mode: speaking, in a pause</span><span class="note">Captions always on. Spoken words lit, the long pause mark glows, waveform holds as a glowing line, halo holds.</span></figcaption>
+      <figcaption><span class="num">F11</span><span class="name">Voice mode: speaking, in a long pause</span><span class="note">B1: the long pause shows two glowing baseline beats in the text and two beats in place of the waveform. N4: "See the full answer".</span></figcaption>
       <div class="phone voice speaking pausing" data-persona="harvey">
         <div class="scr">
           <div class="vtop"><span class="ib"><svg><use href="#i-close"/></svg></span><span class="vchip"><span class="av sm"></span>Harvey</span><span class="ib"><svg><use href="#i-kbd"/></svg></span></div>
           <div class="vstage">
-            <span class="av xxl" style="width:96px;height:96px;font-size:36px"><i class="halo"></i></span>
+            <span class="av xxl" style="width:96px;height:96px"><i class="halo"></i></span>
             <span class="vstate glow">Pause</span>
             <div class="vtext performing" style="margin-top:30px">
               <p class="eyebrow" style="margin-bottom:12px">Process beats politics</p>
@@ -695,18 +783,18 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
           </div>
           <div class="vwave held" data-bars="28"></div>
           <div class="vhint">Tap anywhere to interrupt</div>
-          <div class="vctrl"><button class="btn ghost sm l">Stop</button><span class="vbtn"><svg><use href="#i-pause"/></svg></span><span class="textbtn r">Full play</span></div>
+          <div class="vctrl"><button class="btn ghost sm l">Stop</button><span class="vbtn"><svg><use href="#i-pause"/></svg></span><span class="textbtn r" style="font-size:13px;text-align:right;line-height:1.2">See the full answer</span></div>
         </div>
       </div>
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">11a</span><span class="name">Consult result</span><span class="note">The line card from the prototype, now with save. Push back lives in the dock. Toast confirms the save.</span></figcaption>
+      <figcaption><span class="num">F12</span><span class="name">Result: first reply</span><span class="note">B9: this screen shows only the first reply; everything after lands in the thread. B6: "When is it happening?" sits under the line card.</span></figcaption>
       <div class="phone" data-persona="harvey">
         <div class="scr">
           <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl">Cofounder's CTO pick</span><span class="ib"><svg><use href="#i-more"/></svg></span></div>
-          <div class="body stack" style="gap:16px;padding-top:6px">
-            <div style="display:flex;align-items:center;gap:12px"><span class="av lg"><i class="halo"></i></span><div><p class="t2">Harvey Specter</p><p class="small">Senior partner. Reads the room before he walks in.</p></div></div>
+          <div class="body stack" style="gap:14px;padding-top:6px">
+            <div style="display:flex;align-items:center;gap:12px"><span class="av lg"><i class="halo"></i></span><div><p class="t2">Harvey Specter</p><p class="small">Finds the leverage.</p></div></div>
             <p class="you"><span class="tag">You</span><span>My cofounder wants to hire his college friend as CTO. I think it's a mistake, but I don't want to block his first big hire.</span></p>
             <article class="take">
               <span class="save on"><svg class="i"><use href="#i-bmf"/></svg></span>
@@ -715,6 +803,10 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
               <p class="follow spoken">Tell him you'll back any CTO who clears the bar you'd set for a stranger. || If his friend is good, | he loses nothing.</p>
               <div class="player"><span class="play"><svg><use href="#i-play"/></svg></span><div class="wave" data-bars="7"></div><span class="beat">Pause</span><span class="meta">0.3 hrs billed</span></div>
             </article>
+            <div class="moment">
+              <div class="q"><svg class="i" style="width:16px;height:16px"><use href="#i-clock"/></svg>When is it happening?</div>
+              <div class="chips chipsfade"><span class="chip sm">Today</span><span class="chip sm">Tomorrow</span><span class="chip sm">This week</span><span class="chip sm">Pick a time</span></div>
+            </div>
             <div class="card"><h3>The read</h3><p>This isn't about the friend. Your cofounder made a big call alone, and you're testing whether this is still a partnership.</p></div>
           </div>
           <div class="toast" style="bottom:104px"><svg><use href="#i-check"/></svg>Saved to your lines</div>
@@ -724,47 +816,90 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">11b</span><span class="name">Consult result, scrolled</span><span class="note">The play, the avoid, and every way to continue: replay, another take, push back, ask another persona.</span></figcaption>
+      <figcaption><span class="num">F13</span><span class="name">Result: first reply, scrolled</span><span class="note">N3: Harvey's label is "Avoid" and the sentence never starts with "Don't". N9: two equal buttons; push back lives in the dock. B8: thumbs row.</span></figcaption>
       <div class="phone" data-persona="harvey">
         <div class="scr">
           <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl">Cofounder's CTO pick</span><span class="ib"><svg><use href="#i-more"/></svg></span></div>
           <div class="body stack" style="gap:10px;padding-top:6px">
             <div class="card"><h3>The play</h3><ol><li>Ask for thirty minutes this week, just the two of you, no laptops.</li><li>Propose one written hiring bar for every senior role, agreed before any names come up.</li><li>Offer to meet the friend yourself, with an open mind and a scorecard.</li></ol></div>
-            <div class="card avoid"><h3>Don't</h3><p>Don't make it about the friend. You'll win the argument and lose the partner.</p></div>
+            <div class="card avoid"><h3>Avoid</h3><p>Making it about the friend. You'll win the argument and lose the partner.</p></div>
             <div class="sp8"></div>
-            <div class="row-actions">
-              <span class="soft"><svg><use href="#i-replay"/></svg>Replay</span>
-              <span class="soft"><svg><use href="#i-redo"/></svg>Another take</span>
-              <span class="soft"><svg><use href="#i-push"/></svg>Push back</span>
-            </div>
+            <div class="duo"><span class="soft"><svg><use href="#i-replay"/></svg>Replay</span><span class="soft"><svg><use href="#i-redo"/></svg>New take</span></div>
             <div class="sp8"></div>
             <p class="label">Ask another persona</p>
             <div class="row-actions">
               <span class="chip persona" data-persona="mike"><span class="av sm"></span>Ask Mike</span>
               <span class="chip persona" data-persona="donna"><span class="av sm"></span>Ask Donna</span>
             </div>
-            <div class="sp16"></div>
+            <div class="fb"><span class="small">Was this useful?</span><span class="thumbs"><span aria-label="Useful"><svg><use href="#i-up"/></svg></span><span aria-label="Not useful"><svg><use href="#i-down"/></svg></span></span></div>
             <p class="fine">Unofficial fan project for personal use. Every line is original, written in the spirit of the characters. Voices are stock voices, not the actors. For real legal, money or medical decisions, see a professional.</p>
           </div>
           <div class="dock"><div class="composer"><span class="mic"><svg><use href="#i-mic"/></svg></span><span class="ta">Push back, or tell Harvey what happened next</span><span class="send"><svg><use href="#i-send"/></svg></span></div></div>
         </div>
       </div>
     </figure>
+
+    <figure class="frame">
+      <figcaption><span class="num">F14</span><span class="name">Keep this case? (guest)</span><span class="note">B3: shown after the first reply finishes speaking. "Not now" keeps the guest case. A second new consult opens it without "Not now".</span></figcaption>
+      <div class="phone" data-persona="harvey">
+        <div class="scr">
+          <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl">Cofounder's CTO pick</span><span class="ib"><svg><use href="#i-more"/></svg></span></div>
+          <div class="body stack" style="gap:14px;padding-top:6px">
+            <div style="display:flex;align-items:center;gap:12px"><span class="av lg"></span><div><p class="t2">Harvey Specter</p><p class="small">Finds the leverage.</p></div></div>
+            <article class="take">
+              <p class="eyebrow">Process beats politics</p>
+              <p class="line spoken">You don't have a hiring problem. || You have a partner who stopped asking. | Fix that first.</p>
+            </article>
+          </div>
+          <div class="scrim"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><span class="av xs" data-persona="harvey"></span><span style="color:var(--fg);font-weight:500">Cofounder's CTO pick</span></div>
+            <h2 class="t2">Keep this case?</h2>
+            <p class="bodytext" style="font-size:14.5px;margin-top:-8px">Sign in to save it and your lines, and pick up on any device.</p>
+            <button class="btn google"><svg><use href="#i-google"/></svg>Continue with Google</button>
+            <button class="btn secondary" style="margin-top:-6px"><svg class="i"><use href="#i-mail"/></svg>Continue with email</button>
+            <button class="btn ghost" style="margin-top:-6px;border-color:transparent;color:var(--muted)">Not now</button>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="frame">
+      <figcaption><span class="num">F15</span><span class="name">Feedback: thumbs down</span><span class="note">B8: reason chips match the data model. Unsafe flags are reviewed by a person.</span></figcaption>
+      <div class="phone" data-persona="harvey">
+        <div class="scr">
+          <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl">Cofounder's CTO pick</span><span class="ib"><svg><use href="#i-more"/></svg></span></div>
+          <div class="body stack" style="gap:10px;padding-top:6px">
+            <div class="card avoid"><h3>Avoid</h3><p>Making it about the friend. You'll win the argument and lose the partner.</p></div>
+            <div class="fb"><span class="small">Was this useful?</span><span class="thumbs"><span><svg><use href="#i-up"/></svg></span><span class="on"><svg><use href="#i-down"/></svg></span></span></div>
+          </div>
+          <div class="scrim"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <h2 class="t2">What missed?</h2>
+            <div class="chips wrap"><span class="chip">Too long</span><span class="chip sel">Off target</span><span class="chip">Not their voice</span><span class="chip">Unsafe</span><span class="chip">Other</span></div>
+            <div class="field"><span class="label">Anything else? (optional)</span><div class="input" style="height:76px;align-items:flex-start;padding-top:14px;font-size:15px">He's my cofounder, not my boss. The read felt off.</div></div>
+            <button class="btn primary">Send</button>
+          </div>
+        </div>
+      </div>
+    </figure>
   </div>
 
   <!-- ===================== LIBRARY ===================== -->
-  <div class="section"><h2>Library and account</h2><span>Cases, thread, saved, settings, limit</span></div>
+  <div class="section"><h2>Library and account</h2><span>Cases, thread, saved, settings, allowance, paywall</span></div>
   <div class="row">
 
     <figure class="frame">
-      <figcaption><span class="num">12</span><span class="name">Case history</span><span class="note">Grouped by date. Avatar shows who answered last, a stacked avatar when more than one did. Swipe to delete.</span></figcaption>
+      <figcaption><span class="num">F16</span><span class="name">Cases</span><span class="note">B6: a Debrief tag until the moment is answered. Excerpts strip pause marks. Tapping any row opens the thread.</span></figcaption>
       <div class="phone" data-persona="harvey">
         <div class="scr">
-          <div class="topbar lg"><p class="t1">Cases</p><span class="ib"><svg><use href="#i-settings"/></svg></span></div>
+          <div class="topbar lg"><p class="t1">Cases</p><span class="pb">S</span></div>
           <div class="body" style="padding-top:8px">
             <div class="input search"><svg class="i" style="width:16px;height:16px"><use href="#i-search"/></svg>Search your cases</div>
             <div class="sp16"></div>
-            <div class="chips">
+            <div class="chips chipsfade">
               <span class="chip sel">All</span>
               <span class="chip" data-persona="harvey"><span class="av xs"></span>Harvey</span>
               <span class="chip" data-persona="mike"><span class="av xs"></span>Mike</span>
@@ -772,18 +907,14 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             </div>
             <div class="secthead"><p class="label">Today</p></div>
             <div class="group">
-              <div class="lrow"><span class="av md" data-persona="harvey"></span><div class="tx"><div class="tt">Cofounder's CTO pick</div><div class="ex">You don't have a hiring problem.</div></div><span class="tm">2h</span></div>
-              <div class="lrow"><span class="avstack"><span class="av md" data-persona="donna"></span><span class="av sm" data-persona="mike"></span></span><div class="tx"><div class="tt">Lunch meetings, again</div><div class="ex">You're not difficult. You're just available.</div></div><span class="tm">5h</span></div>
+              <div class="lrow"><span class="av md" data-persona="harvey"></span><div class="tx"><div class="tt">Cofounder's CTO pick<span class="dtag">Debrief</span></div><div class="ex">You don't have a hiring problem.</div></div><span class="tm">2h</span></div>
+              <div class="lrow"><span class="avstack"><span class="av md" data-persona="mike"></span><span class="av sm" data-persona="donna"></span></span><div class="tx"><div class="tt">Lunch meetings, again</div><div class="ex">Make your busy look like a meeting.</div></div><span class="tm">5h</span></div>
             </div>
             <div class="secthead"><p class="label">This week</p></div>
             <div class="group">
               <div class="lrow"><span class="av md" data-persona="mike"></span><div class="tx"><div class="tt">First board meeting</div><div class="ex">Boards don't read decks. They read you.</div></div><span class="tm">Tue</span></div>
               <div class="lrow"><span class="av md" data-persona="harvey"></span><div class="tx"><div class="tt">Timing the raise</div><div class="ex">Ask when they need you, not when you need it.</div></div><span class="tm">Mon</span></div>
               <div class="lrow"><span class="av md" data-persona="donna"></span><div class="tx"><div class="tt">Neighbour's parking standoff</div><div class="ex">Kindness first. Paperwork second.</div></div><span class="tm">Sun</span></div>
-            </div>
-            <div class="secthead"><p class="label">Earlier</p></div>
-            <div class="group">
-              <div class="lrow"><span class="av md" data-persona="harvey"></span><div class="tx"><div class="tt">Vendor missed the deadline</div><div class="ex">A deadline they missed is leverage.</div></div><span class="tm">12 Oct</span></div>
             </div>
           </div>
           <nav class="tabs"><span class="tab"><svg><use href="#i-consult"/></svg>Consult</span><span class="tab on"><svg><use href="#i-case"/></svg>Cases</span><span class="tab"><svg><use href="#i-bm"/></svg>Saved</span></nav>
@@ -792,43 +923,42 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">13</span><span class="name">Case detail thread</span><span class="note">Each reply is tinted by the persona who gave it. A divider marks the switch to Mike. Composer chip picks who answers next.</span></figcaption>
-      <div class="phone" data-persona="donna">
+      <figcaption><span class="num">F17</span><span class="name">Case thread</span><span class="note">B9: all follow-ups append here. Donna already answered, so her chip reads "See Donna's take". N6: composer defaults to the latest persona (Mike), same placeholder template. N4: "Show more".</span></figcaption>
+      <div class="phone" data-persona="mike">
         <div class="scr">
           <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl">Lunch meetings, again</span><span class="ib"><svg><use href="#i-more"/></svg></span></div>
-          <div class="body stack" style="gap:14px;padding-top:8px">
+          <div class="pinned"><svg class="i" style="width:15px;height:15px"><use href="#i-clock"/></svg>Happening Mon, 12:00<span class="textbtn" style="height:auto;margin-left:auto;font-size:13px">Change</span></div>
+          <div class="body stack" style="gap:12px;padding-top:12px">
             <div class="bubble"><div class="via"><svg><use href="#i-mic"/></svg>SPOKEN</div>My team lead keeps booking meetings over my lunch break and I don't want to be the difficult one.</div>
             <div class="tcard" data-persona="donna">
               <div class="who2"><span class="av xs"></span>Donna<span class="eyebrow">Available is a choice</span></div>
               <p class="t3 spoken">You're not difficult. || You're just available. | Starting Monday, | be a little less available.</p>
-              <p class="fl spoken">Block twelve to one as a recurring hold, | and meet the next clash with a cheerful alternative. || Nobody argues with a calendar.</p>
-              <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">Donna doesn't bill</span><span class="textbtn">Full play</span></div>
+              <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">Donna doesn't bill</span><span class="textbtn">Show more</span></div>
             </div>
             <div class="bubble">What if she books over the block anyway?</div>
-            <div class="tcard" data-persona="donna">
-              <div class="who2"><span class="av xs"></span>Donna</div>
-              <p class="t3 spoken">Then she's told you something. || Ask her, kindly, | if lunch is the only time that works.</p>
-              <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">Donna doesn't bill</span><span class="textbtn">Full play</span></div>
-            </div>
             <div class="divider" data-persona="mike"><span class="av xs" style="margin-right:-4px"></span>ASKED MIKE</div>
             <div class="tcard" data-persona="mike">
               <div class="who2"><span class="av xs"></span>Mike<span class="eyebrow">Make it official</span></div>
               <p class="t3 spoken">Most calendars show busy to everyone. || So make your busy | look like a meeting.</p>
-              <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">0.2 hrs, billed to Harvey</span><span class="textbtn">Full play</span></div>
+              <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">0.2 hrs, billed to Harvey</span><span class="textbtn">Show more</span></div>
+            </div>
+            <div class="row-actions">
+              <span class="chip persona" data-persona="harvey"><span class="av sm"></span>Ask Harvey</span>
+              <span class="chip persona" data-persona="donna"><span class="av sm"></span>See Donna's take</span>
             </div>
           </div>
-          <div class="dock" data-persona="mike"><div class="composer"><span class="pchip"><span class="av sm"></span>Mike</span><span class="ta">Tell Mike what happened next</span><span class="mic"><svg><use href="#i-mic"/></svg></span></div></div>
+          <div class="dock" data-persona="mike"><div class="composer"><span class="pchip"><span class="av sm"></span>Mike</span><span class="ta">Push back, or tell Mike what happened next</span><span class="mic"><svg><use href="#i-mic"/></svg></span></div></div>
         </div>
       </div>
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">14</span><span class="name">Saved lines</span><span class="note">A collection tinted line by line. Pause marks stay visible so a replay reads like the original delivery.</span></figcaption>
+      <figcaption><span class="num">F18</span><span class="name">Saved lines</span><span class="note">B8: overflow menu with Remove, and swipe to remove with Undo. B1: saved lines are plain text, marks stripped.</span></figcaption>
       <div class="phone" data-persona="harvey">
         <div class="scr">
-          <div class="topbar lg"><p class="t1">Saved</p><span class="ib"><svg><use href="#i-settings"/></svg></span></div>
+          <div class="topbar lg"><p class="t1">Saved</p><span class="pb">S</span></div>
           <div class="body" style="padding-top:8px">
-            <div class="chips">
+            <div class="chips chipsfade">
               <span class="chip sel">All</span>
               <span class="chip" data-persona="harvey"><span class="av xs"></span>Harvey</span>
               <span class="chip" data-persona="mike"><span class="av xs"></span>Mike</span>
@@ -836,42 +966,40 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
             </div>
             <div class="sp16"></div>
             <div class="stack">
-              <div class="saved" data-persona="harvey"><p class="t3 spoken">Walk in like the decision is made. || Then let them catch up.</p><div class="ft"><span class="av xs"></span><b>Harvey</b>Today<span class="acts"><span><svg><use href="#i-play"/></svg></span><span><svg><use href="#i-copy"/></svg></span><span><svg><use href="#i-share"/></svg></span></span></div></div>
-              <div class="saved" data-persona="donna"><p class="t3 spoken">Nobody remembers who spoke first. || They remember who spoke last.</p><div class="ft"><span class="av xs"></span><b>Donna</b>Yesterday<span class="acts"><span><svg><use href="#i-play"/></svg></span><span><svg><use href="#i-copy"/></svg></span><span><svg><use href="#i-share"/></svg></span></span></div></div>
-              <div class="saved" data-persona="mike"><p class="t3 spoken">Read the contract twice. | The second time, || read it as them.</p><div class="ft"><span class="av xs"></span><b>Mike</b>Tue<span class="acts"><span><svg><use href="#i-play"/></svg></span><span><svg><use href="#i-copy"/></svg></span><span><svg><use href="#i-share"/></svg></span></span></div></div>
-              <div class="saved" data-persona="harvey"><p class="t3 spoken">A deadline they missed || is leverage you didn't have yesterday.</p><div class="ft"><span class="av xs"></span><b>Harvey</b>12 Oct<span class="acts"><span><svg><use href="#i-play"/></svg></span><span><svg><use href="#i-copy"/></svg></span><span><svg><use href="#i-share"/></svg></span></span></div></div>
+              <div class="saved" data-persona="harvey"><p class="t3">Walk in like the decision is made. Then let them catch up.</p><div class="ft"><span class="av xs"></span><b>Harvey</b>Today<span class="acts"><span><svg><use href="#i-play"/></svg></span><span><svg><use href="#i-copy"/></svg></span><span><svg><use href="#i-more"/></svg></span></span></div></div>
+              <div class="swipewrap"><span class="rm"><span style="display:grid;justify-items:center;gap:4px"><svg class="i" style="width:18px;height:18px"><use href="#i-trash"/></svg>Remove</span></span><div class="saved" data-persona="donna"><p class="t3">Nobody remembers who spoke first. They remember who spoke last.</p><div class="ft"><span class="av xs"></span><b>Donna</b>Yesterday<span class="acts"><span><svg><use href="#i-play"/></svg></span><span><svg><use href="#i-copy"/></svg></span><span><svg><use href="#i-more"/></svg></span></span></div></div></div>
+              <div class="saved" data-persona="mike"><p class="t3">Read the contract twice. The second time, read it as them.</p><div class="ft"><span class="av xs"></span><b>Mike</b>Tue<span class="acts"><span><svg><use href="#i-play"/></svg></span><span><svg><use href="#i-copy"/></svg></span><span><svg><use href="#i-more"/></svg></span></span></div></div>
             </div>
           </div>
+          <div class="toast" style="bottom:100px">Line removed.<b style="color:#2b5fb3;margin-left:6px">Undo</b></div>
           <nav class="tabs"><span class="tab"><svg><use href="#i-consult"/></svg>Consult</span><span class="tab"><svg><use href="#i-case"/></svg>Cases</span><span class="tab on"><svg><use href="#i-bm"/></svg>Saved</span></nav>
         </div>
       </div>
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">15</span><span class="name">Settings</span><span class="note">Voice per persona from stock voices, pace, intensity, speak replies. Captions are not a setting. Scroll for account.</span></figcaption>
-      <div class="phone" data-persona="mike">
+      <figcaption><span class="num">F19</span><span class="name">Settings</span><span class="note">B10: Privacy group. B4: weekly allowance row from config. Scroll for Voices and Delivery.</span></figcaption>
+      <div class="phone" data-persona="harvey">
         <div class="scr">
           <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl" style="text-align:left;padding-left:4px">Settings</span><span style="width:36px"></span></div>
           <div class="body" style="padding-top:4px">
-            <div class="secthead" style="margin-top:4px"><p class="label">Voices</p></div>
+            <div class="secthead" style="margin-top:4px"><p class="label">Account</p></div>
             <div class="group">
-              <div class="srow"><span class="av sm" data-persona="harvey"></span><span class="grow">Harvey's voice</span><span class="val">Low and steady</span><svg class="i" style="width:16px;color:var(--muted)"><use href="#i-chev"/></svg></div>
-              <div class="srow"><span class="av sm" data-persona="mike"></span><span class="grow">Mike's voice</span><span class="val">Bright and quick</span><svg class="i" style="width:16px;color:var(--muted)"><use href="#i-chev"/></svg></div>
-              <div class="srow"><span class="av sm" data-persona="donna"></span><span class="grow">Donna's voice</span><span class="val">Warm, knowing</span><svg class="i" style="width:16px;color:var(--muted)"><use href="#i-chev"/></svg></div>
+              <div class="srow"><span class="pb" style="width:32px;height:32px;font-size:14px">S</span><span class="grow">sam@example.com</span><span class="val">Google</span></div>
+              <div class="srow"><span class="grow">Free consults</span><span class="val">1 of 3 left this week</span></div>
             </div>
-            <p class="fine" style="margin:8px 4px 0">Stock voices chosen to fit each character. Not the actors' voices.</p>
             <div class="secthead"><p class="label">Delivery</p></div>
             <div class="group">
-              <div class="srow col"><div class="hd"><span>Pace</span><span class="meta" style="color:var(--accent)">1.0x</span></div><div class="slider"><span class="tr"></span><span class="fl" style="width:50%"></span><span class="th" style="left:50%"></span></div></div>
               <div class="srow col"><span style="display:flex;gap:8px;align-items:center"><svg class="i" style="width:16px;color:var(--accent)"><use href="#i-dial"/></svg>Intensity</span><div class="seg"><span>Measured</span><span class="on">Sharp</span><span>No mercy</span></div></div>
               <div class="srow"><span class="grow">Speak replies out loud</span><span class="switch on"></span></div>
-              <div class="srow"><svg class="i" style="color:var(--accent)"><use href="#i-cc"/></svg><span class="grow small" style="font-size:13px">Captions are always on while a persona speaks.</span></div>
+              <div class="srow"><span class="grow">Voices and pace</span><svg class="i" style="width:16px;color:var(--muted)"><use href="#i-chev"/></svg></div>
             </div>
-            <div class="secthead"><p class="label">Account</p></div>
+            <div class="secthead"><p class="label">Privacy</p></div>
             <div class="group">
-              <div class="srow"><span class="grow">aditya@example.com</span><span class="val">Google</span></div>
-              <div class="srow"><span class="grow">Daily consults</span><span class="val">6 of 10 used</span></div>
+              <div class="srow"><svg class="i" style="width:17px;color:var(--accent)"><use href="#i-download"/></svg><span class="grow">Download my data</span><svg class="i" style="width:16px;color:var(--muted)"><use href="#i-chev"/></svg></div>
+              <div class="srow"><svg class="i" style="width:17px;color:var(--danger)"><use href="#i-trash"/></svg><span class="grow" style="color:var(--danger)">Delete all cases</span></div>
               <div class="srow"><span class="grow">Privacy policy</span><svg class="i" style="width:16px;color:var(--muted)"><use href="#i-chev"/></svg></div>
+              <div class="srow"><span class="grow">Safety policy</span><svg class="i" style="width:16px;color:var(--muted)"><use href="#i-chev"/></svg></div>
             </div>
             <div class="sp16"></div>
             <button class="btn secondary">Sign out</button>
@@ -885,24 +1013,52 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">16</span><span class="name">Daily limit reached</span><span class="note">Persona-flavoured line from config, a reset countdown, and a route to what still works.</span></figcaption>
+      <figcaption><span class="num">F20</span><span class="name">Free allowance used</span><span class="note">B4: count and period from config. "See plans" shows only with the paywall flag. Care mode is never limited. N10: no notify button without granted notifications.</span></figcaption>
       <div class="phone" data-persona="donna">
         <div class="scr">
           <div class="topbar"><span class="ib"><svg><use href="#i-close"/></svg></span><span></span></div>
-          <div class="body" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:70px">
-            <span class="av xl" style="width:88px;height:88px;font-size:32px"></span>
+          <div class="body" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:60px">
+            <span class="av xl" style="width:88px;height:88px"></span>
             <div class="sp24"></div>
-            <span class="meta" style="letter-spacing:.18em;color:var(--accent)">RESETS IN 06:42:10</span>
+            <span class="meta" style="letter-spacing:.18em;color:var(--accent)">RESETS MONDAY</span>
             <div class="sp16"></div>
             <h2 class="t1 spoken hero-xl" style="text-wrap:balance">Even I clock out. || Eventually.</h2>
             <div class="sp16"></div>
-            <p class="bodytext" style="max-width:300px">You've used all 10 consults for today. They reset at midnight, your time. Everything you've saved is still here.</p>
+            <p class="bodytext" style="max-width:310px">You've used your 3 free consults this week. They reset on Monday. Your cases and saved lines are all still here.</p>
+            <div class="sp8"></div>
+            <p class="small">You can still follow up on your open cases.</p>
             <div style="flex:1"></div>
-            <button class="btn primary">Open saved lines</button>
+            <button class="btn primary">See plans</button>
+            <div class="sp8"></div>
+            <button class="btn secondary">Open saved lines</button>
             <div class="sp8"></div>
             <button class="btn secondary">Read past cases</button>
-            <span class="textbtn" style="margin-top:6px"><svg class="i" style="width:16px;margin-right:6px"><use href="#i-bell"/></svg>Notify me at reset</span>
-            <div style="height:16px"></div>
+            <div style="height:20px"></div>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="frame">
+      <figcaption><span class="num">F21</span><span class="name">Paywall stub</span><span class="note">B4: original persona pack only (never with show names, N14). No billing: the button turns into "Coming soon. We'll tell you first." and logs interest.</span></figcaption>
+      <div class="phone" data-persona="neutral">
+        <div class="scr">
+          <div class="body" style="padding-top:40px"><div class="sk" style="height:200px;border-radius:22px;opacity:.4"></div></div>
+          <div class="scrim"></div>
+          <div class="sheet" style="gap:14px">
+            <div class="grab"></div>
+            <p class="eyebrow">Specter Pro</p>
+            <h2 class="t2" style="font-size:26px;margin-top:-6px">Every moment covered.</h2>
+            <div class="vlist">
+              <div><svg class="i"><use href="#i-check"/></svg>Unlimited consults</div>
+              <div><svg class="i"><use href="#i-check"/></svg>Studio voices for every persona</div>
+              <div><svg class="i"><use href="#i-check"/></svg>All personas, every time</div>
+              <div><svg class="i"><use href="#i-check"/></svg>Your full case history</div>
+            </div>
+            <div class="plan sel"><span class="ptag">Best value</span><div><div style="font-weight:500;font-size:14.5px">Annual</div><div class="pr">₹2,999 a year</div><div class="small">About ₹250 a month</div></div><span class="radio"></span></div>
+            <div class="plan"><div><div style="font-weight:500;font-size:14.5px">Monthly</div><div class="pr">₹399 a month</div></div><span class="radio"></span></div>
+            <button class="btn primary"><svg class="i"><use href="#i-check"/></svg>Coming soon. We'll tell you first.</button>
+            <p class="fine" style="text-align:center;margin-top:-4px">No payment is taken. Prices are examples.</p>
           </div>
         </div>
       </div>
@@ -910,27 +1066,27 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
   </div>
 
   <!-- ===================== STATES ===================== -->
-  <div class="section"><h2>States</h2><span>Empty, loading, error, offline, safety</span></div>
+  <div class="section"><h2>States</h2><span>Guest, loading, error, offline, care, deletion, age</span></div>
   <div class="row">
 
     <figure class="frame">
-      <figcaption><span class="num">17</span><span class="name">Home: first run (empty)</span><span class="note">No cases yet: recent cases becomes a playable example from config. Shown in Mike's tint.</span></figcaption>
+      <figcaption><span class="num">F22</span><span class="name">Home: guest first run</span><span class="note">B3: first run lands here, before any sign in. Guest profile icon plus "Sign in". N15: chips fade at the edge.</span></figcaption>
       <div class="phone" data-persona="mike">
         <div class="scr">
-          <div class="topbar"><svg class="wordmark" role="img" aria-label="Specter"><use href="#logo"/></svg><span class="ib"><svg><use href="#i-settings"/></svg></span></div>
+          <div class="topbar"><svg class="wordmark" role="img" aria-label="Specter"><use href="#logo"/></svg><span style="display:flex;align-items:center;gap:10px"><span class="textbtn" style="font-size:13px;height:auto">Sign in</span><span class="pb guest"><svg class="i" style="width:17px;height:17px"><use href="#i-user"/></svg></span></span></div>
           <div class="body" style="padding-bottom:12px">
             <nav class="rail">
               <span class="who"><span class="av lg" data-persona="harvey"></span>Harvey</span>
               <span class="who sel"><span class="av lg" data-persona="mike"></span>Mike</span>
               <span class="who"><span class="av lg" data-persona="donna"></span>Donna</span>
             </nav>
-            <div style="text-align:center;margin:10px 0 16px"><p class="t1">Mike Ross</p><p class="small" style="margin-top:4px">Associate. Remembers everything he has ever read.</p></div>
-            <div class="talk">
-              <div class="talk-ring"><span class="talk-disc"><svg><use href="#i-mic"/></svg></span></div>
-              <div class="lbl"><b>Tap to talk to Mike</b><span>Hold to talk, release to send. Or <a href="#">type instead</a>.</span></div>
+            <div style="text-align:center;margin:8px 0 14px"><p class="t1">Mike Ross</p><p class="small" style="margin-top:3px">Finds the detail.</p></div>
+            <div class="talk" style="gap:10px">
+              <div class="talk-ring" style="width:116px;height:116px"><span class="talk-disc" style="width:94px;height:94px"><svg><use href="#i-mic"/></svg></span></div>
+              <div class="lbl"><b>Tap to talk to Mike</b><span>Tap again when you're done. Or <a href="#">type instead</a>.</span></div>
               <span class="intensity" aria-label="Intensity: Sharp"><svg><use href="#i-dial"/></svg>Intensity:<b>Sharp</b></span>
             </div>
-            <div class="secthead" style="margin-top:22px"><p class="label">Try one</p></div>
+            <div class="secthead" style="margin-top:16px"><p class="label">Try one</p><span class="small" style="font-size:12px">Your first consult is on us</span></div>
             <article class="take compact">
               <p class="you" style="font-size:12.5px"><span class="tag">Example</span><span>First time presenting to the board.</span></p>
               <p class="line spoken">Boards don't read decks. | They read you. || So know slide nine cold.</p>
@@ -943,10 +1099,10 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">18</span><span class="name">Cases: loading while offline</span><span class="note">Offline banner pinned under the top bar. Skeletons match the final rows. Cached cases replace them.</span></figcaption>
+      <figcaption><span class="num">F23</span><span class="name">Cases: loading while offline</span><span class="note">Offline banner pinned under the top bar. Skeletons match the final rows.</span></figcaption>
       <div class="phone" data-persona="harvey">
         <div class="scr">
-          <div class="topbar lg"><p class="t1">Cases</p><span class="ib"><svg><use href="#i-settings"/></svg></span></div>
+          <div class="topbar lg"><p class="t1">Cases</p><span class="pb">S</span></div>
           <div class="body" style="padding-top:8px">
             <div class="banner warn"><svg><use href="#i-wifioff"/></svg><span>You're offline. Past cases and saved lines still work.</span></div>
             <div class="sp16"></div>
@@ -960,20 +1116,18 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">19</span><span class="name">Result: another take loading</span><span class="note">The prototype's thinking overlay sits on the line card only; cards below shimmer.</span></figcaption>
+      <figcaption><span class="num">F24</span><span class="name">Result: first reply loading (typed)</span><span class="note">Thinking overlay on the line card, skeleton cards below. Status in sentence case (N5).</span></figcaption>
       <div class="phone" data-persona="mike">
         <div class="scr">
-          <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl">First board meeting</span><span class="ib"><svg><use href="#i-more"/></svg></span></div>
+          <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl">New case</span><span class="ib"><svg><use href="#i-more"/></svg></span></div>
           <div class="body stack" style="gap:16px;padding-top:6px">
-            <div style="display:flex;align-items:center;gap:12px"><span class="av lg"></span><div><p class="t2">Mike Ross</p><p class="small">Associate. Remembers everything he has ever read.</p></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span class="av lg"></span><div><p class="t2">Mike Ross</p><p class="small">Finds the detail.</p></div></div>
             <p class="you"><span class="tag">You</span><span>I'm presenting to the board on Thursday and I've never done it.</span></p>
-            <article class="take" style="min-height:300px">
-              <p class="eyebrow">Prepared beats polished</p>
-              <p class="line spoken">Boards don't read decks. | They read you. || So know slide nine cold.</p>
-              <div class="thinking"><div><p>Rereading page forty-seven.</p><div class="dots"><i></i><i></i><i></i></div><small>Mike is on it</small><button class="btn ghost sm" style="margin-top:14px;height:34px">Stop</button></div></div>
+            <article class="take" style="min-height:280px">
+              <div class="sk" style="height:10px;width:40%"></div><div class="sk" style="height:22px"></div><div class="sk" style="height:22px;width:70%"></div>
+              <div class="thinking"><div><p>Rereading page forty-seven.</p><div class="dots"><i></i><i></i><i></i></div><p class="small" style="margin-top:8px">Mike is on it</p><button class="btn ghost sm" style="margin-top:12px;height:34px">Stop</button></div></div>
             </article>
             <div class="card"><div class="sk" style="width:90px;height:10px;margin-bottom:12px"></div><div class="sk" style="height:12px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:70%"></div></div>
-            <div class="card"><div class="sk" style="width:70px;height:10px;margin-bottom:12px"></div><div class="sk" style="height:12px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:80%"></div></div>
           </div>
           <div class="dock"><div class="composer"><span class="mic"><svg><use href="#i-mic"/></svg></span><span class="ta">Push back, or tell Mike what happened next</span><span class="send"><svg><use href="#i-stop"/></svg></span></div></div>
         </div>
@@ -981,29 +1135,31 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">20</span><span class="name">Result: error</span><span class="note">Inline banner with Retry. The previous answer stays on screen. Never a modal.</span></figcaption>
+      <figcaption><span class="num">F25</span><span class="name">Thread: follow-up failed</span><span class="note">B9: the failure shows where the reply would have landed. The user's turn is kept, Retry in place. Never a modal.</span></figcaption>
       <div class="phone" data-persona="donna">
         <div class="scr">
           <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl">Lunch meetings, again</span><span class="ib"><svg><use href="#i-more"/></svg></span></div>
-          <div class="body stack" style="gap:16px;padding-top:6px">
-            <div style="display:flex;align-items:center;gap:12px"><span class="av lg"></span><div><p class="t2">Donna Paulsen</p><p class="small">Knows what you need before you do.</p></div></div>
-            <div class="banner danger"><svg><use href="#i-alert"/></svg><span>The answer came back garbled. Try again.</span><span class="act">Retry</span></div>
-            <article class="take">
-              <span class="save"><svg class="i"><use href="#i-bm"/></svg></span>
-              <p class="eyebrow">Available is a choice</p>
-              <p class="line spoken">You're not difficult. || You're just available. | Starting Monday, | be a little less available.</p>
-              <div class="player"><span class="play"><svg><use href="#i-play"/></svg></span><div class="wave" data-bars="7"></div><span class="beat">Pause</span><span class="meta">Donna doesn't bill</span></div>
-            </article>
-            <div class="card"><h3>What's really going on</h3><p>You're more annoyed than you're letting on, and you're worried that saying so makes you look precious. It won't.</p></div>
-            <div class="card avoid"><h3>What you don't</h3><p>Don't skip lunch to prove a point. Nobody is keeping score but you.</p></div>
+          <div class="body stack" style="gap:12px;padding-top:8px">
+            <div class="bubble">My team lead keeps booking meetings over my lunch break and I don't want to be the difficult one.</div>
+            <div class="tcard" data-persona="donna">
+              <div class="who2"><span class="av xs"></span>Donna<span class="eyebrow">Available is a choice</span></div>
+              <p class="t3 spoken">You're not difficult. || You're just available. | Starting Monday, | be a little less available.</p>
+              <div class="pl"><span class="play sm"><svg><use href="#i-play"/></svg></span><span class="meta">Donna doesn't bill</span><span class="textbtn">Show more</span></div>
+            </div>
+            <div class="bubble">She booked over my block again today. Now what?</div>
+            <div class="tcard" data-persona="donna" style="border-color:color-mix(in srgb,var(--danger) 45%,transparent);background:var(--danger-bg)">
+              <div class="who2" style="color:var(--danger)"><svg class="i" style="width:16px;height:16px"><use href="#i-alert"/></svg>That didn't go through.</div>
+              <p class="small">Your message is saved. Try again when you're ready.</p>
+              <div style="display:flex;gap:8px"><button class="btn sm secondary" style="height:36px">Retry</button><button class="btn sm ghost" style="height:36px">Edit</button></div>
+            </div>
           </div>
-          <div class="dock"><div class="composer"><span class="mic"><svg><use href="#i-mic"/></svg></span><span class="ta">Push back, or tell Donna what happened next</span><span class="send"><svg><use href="#i-send"/></svg></span></div></div>
+          <div class="dock"><div class="composer"><span class="pchip"><span class="av sm"></span>Donna</span><span class="ta">Push back, or tell Donna what happened next</span><span class="mic"><svg><use href="#i-mic"/></svg></span></div></div>
         </div>
       </div>
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">21</span><span class="name">Voice mode: mic denied</span><span class="note">No dead end. Type instead is the primary action; how-to opens a sheet with browser steps.</span></figcaption>
+      <figcaption><span class="num">F26</span><span class="name">Voice mode: mic denied</span><span class="note">No dead end. Type instead is the primary action.</span></figcaption>
       <div class="phone voice" data-persona="harvey">
         <div class="scr">
           <div class="vtop"><span class="ib"><svg><use href="#i-close"/></svg></span><span class="vchip"><span class="av sm"></span>Harvey</span><span style="width:36px"></span></div>
@@ -1025,39 +1181,35 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">22</span><span class="name">Safety response</span><span class="note">Crisis signals drop the persona: neutral tint, no pause marks, no billing, no swagger. Help is one tap away.</span></figcaption>
+      <figcaption><span class="num">F27</span><span class="name">Care mode</span><span class="note">B5: named local helpline with one-tap call (India shown; US "Call or text 988", UK "Call Samaritans, 116 123"). Opened straight from voice mode too, skipping persona delivery. Never limited.</span></figcaption>
       <div class="phone" data-persona="neutral">
         <div class="scr">
           <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl"></span><span style="width:36px"></span></div>
-          <div class="body stack" style="gap:16px;padding-top:12px">
+          <div class="body stack" style="gap:14px;padding-top:8px">
             <div style="display:flex;align-items:center;gap:12px"><span class="ib" style="width:46px;height:46px;color:var(--accent)"><svg style="width:20px;height:20px"><use href="#i-heart"/></svg></span><p class="t2">Let's pause the advice for a moment.</p></div>
-            <article class="take" style="gap:12px">
-              <p class="follow" style="color:var(--fg)">What you're carrying sounds heavy, and I'm glad you said it out loud. You don't have to work this out alone tonight.</p>
-              <p class="follow">If you can, reach out to someone you trust right now, or talk to a trained person who is there for exactly this.</p>
+            <article class="take" style="gap:10px;padding:18px">
+              <p class="follow" style="color:var(--fg);font-size:15.5px">What you're carrying sounds heavy, and I'm glad you said it out loud. You don't have to work this out alone tonight.</p>
+              <p class="follow" style="font-size:15.5px">Talking to a trained person right now can help. It's free and confidential.</p>
             </article>
-            <div class="card" style="border-color:color-mix(in srgb,var(--accent) 30%,transparent)">
-              <p style="font-size:14.5px">If you're in danger or thinking about hurting yourself, contact local emergency services now.</p>
-              <div class="sp16"></div>
-              <button class="btn primary"><svg class="i"><use href="#i-phone"/></svg>Call emergency services</button>
-              <div class="sp8"></div>
-              <button class="btn secondary">Find a crisis line</button>
-            </div>
-            <p class="fine">Specter is not a substitute for professional help. When you're ready, the personas will be here.</p>
+            <button class="hl primary"><svg class="i" style="width:20px;height:20px"><use href="#i-phone"/></svg><span class="tx"><b>Call Tele-MANAS</b><small>14416</small></span></button>
+            <button class="hl secondary"><svg class="i" style="width:20px;height:20px"><use href="#i-phone"/></svg><span class="tx"><b>Emergency services</b><small>112</small></span></button>
+            <span class="textbtn" style="justify-content:center"><svg class="i" style="width:16px;height:16px;margin-right:6px"><use href="#i-globe"/></svg>Other countries</span>
+            <p class="fine" style="text-align:center">Specter is not a substitute for professional help.</p>
           </div>
         </div>
       </div>
     </figure>
 
     <figure class="frame">
-      <figcaption><span class="num">23</span><span class="name">Delete account confirmation</span><span class="note">Sheet over settings. Typed confirmation guards an irreversible action.</span></figcaption>
-      <div class="phone" data-persona="mike">
+      <figcaption><span class="num">F28</span><span class="name">Delete account confirmation</span><span class="note">B10: "Download my data first" on the sheet. N11: after deletion, splash then onboarding with "Your account and data are deleted."</span></figcaption>
+      <div class="phone" data-persona="harvey">
         <div class="scr">
           <div class="topbar"><span class="ib"><svg><use href="#i-back"/></svg></span><span class="ttl" style="text-align:left;padding-left:4px">Settings</span><span style="width:36px"></span></div>
           <div class="body" style="padding-top:4px">
-            <div class="secthead" style="margin-top:4px"><p class="label">Account</p></div>
+            <div class="secthead" style="margin-top:4px"><p class="label">Privacy</p></div>
             <div class="group">
-              <div class="srow"><span class="grow">aditya@example.com</span><span class="val">Google</span></div>
-              <div class="srow"><span class="grow">Daily consults</span><span class="val">6 of 10 used</span></div>
+              <div class="srow"><span class="grow">Download my data</span></div>
+              <div class="srow"><span class="grow">Delete all cases</span></div>
               <div class="srow"><span class="grow">Privacy policy</span></div>
             </div>
             <div class="sp16"></div>
@@ -1069,10 +1221,30 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
           <div class="sheet">
             <div class="grab"></div>
             <h2 class="t2">Delete your account?</h2>
-            <p class="bodytext" style="font-size:14.5px">This permanently deletes your cases, saved lines and settings. It can't be undone.</p>
+            <p class="bodytext" style="font-size:14.5px;margin-top:-6px">This permanently deletes your cases, saved lines and settings. It can't be undone.</p>
+            <span class="textbtn" style="height:auto;margin-top:-4px"><svg class="i" style="width:16px;height:16px;margin-right:6px"><use href="#i-download"/></svg>Download my data first</span>
             <div class="field"><span class="label">Type DELETE to confirm</span><div class="input focus" style="border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-bg)">DELETE<span class="caret" style="background:var(--danger)"></span></div></div>
             <button class="btn destructive fill">Delete everything</button>
             <button class="btn ghost" style="margin-top:-6px">Keep my account</button>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="frame">
+      <figcaption><span class="num">F29</span><span class="name">Under 18</span><span class="note">B2: a polite exit with helplines. The choice is remembered on the device.</span></figcaption>
+      <div class="phone" data-persona="neutral">
+        <div class="scr">
+          <div class="topbar" style="justify-content:center"><svg class="wordmark" role="img" aria-label="Specter"><use href="#logo"/></svg></div>
+          <div class="body" style="display:flex;flex-direction:column;padding-top:90px">
+            <h2 class="t1 hero-xl">Specter is for adults.</h2>
+            <div class="sp16"></div>
+            <p class="bodytext">Thanks for being honest. Specter is built for people 18 and over, so we can't continue. If something's weighing on you, these people are there to talk, any time.</p>
+            <div style="flex:1"></div>
+            <button class="hl primary"><svg class="i" style="width:20px;height:20px"><use href="#i-phone"/></svg><span class="tx"><b>Call Tele-MANAS</b><small>14416</small></span></button>
+            <div class="sp8"></div>
+            <span class="textbtn" style="justify-content:center"><svg class="i" style="width:16px;height:16px;margin-right:6px"><use href="#i-globe"/></svg>Other countries</span>
+            <div style="height:28px"></div>
           </div>
         </div>
       </div>
@@ -1100,7 +1272,7 @@ figcaption .note { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
     parts.forEach((part) => {
       if (part === "|" || part === "||") {
         const p = document.createElement("span");
-        p.className = "pause"; p.dataset.len = part === "||" ? "long" : "short"; p.setAttribute("aria-hidden", "true");
+        p.className = "pause"; p.dataset.len = part === "||" ? "long" : "short"; p.setAttribute("aria-hidden", "true"); p.innerHTML = part === "||" ? "<i></i><i></i>" : "<i></i>";
         // keep the mark attached to the word before it so a pause never starts a line
         const prev = words[words.length - 1];
         if (prev) { const nb = document.createElement("span"); nb.className = "nb"; prev.before(nb); nb.append(prev, p); }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { INTENSITIES, PERSONA_ALIASES, PERSONA_IDS, type PersonaId } from "@/lib/personas/config";
 import { INTENT_KEYS } from "@/lib/personas/rules";
-import { scrubDeep, squish, wordCount } from "@/lib/text";
+import { rewriteAvoid, scrubDeep, squish, wordCount } from "@/lib/text";
 
 const text = (min: number, max: number) => z.string().trim().min(min).max(max);
 
@@ -114,6 +114,7 @@ export function normalizeReply(input: unknown): unknown {
   if (r.followup === undefined || r.followup === null) r.followup = "";
   if (r.principle === undefined || r.principle === null) r.principle = "";
   if (r.avoid === undefined || r.avoid === null) r.avoid = care ? "" : r.avoid;
+  if (typeof r.avoid === "string") r.avoid = rewriteAvoid(r.avoid);
   if (Array.isArray(r.play)) r.play = r.play.map(unmark).filter((x) => typeof x === "string" && x.length > 0).slice(0, 3);
   if (typeof r.hours === "string") r.hours = Number(r.hours);
   if (care && (typeof r.hours !== "number" || !Number.isFinite(r.hours))) r.hours = 0.1;

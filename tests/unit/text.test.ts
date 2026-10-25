@@ -63,3 +63,30 @@ describe("wordCount", () => {
     expect(wordCount("They didn't lowball you. || They asked a question.")).toBe(8);
   });
 });
+
+import { rewriteAvoid, toGerund } from "@/lib/text";
+
+describe("avoid sentence rewrite", () => {
+  it("turns verbs into gerunds", () => {
+    expect(["justify", "vent", "let", "make", "be", "bluff", "stop", "lie", "apologise", "skip", "regret"].map(toGerund)).toEqual([
+      "justifying",
+      "venting",
+      "letting",
+      "making",
+      "being",
+      "bluffing",
+      "stopping",
+      "lying",
+      "apologising",
+      "skipping",
+      "regretting",
+    ]);
+  });
+
+  it("rewrites avoid sentences that start with Don't or Do not", () => {
+    expect(rewriteAvoid("Don't justify your number with your rent.")).toBe("Justifying your number with your rent.");
+    expect(rewriteAvoid("Do not send the email tonight.")).toBe("Sending the email tonight.");
+    expect(rewriteAvoid("Don’t let them see you sweat.")).toBe("Letting them see you sweat.");
+    expect(rewriteAvoid("Venting to the group chat.")).toBe("Venting to the group chat.");
+  });
+});

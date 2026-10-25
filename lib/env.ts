@@ -1,3 +1,5 @@
+import { BRAND } from "@/lib/personas/config";
+
 /**
  * Server-side environment. Read lazily (functions, not constants) so values set at
  * runtime (next start, Vercel) are honoured and tests can override process.env.
@@ -66,6 +68,8 @@ export type PublicConfig = {
   supabaseUrl: string;
   supabaseAnonKey: string;
   freeConsultsPerWeek: number;
+  authMode: "mock" | "supabase" | "unconfigured";
+  paywall: boolean;
 };
 
 export function publicConfig(): PublicConfig {
@@ -76,5 +80,7 @@ export function publicConfig(): PublicConfig {
     supabaseUrl: env.supabaseUrl(),
     supabaseAnonKey: env.supabaseAnonKey(),
     freeConsultsPerWeek: env.freeConsultsPerWeek(),
+    authMode: env.mockAuth() ? "mock" : env.supabaseConfigured() ? "supabase" : "unconfigured",
+    paywall: env.paywallEnabled() && BRAND.paywall,
   };
 }

@@ -61,3 +61,30 @@ export function wordCount(s: string): number {
   const t = squish(s.replace(/\|+/g, " "));
   return t ? t.split(" ").length : 0;
 }
+
+const DOUBLE_FINAL = new Set(["regret", "forget", "admit", "commit", "omit", "submit", "permit", "refer", "prefer", "occur", "upset", "begin", "overstep"]);
+
+/** "justify" -> "justifying", "vent" -> "venting", "let" -> "letting", "make" -> "making". */
+export function toGerund(verb: string): string {
+  const v = verb.toLowerCase();
+  if (v === "be") return "being";
+  if (v === "see") return "seeing";
+  if (v.endsWith("ie")) return `${v.slice(0, -2)}ying`;
+  if (v.endsWith("ee") || v.endsWith("ye") || v.endsWith("oe")) return `${v}ing`;
+  if (v.endsWith("e") && v.length > 2) return `${v.slice(0, -1)}ing`;
+  const cvc = /^[^aeiou]*[aeiou][^aeiouwxy]$/.test(v);
+  if ((cvc && v.length <= 4) || DOUBLE_FINAL.has(v)) return `${v}${v.slice(-1)}ing`;
+  return `${v}ing`;
+}
+
+/**
+ * The avoid card's label already says "Don't", so the sentence must start with the
+ * mistake itself (persona-specs.md): "Don't justify your number" -> "Justifying your number".
+ */
+export function rewriteAvoid(s: string): string {
+  const m = s.match(/^\s*(?:don['’]t|do\s+not|never)\s+([A-Za-z]+)\b/i);
+  if (!m) return s;
+  const g = toGerund(m[1]!);
+  const rest = s.slice(m[0].length);
+  return `${g.charAt(0).toUpperCase()}${g.slice(1)}${rest}`;
+}

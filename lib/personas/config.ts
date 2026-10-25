@@ -1,5 +1,5 @@
 /**
- * THE persona config. Every persona's name, monogram, colours, labels, voice
+ * THE persona config. Every persona's name, mark, colours, labels, voice
  * settings and system prompt comes from here, so the cast can be swapped for
  * original characters by editing this file (or flipping NEXT_PUBLIC_PERSONA_PACK).
  *
@@ -71,8 +71,11 @@ export type PersonaConfig = {
   id: PersonaId;
   name: string;
   short: string;
-  monogram: string;
+  /** Geometric persona mark: inner SVG markup on a 24 grid, white (docs/design/brand/glyph-*.svg). */
+  glyph: string;
   role: string;
+  /** Three-word tagline used on onboarding cards and the persona sheet. */
+  tagline: string;
   /** One-word mode label, e.g. "The closer". */
   archetype: string;
   /** Bullets for the persona sheet ("How they think"). */
@@ -224,6 +227,19 @@ NEVER
 - Recognise abuse and coercion signals and route to safety, never to social tactics.`;
 
 // ---------------------------------------------------------------------------
+// Persona marks (design-system.md 6.1). Abstract shapes, never initials or likenesses.
+// ---------------------------------------------------------------------------
+
+const GLYPHS = {
+  chevron: '<path fill="#fff" d="M12 4.2 20.2 14h-3.7L12 8.7 7.5 14H3.8z"/><path fill="#fff" d="m12 15.6 2.5 2.5-2.5 2.5-2.5-2.5z"/>',
+  grid: '<rect x="3.5" y="3.5" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="9.9" y="3.5" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="16.3" y="3.5" width="4.2" height="4.2" rx="1" fill="#fff"/><rect x="3.5" y="9.9" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="9.9" y="9.9" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="16.3" y="9.9" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="3.5" y="16.3" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="9.9" y="16.3" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/><rect x="16.3" y="16.3" width="4.2" height="4.2" rx="1" fill="#fff" fill-opacity=".5"/>',
+  waves: '<path d="M4 11.5c2.7-5 5.5-5 8-1.5s5.3 3.5 8-1.5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><path d="M4 17.5c2.7-5 5.5-5 8-1.5s5.3 3.5 8-1.5" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.8" stroke-linecap="round"/>',
+};
+
+/** The beat: the brand's pause bar, used for neutral and safety surfaces. */
+export const NEUTRAL_GLYPH = '<rect x="4" y="10.5" width="16" height="3" rx="1.5" fill="#fff"/>';
+
+// ---------------------------------------------------------------------------
 // Shared building blocks
 // ---------------------------------------------------------------------------
 
@@ -311,7 +327,7 @@ const EXAMPLES: Record<PersonaId, PersonaConfig["example"]> = {
         "Name a specific figure above your target and hold eye contact while you say it.",
         "If they push back, ask what it would take to get there, then stay quiet.",
       ],
-      avoid: "Don't justify your number with your expenses. They're paying for your value, not your rent.",
+      avoid: "Justifying your number with your expenses. They're paying for your value, not your rent.",
       principle: "Never negotiate against yourself",
       intent: "negotiate",
       stakes: "high",
@@ -332,7 +348,7 @@ const EXAMPLES: Record<PersonaId, PersonaConfig["example"]> = {
         "Write one page on how you'd attack their biggest problem in your first 90 days.",
         "When the gap comes up, name it first, then explain exactly how you'd close it.",
       ],
-      avoid: "Don't bluff about something you haven't done. Getting caught costs more than the gap ever would.",
+      avoid: "Bluffing about something you haven't done. Getting caught costs more than the gap ever would.",
       principle: "Prepared beats qualified",
       intent: "prepare",
       stakes: "high",
@@ -353,7 +369,7 @@ const EXAMPLES: Record<PersonaId, PersonaConfig["example"]> = {
         "Send your manager a friendly note offering to present the follow-up yourself.",
         "Keep a running log of what you delivered and when. You'll want it at review time.",
       ],
-      avoid: "Don't vent about it at work, not even to the people you trust. Especially not to them.",
+      avoid: "Venting about it at work, even to the people you trust. Especially to them.",
       principle: "Everyone noticed. Act like it.",
       intent: "claim_credit",
       stakes: "medium",
@@ -365,8 +381,10 @@ const EXAMPLES: Record<PersonaId, PersonaConfig["example"]> = {
 type PackIdentity = {
   name: string;
   short: string;
-  monogram: string;
+  /** Geometric persona mark: inner SVG markup on a 24 grid, white (docs/design/brand/glyph-*.svg). */
+  glyph: string;
   role: string;
+  tagline: string;
   thinking: string[];
   meta: string;
   greeting: string;
@@ -413,8 +431,9 @@ const SUITS_PACK = buildPack({
   closer: {
     name: "Harvey Specter",
     short: "Harvey",
-    monogram: "HS",
-    role: "Senior partner. Reads the room before he walks in.",
+    glyph: GLYPHS.chevron,
+    role: "Senior partner. Walks in knowing how it ends.",
+    tagline: "Finds the leverage",
     thinking: ["Reading the room.", "Finding the leverage.", "Straightening the tie.", "Writing the line."],
     meta: "{hours} hrs billed",
     greeting: "You brought a situation. || Good. | Let's close it.",
@@ -428,8 +447,9 @@ const SUITS_PACK = buildPack({
   prodigy: {
     name: "Mike Ross",
     short: "Mike",
-    monogram: "MR",
+    glyph: GLYPHS.grid,
     role: "Associate. Remembers everything he has ever read.",
+    tagline: "Finds the detail",
     thinking: ["Checking the precedent.", "Rereading page forty-seven.", "Wait. Found something."],
     meta: "{hours} hrs, billed to Harvey",
     greeting: "Give me the details. | All of them. || That's where the answer is.",
@@ -443,8 +463,9 @@ const SUITS_PACK = buildPack({
   insider: {
     name: "Donna Paulsen",
     short: "Donna",
-    monogram: "DP",
+    glyph: GLYPHS.waves,
     role: "Knows what you need before you do.",
+    tagline: "Reads the people",
     thinking: ["I already know.", "Just confirming.", "Getting a coffee for this one."],
     meta: "Donna doesn't bill",
     greeting: "I already know what's going on. || Sit down. | Tell me anyway.",
@@ -459,14 +480,15 @@ const SUITS_PACK = buildPack({
 
 /**
  * Pack 2: original characters for a commercial launch. PLACEHOLDER names chosen
- * by engineering; the founder picks the final names, monograms and copy.
+ * by engineering; the founder picks the final names, marks and copy.
  */
 const ORIGINAL_PACK = buildPack({
   closer: {
     name: "Cole Mercer",
     short: "Cole",
-    monogram: "CM",
+    glyph: GLYPHS.chevron,
     role: "Managing partner. Walks in already knowing the number.",
+    tagline: "Finds the leverage",
     thinking: ["Reading the room.", "Finding the leverage.", "Checking the terms.", "Writing the line."],
     meta: "{hours} hrs billed",
     greeting: "You brought a situation. || Good. | Let's close it.",
@@ -480,8 +502,9 @@ const ORIGINAL_PACK = buildPack({
   prodigy: {
     name: "Theo Lark",
     short: "Theo",
-    monogram: "TL",
+    glyph: GLYPHS.grid,
     role: "Junior associate. Reads the fine print for fun.",
+    tagline: "Finds the detail",
     thinking: ["Checking the timeline.", "Rereading the fine print.", "Wait. Found something."],
     meta: "{hours} hrs, billed to Cole",
     greeting: "Give me the details. | All of them. || That's where the answer is.",
@@ -495,8 +518,9 @@ const ORIGINAL_PACK = buildPack({
   insider: {
     name: "Vivian Hale",
     short: "Vivian",
-    monogram: "VH",
+    glyph: GLYPHS.waves,
     role: "Chief of staff. Reads everyone in the building.",
+    tagline: "Reads the people",
     thinking: ["I already know.", "Just confirming.", "Pouring a coffee for this one."],
     meta: "Vivian doesn't bill",
     greeting: "I already know what's going on. || Sit down. | Tell me anyway.",
@@ -543,19 +567,22 @@ export const QUICK_SITUATIONS: string[] = [
   "First week, new job",
 ];
 
-const BRAND_BY_PACK: Record<PersonaPack, { disclaimer: string; about: string; licence: string }> = {
+const BRAND_BY_PACK: Record<PersonaPack, { disclaimer: string; about: string; licence: string; paywall: boolean }> = {
   suits: {
     disclaimer:
       "Unofficial fan project. Every line is original and written in the spirit of the characters. Voices are stock voices, not the actors. For real legal, money or medical decisions, see a professional.",
     about: "Specter is an AI. Characters are fictional.",
     licence:
       "Fan inspired, not affiliated with or endorsed by NBCUniversal or the makers of Suits. Character names belong to their owners. No dialogue from the show is used or stored.",
+    /** The show-name pack is a private, unpaid preview: never show a paywall (design review N14). */
+    paywall: false,
   },
   original: {
     disclaimer:
       "Every line is original. Voices are stock voices. For real legal, money or medical decisions, see a professional.",
     about: "Specter is an AI. Characters are fictional.",
     licence: "All characters are original to Specter.",
+    paywall: true,
   },
 };
 

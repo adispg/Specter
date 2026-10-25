@@ -1,6 +1,6 @@
 # Specter design system
 
-Version 1.1 for the MVP (revised after founder review: modern sans system, new wordmark and icon, geometric persona marks, intensity naming fix). Owner: Design. Source of truth for the engineer; `mockups.html` in this folder shows every token and component in use.
+Version 1.2 for the MVP. v1.1: founder review (modern sans system, new wordmark and icon, geometric persona marks, intensity naming fix). v1.2: design review 01 (baseline beat pause marks, single talk gesture, retention, feedback, allowance, care and privacy components). Owner: Design. Source of truth for the engineer; `mockups.html` in this folder shows every token and component in use.
 
 This system evolves the approved prototype (`docs/prototype.html`). What the founder approved carries over: the dark premium surface, per-persona tinting, speech-synced word lighting, glowing pause marks, the pulsing avatar halo and Geist for UI. What changed in v1.1: the serif is gone (the spoken line now uses Bricolage Grotesque, a modern display sans), monograms are replaced by geometric persona marks, the brand has a new wordmark and app icon, and intensity is never shown next to a persona name. What this document adds is structure: a complete token set, named components with states, the voice choreography, and accessibility rules.
 
@@ -126,6 +126,8 @@ Rule: **Bricolage is the persona speaking and the brand. Geist is the app talkin
 | `tab` | Geist | 11 / 1 | 600 | 0 | Tab bar labels, sentence case |
 | `fine` | Geist | 11.5 / 1.50 | 400 | 0 | Disclaimers |
 | `meta` | Geist Mono | 11 / 1.2 | 400 | 0, `tabular-nums` | Billing meta, timestamps, countdown, values |
+
+Sizes are listed in px for readability; the tokens ship in rem (px / 16) so they follow the user's text size setting (see section 8).
 
 Rules: uppercase is limited to `overline` (short strings only). Section headers are sentence case. Mono never sets words, except the billing meta line, which reads like a timesheet entry. Display tracking tightens as size grows; never track Bricolage positive. There is no italic; emphasis inside a line uses weight 700, never italic or colour.
 
@@ -265,8 +267,8 @@ Placeholders from config: "Tell {short} what's going on" before a case, "Push ba
 The home screen's primary action and the voice mode control.
 
 - Visual: 132px outer ring (1px `--hair-2`), 108px inner disc filled with `linear-gradient(160deg, var(--accent), color-mix(in srgb, var(--accent-2) 70%, var(--accent)))`, mic icon 32px in `--on-accent`. Outer soft glow `0 0 60px -10px var(--glow)`.
-- Label under it: `body-strong` "Tap to talk to {short}" with `small` muted sub-label "Hold to talk, release to send. Or type instead." ("type instead" is an inline text link in `--accent`). Below that, 12px gap, the intensity control (6.16).
-- Interaction: tap toggles into voice mode (listening). Press and hold over 350ms enters push-to-talk; release submits. Haptic light impact on start (where supported).
+- Label under it: `body-strong` "Tap to talk to {short}" with `small` muted sub-label "Tap again when you're done. Or type instead." ("type instead" is an inline text link in `--accent`). Below that, 12px gap, the intensity control (6.16).
+- Interaction (one gesture everywhere): tap to start listening, tap again to finish, or stop talking and the turn ends after a silence (starting threshold 1.6s, tuned in build). There is no hold or push-to-talk gesture in the MVP. Haptic light impact on start (where supported). The first ever tap opens the mic priming sheet before the OS prompt.
 - States: idle; pressed (scale 0.96, 120ms); listening (inner disc becomes `--accent-2`, icon becomes a stop square, two rings pulse in `--accent-2`); disabled at limit (inner disc `--surface-2`, icon `--dim`, label "Back at midnight"); offline (same as disabled, label "Voice needs a connection").
 - In voice mode the control is 76px with the same states.
 
@@ -276,10 +278,12 @@ The prototype's `.take` card, now a named component.
 
 - Container: radius 22, padding 22 / 20 / 16, `linear-gradient(160deg, var(--surface-2), var(--surface) 60%)`, `--hair` border, `shadow-1`.
 - Slots, in order: eyebrow (principle, `overline` in `--accent`), the line (`display-line`), the two-liner (`body-lg`, `--fg-2`), player row (see 6.6), optional save icon button top right (bookmark, 44px hit area).
-- **Markup source**: the model returns text with `|` (beat) and `||` (long pause). The renderer splits on pause marks into segments, then into words. Each word is a `span.w`; each mark becomes `span.pause[data-len=short|long]`, 2px tall, rounded, `--dim`; widths 0.55em (short) and 1.4em (long), margin 0 0.28em, vertically centred.
+- **Markup source**: the model returns text with `|` (beat) and `||` (long pause). The renderer splits on pause marks into segments, then into words. Each word is a `span.w`; each mark becomes `span.pause[data-len=short|long]` holding one beat (`|`) or two beats (`||`).
+- **Beat mark (v1.2)**: a mark must never read as punctuation, so there are no bars. Each beat is a dot-sized rounded pill, 0.22em wide by 0.13em tall (slightly wider than tall, so it is not a full stop), sitting on the text baseline (an `inline-flex` box aligned to the baseline). One pill means a beat, two pills (0.16em apart) mean a long pause. Wider pills were tested and rejected because a pair read as underscores. The mark has 0.34em of space on each side and rests in `--dim`, a deliberately low-contrast colour, so at rest it reads as rhythm rather than a character. It echoes the brand beat in the wordmark. Checked in a sentence at every size: `display-voice`, `display-line`, `title-3`, `body-lg`.
+- **Where marks appear**: only in spoken surfaces (voice mode, line cards, thread replies, the onboarding demo). Saved lines, case excerpts, copied text, shares and notifications strip them.
 - **No orphan marks**: a pause mark must never start a line. Wrap the word before each mark and the mark itself in a `white-space: nowrap` span.
 - **Performing** (card has `.performing`): unspoken words drop to opacity 0.34 (raised from the prototype's 0.26 for legibility, 2.9:1); spoken words get `.lit` at opacity 1. Transition `dur-word` `ease-standard`. Words stay lit after they are spoken so the reader can see progress.
-- **Pausing**: the current pause mark gets `.on`: background `--accent`, `shadow-glow`, transition 200ms. The player's beat label ("Pause") fades in.
+- **Pausing**: the current pause mark gets `.on`: its pills turn `--accent` with a `0 0 0.4em var(--accent)` glow, transition 200ms. The player's beat label ("Pause") fades in.
 - **Done**: `.performing` is removed; all words return to full opacity over 240ms.
 - **Timing source**, in priority order: (1) ElevenLabs character alignment returned with the audio, mapped to word start times; (2) `speechSynthesis` `onboundary` word events; (3) an estimate of 160 words per minute times the pace setting. Pause durations come from persona config (`gaps.short`, `gaps.long`; defaults Harvey 420/1050ms, Mike 300/700ms, Donna 360/900ms) and are also sent to TTS as `<break time="..."/>`.
 - **Accessibility**: the word spans are `aria-hidden="true"`; a visually hidden sibling holds the plain text without marks, so screen readers read the line once, cleanly.
@@ -291,7 +295,7 @@ The prototype's `.take` card, now a named component.
   - Listening: bar heights follow microphone RMS from an `AnalyserNode`, colour `--accent-2`.
   - Speaking with ElevenLabs audio: driven by an analyser on the audio element, colour `--accent`.
   - Speaking with `speechSynthesis` (no analyser): synthetic loop, 900ms ease-in-out with staggered delays.
-  - Pausing: all bars collapse to 2px and the row becomes a single glowing line (`shadow-glow`), echoing the pause mark.
+  - Pausing: the bars fade out and two glowing beats (8 by 4px pills in `--accent`, 6px apart) hold in the centre, echoing the mark in the text. A short beat shows one.
   - Idle and reduced motion: flat 4px bars at 50% opacity.
 
 ### 6.7 Cards
@@ -300,8 +304,8 @@ The prototype's `.take` card, now a named component.
 - **Read card**: paragraph, `body`.
 - **Play card**: ordered list, markers in Geist Mono 12px `--accent` (numbers), item gap 7.
 - **Avoid card**: border `color-mix(in srgb, var(--accent-2) 45%, transparent)`, heading in `--accent-2-text`.
-- Headings come from persona config (Harvey: The read, The play, Don't. Mike: The precedent, The angle, Watch out. Donna: What's really going on, What you do, What you don't).
-- **Saved line card**: radius 16, a 2px left inner bar in the line's persona `--accent-2`, top-left glow `radial-gradient(80% 120% at 0% 0%, var(--glow), transparent 60%)`, line in `title-3`, footer with xs avatar, persona short name, date and icon actions (play, copy, share).
+- Headings come from persona config (Harvey: The read, The play, Avoid. Mike: The precedent, The angle, Watch out. Donna: What's really going on, What you do, What you don't). Avoid sentences never start with "Don't" (persona spec rule), so a heading never stutters.
+- **Saved line card**: radius 16, a 2px left inner bar in the line's persona `--accent-2`, top-left glow `radial-gradient(80% 120% at 0% 0%, var(--glow), transparent 60%)`, line in `title-3` as plain text with marks stripped, footer with xs avatar, persona short name, date and icon actions (play, copy, overflow with Share, Open case, Remove). Swipe left reveals a 72px `--danger` Remove action; removal shows an Undo toast for 4s.
 - **Banner**: radius 12, 1px border in the semantic colour at 30%, matching `-bg` fill, icon 16, `small` text, optional text action on the right.
 
 ### 6.8 Chips
@@ -354,7 +358,7 @@ Inverted pill (radius 12, `--toast-bg`, `--toast-fg`, 13px, padding 9 / 14, `sha
 
 ### 6.14 Top bar and tab bar
 
-- **Top bar**: 52 tall. Left: the SVG wordmark at 18px tall (home) or back icon button. Centre (detail screens): title in `body-strong` or case matter. Right: icon buttons.
+- **Top bar**: 52 tall. Left: the SVG wordmark at 18px tall (home) or back icon button. Centre (detail screens): title in `body-strong` or case matter. Right: icon buttons, and on Home, Cases and Saved the profile button (6.17).
 - **Tab bar**: three tabs, Consult, Cases, Saved. 56 tall plus safe area, `--bg` at 85% with 20px backdrop blur, top `--hair`. Icon 22 over a `tab` label (Geist 11/600, sentence case); active tab `--fg` with a 2px `--accent` dot above the icon, inactive `--muted`. Hidden in voice mode, onboarding, sign in and the consult flow while a reply is speaking.
 
 ### 6.15 Skeletons, empty and error blocks
@@ -372,6 +376,38 @@ Intensity (Measured, Sharp, No mercy) is a setting, not part of a persona's name
 - Interaction: tap opens a small sheet with the three levels and one-line descriptions ("Measured: direct, warmer underneath." "Sharp: the full character." "No mercy: the hard truth, no cushioning."). Selection shows a toast "Intensity: No mercy".
 - Spacing: at least 12px from any persona name or chip.
 
+### 6.17 Profile button
+
+A 36px circle (44 hit area) that opens Settings. Signed in: the user's initial in Geist 600 15px on `--surface-2` with a 1px `--hair-2` ring. Guest: a person icon on the same circle, with a "Sign in" text button (13px, `--accent`) to its left on Home only. Replaces the v1.1 sliders icon, which read as a filter next to search.
+
+### 6.18 Moment row ("When is it happening?")
+
+A borderless row under the line card on the first result: 16px clock icon in `--muted`, `small` "When is it happening?", then a scrolling chip row (Today, Tomorrow, This week, Pick a time). Pick a time opens the native date and time picker. Once set, the row collapses to `small` "Happening Tomorrow, 10:00" in `--fg-2` with a text button "Change". In the thread it is pinned under the top bar.
+
+### 6.19 Debrief card
+
+Persona-tinted card (`--surface` with the persona glow at top left, `--hair` border, radius 16, padding 14 16). Header row: xs avatar, `overline` "Debrief" in `--accent`, and a close icon (dismiss, asks again next open, then stops). Title `title-3` "How did it go with {matter}?". Three equal chips: "Used it", "Partly", "Didn't". Text button "Add a note" opens the thread with the composer focused. On Home it sits between the talk control and quick situations; in the thread it replaces the moment row. Case rows show an outlined `overline` "Debrief" tag (accent at 50%) until answered.
+
+### 6.20 Feedback row and sheet
+
+End of the result cards and inside "Show more" in the thread: `small` "Was this useful?" left, two 36px icon buttons (thumbs up, thumbs down, 44 hit area) right. Selected thumb fills `--accent` with `--on-accent` icon. Thumbs down opens a sheet: `title-2` "What missed?", single-choice chips (Too long, Off target, Not their voice, Unsafe, Other), optional note field, primary "Send".
+
+### 6.21 Account sheet ("Keep this case?")
+
+A bottom sheet (6.12) with a mini case summary row (xs avatar, matter in `body-strong`), `title-2` headline, `body` reason line, Google button, secondary "Continue with email" (expands an inline email field and "Send me a link"), ghost "Not now" (omitted when sign in is required).
+
+### 6.22 Plan card (paywall stub)
+
+Radius 16, `--surface`, 1px `--hair`, padding 16. Left: plan name `body-strong`, price in Bricolage 650 20px, equivalent in `small` muted. Right: 22px radio. Selected: border `--accent`, 1px outer ring, radio filled. Optional tag pill top right ("Best value", `overline`, `--accent` on `color-mix(in srgb, var(--accent) 14%, transparent)`). Annual first, monthly second.
+
+### 6.23 Helpline button (care mode)
+
+Full-width 56px button, `--accent` fill (neutral tint, so platinum), phone icon, two-line label: helpline name in Geist 600 15px ("Call Tele-MANAS") and the number in Geist Mono 13px ("14416"). Secondary emergency button uses the secondary style with the same two-line layout. Values come from region config (`helplines[country] = { name, number, sms?, emergencyNumber, directoryUrl }`).
+
+### 6.24 Chip row overflow
+
+Single-row chip scrollers end with a 32px fade (`linear-gradient(to right, transparent, var(--bg))` masked over the trailing edge) so clipped chips read as scrollable. Fade hides when scrolled to the end.
+
 ## 7. Voice-state choreography
 
 One state machine drives the home talk button, the voice mode screen and the line card. States: `idle`, `listening`, `thinking`, `speaking`, `pausing` (a sub-state of speaking), `interrupted`. Transitions are listed with what every element does.
@@ -388,7 +424,7 @@ One state machine drives the home talk button, the voice mode screen and the lin
 ### 7.1 Transitions
 
 - **idle to listening**: tap the talk button or mic. Voice mode slides up (320ms `ease-enter`); the avatar scales from its home position to 120px. The microphone opens before the animation ends so the first syllable is not lost. If permission is missing, go to the permission prompt (screens.md, onboarding 3) instead.
-- **listening**: interim words render in `--muted`, final words in `--fg`, both in `transcript` style, auto-scrolling to keep the last line visible. End of speech: tap the control, release in push-to-talk, or 1.6s of silence after at least 8 characters. Under 8 characters: toast "Give them a little more than that." and stay in listening.
+- **listening**: interim words render in `--muted`, final words in `--fg`, both in `transcript` style, auto-scrolling to keep the last line visible. End of turn: tap the control again, or a silence (1.6s to start) after at least 8 characters. Under 8 characters: toast "Give them a little more than that." and stay in listening.
 - **listening to thinking**: the transcript shrinks into a "You" echo line at the top (240ms), the avatar halo stops, dots appear. Thinking copy rotates every 2400ms from config. Stop returns to idle with the transcript kept in the composer.
 - **thinking to speaking**: the line types in nothing; it appears fully, dimmed to 0.34 (performing), then the first word lights when audio starts. Audio and lighting must start together; buffer at least the first segment before showing the speaking state.
 - **speaking to pausing to speaking**: at each pause mark, lighting stops, the mark glows for exactly the persona gap, then the next segment lights. Long pause after the line before the two-liner is always inserted if the model did not mark one.
@@ -401,6 +437,8 @@ One state machine drives the home talk button, the voice mode screen and the lin
 - No speech detected for 8s: back to idle with toast "Didn't catch that. Try again."
 - TTS fails: fall back to `speechSynthesis`; if that is unavailable, show the line fully lit (no performance) with toast "Voice unavailable. Here it is in writing."
 - Network drop during thinking: thinking ends, banner "Lost the connection. Your situation is saved." with Retry.
+- **Care reply**: if the reply has `mode: "care"` (or the pre-screen fires), the machine never enters speaking. Thinking cross-fades to the neutral tint over 240ms, voice mode closes and the care screen opens. With voice on, the care message plays in the neutral voice at normal pace with no beats, halo, word lighting, persona chip or intensity.
+- **Follow-up replies** (interruptions and voice push backs) close voice mode onto the case thread, not the result.
 
 ## 8. Accessibility
 
@@ -409,7 +447,7 @@ One state machine drives the home talk button, the voice mode screen and the lin
 - **Reduced motion** (`prefers-reduced-motion: reduce`): no halo pulses, waveform loops, shimmer, dots or rotating thinking copy (show the first thinking line). Persona re-tint is instant. Word lighting still happens because it carries meaning, but without transitions. Pause marks still switch to `--accent` during pauses but without glow animation. Voice mode appears with a 150ms fade instead of a slide.
 - **Tap targets**: 44 by 44 minimum everywhere, 8px minimum between adjacent targets.
 - **Screen readers**: rail is a tablist; voice mode is a dialog (`role="dialog"`, `aria-modal="true"`, labelled "Talking to {name}"); the state label is a polite live region announcing state changes except during speech. Pause marks are hidden. Every icon button has an `aria-label`.
-- **Text size**: layouts tolerate 200% text zoom; the line card wraps and grows, the tab bar labels truncate before icons shrink.
+- **Text size**: all type tokens are defined in rem (16px root) so browser zoom and iOS Larger Text scale them. Check every screen at 200%: the line card wraps and grows without clipping, the talk label wraps to two lines rather than truncating, chip rows scroll, and tab labels may truncate before icons shrink.
 - **Keyboard**: all actions reachable; Space toggles listening in voice mode; Escape closes voice mode and sheets.
 - **Copy**: no em dashes or en dashes anywhere. Renderer strips any that slip through (`noDash`, as in the prototype).
 
@@ -464,21 +502,21 @@ Drop this into `app/globals.css` (Tailwind v4). Raw tokens live on `:root`; `@th
 
   --font-display: var(--font-display-src); --font-sans: var(--font-sans-src); --font-mono: var(--font-mono-src);
 
-  --text-display-voice: 34px; --text-display-voice--line-height: 1.1; --text-display-voice--letter-spacing: -0.025em; --text-display-voice--font-weight: 600;
-  --text-display-line: 28px;  --text-display-line--line-height: 1.14; --text-display-line--letter-spacing: -0.022em; --text-display-line--font-weight: 600;
-  --text-display-hero: 32px;  --text-display-hero--line-height: 1.08; --text-display-hero--letter-spacing: -0.03em; --text-display-hero--font-weight: 700;
-  --text-title-1: 26px; --text-title-1--line-height: 1.12; --text-title-1--letter-spacing: -0.025em; --text-title-1--font-weight: 700;
-  --text-title-2: 21px; --text-title-2--line-height: 1.2; --text-title-2--letter-spacing: -0.015em; --text-title-2--font-weight: 650;
-  --text-title-3: 18px; --text-title-3--line-height: 1.3; --text-title-3--letter-spacing: -0.01em; --text-title-3--font-weight: 600;
-  --text-excerpt: 14.5px; --text-excerpt--line-height: 1.35;
-  --text-transcript: 20px; --text-transcript--line-height: 1.4; --text-transcript--letter-spacing: -0.01em;
-  --text-section: 13px; --text-section--line-height: 1.3; --text-section--font-weight: 600;
-  --text-overline: 11px; --text-overline--line-height: 1.3; --text-overline--letter-spacing: 0.08em; --text-overline--font-weight: 600;
-  --text-body-lg: 16px; --text-body-lg--line-height: 1.55;
-  --text-body: 15px; --text-body--line-height: 1.5;
-  --text-small: 13px; --text-small--line-height: 1.45;
-  --text-fine: 11.5px; --text-fine--line-height: 1.5;
-  --text-meta: 11px; --text-meta--line-height: 1.2;
+  --text-display-voice: 2.125rem; --text-display-voice--line-height: 1.1; --text-display-voice--letter-spacing: -0.025em; --text-display-voice--font-weight: 600;
+  --text-display-line: 1.75rem;  --text-display-line--line-height: 1.14; --text-display-line--letter-spacing: -0.022em; --text-display-line--font-weight: 600;
+  --text-display-hero: 2rem;  --text-display-hero--line-height: 1.08; --text-display-hero--letter-spacing: -0.03em; --text-display-hero--font-weight: 700;
+  --text-title-1: 1.625rem; --text-title-1--line-height: 1.12; --text-title-1--letter-spacing: -0.025em; --text-title-1--font-weight: 700;
+  --text-title-2: 1.3125rem; --text-title-2--line-height: 1.2; --text-title-2--letter-spacing: -0.015em; --text-title-2--font-weight: 650;
+  --text-title-3: 1.125rem; --text-title-3--line-height: 1.3; --text-title-3--letter-spacing: -0.01em; --text-title-3--font-weight: 600;
+  --text-excerpt: 0.9062rem; --text-excerpt--line-height: 1.35;
+  --text-transcript: 1.25rem; --text-transcript--line-height: 1.4; --text-transcript--letter-spacing: -0.01em;
+  --text-section: 0.8125rem; --text-section--line-height: 1.3; --text-section--font-weight: 600;
+  --text-overline: 0.6875rem; --text-overline--line-height: 1.3; --text-overline--letter-spacing: 0.08em; --text-overline--font-weight: 600;
+  --text-body-lg: 1rem; --text-body-lg--line-height: 1.55;
+  --text-body: 0.9375rem; --text-body--line-height: 1.5;
+  --text-small: 0.8125rem; --text-small--line-height: 1.45;
+  --text-fine: 0.7188rem; --text-fine--line-height: 1.5;
+  --text-meta: 0.6875rem; --text-meta--line-height: 1.2;
   --tracking-overline: 0.08em; --tracking-state: 0.16em;
 
   --spacing: 4px; /* p-4 = 16px, gap-2.5 = 10px, etc. */
@@ -523,10 +561,11 @@ Word and pause classes stay as plain CSS (they are stateful and toggled by the s
 .w { transition: opacity var(--dur-word) var(--ease-standard); }
 .performing .w { opacity: .34; }
 .performing .w.lit { opacity: 1; }
-.pause { display: inline-block; vertical-align: middle; height: 2px; border-radius: 2px; background: var(--dim); margin: 0 .28em; transition: background var(--dur-pause), box-shadow var(--dur-pause); }
-.pause[data-len="short"] { width: .55em; }
-.pause[data-len="long"] { width: 1.4em; }
-.pause.on { background: var(--accent); box-shadow: var(--shadow-glow); }
+/* <span class="pause" data-len="short"><i></i></span>  or  data-len="long" with two <i> */
+.pause { display: inline-flex; gap: .16em; margin: 0 .34em; vertical-align: baseline; }
+.pause i { display: block; width: .22em; height: .13em; border-radius: 1em; background: var(--dim); transition: background var(--dur-pause), box-shadow var(--dur-pause); }
+.pause.on i { background: var(--accent); box-shadow: 0 0 .4em var(--accent); }
+.nb { white-space: nowrap; } /* wraps the word before a mark so a mark never starts a line */
 ```
 
 ### 9.1 Persona config contract (design fields)
@@ -539,14 +578,24 @@ type PersonaDesign = {
   name: string;          // "Harvey Specter"
   short: string;         // "Harvey"
   glyph: string;         // SVG markup or asset path on a 24 grid, white, e.g. brand/glyph-harvey.svg
-  role: string;          // one-line role under the name
+  role: string;          // overline label, one per persona: "The closer", "The prodigy", "The reader"
+  tagline: string;       // the only line under the name, everywhere: "Finds the leverage.", "Finds the detail.", "Reads the people."
   theme: { accent: string; accent2: string; accent2Text: string; glow: string; avFrom: string; avTo: string; onAccent: string };
-  labels: { read: string; play: string; avoid: string };
+  labels: { read: string; play: string; avoid: string }; // Harvey: "The read", "The play", "Avoid"
   thinking: string[];    // rotating thinking copy
   meta: string;          // template, e.g. "{hours} hrs billed"
   gaps: { short: number; long: number }; // ms
   voiceOptions: { id: string; label: string }[]; // stock TTS voices offered in settings
   emptyStates: { home: string; cases: string; saved: string; limit: string };
+};
+
+// App-level config the screens depend on (not per persona)
+type AppDesignConfig = {
+  pack: "show" | "original";   // show: fan disclaimer, no paywall. original: paywall flag allowed, no fan disclaimer
+  paywallEnabled: boolean;     // only honoured when pack is "original"
+  allowance: { count: number; period: "day" | "week"; followUpsPerCase: number; resetWeekday?: string }; // hypothesis: 3 per week, 5 follow-ups
+  helplines: Record<string, { name: string; number: string; sms?: string; emergencyNumber: string; directoryUrl: string }>;
+  // e.g. IN: Tele-MANAS 14416, emergency 112; US: 988 (call or text), 911; GB: Samaritans 116 123, 999
 };
 ```
 
@@ -572,6 +621,8 @@ One rule, applied everywhere, driven by config fields `name` (full) and `short` 
 - **Never** combine a persona name with any other label in the same chip or line (no intensity, no level, no status words). The voice mode chip holds only the mark and the first name.
 - **Possessives** use the short name ("Harvey's voice"). **Billing meta** is persona copy from config and may reference another persona ("billed to Harvey").
 - **Never** use initials as a name in UI copy.
+- **Role and tagline**: each persona has exactly one `role` (overline, onboarding cards and persona sheet) and one `tagline` (under the name on every hero and card). No screen writes its own description of a persona, so taglines never clash (Harvey "Finds the leverage.", Mike "Finds the detail.", Donna "Reads the people.").
+- **Status lines** use the short name in sentence case `small`: "Harvey is on it". Never uppercase.
 
 ## 11. Brand
 
@@ -583,5 +634,7 @@ Files in `docs/design/brand/`:
 | `icon.svg` | App icon (1024, rounded): the "s" and the beat on midnight, with a low aurora of the three persona tints along the bottom edge. Use for `purpose: "any"` and the favicon. |
 | `icon-maskable.svg` | Same artwork full-bleed with the mark inside the central 80% safe zone, for `purpose: "maskable"` in the PWA manifest. |
 | `persona-*.svg`, `glyph-*.svg` | Persona marks (see 6.1). |
+
+In plain text (share text, emails, store listings, notifications) always write **Specter** with a capital S and never an underscore; the baseline beat exists only in the drawn wordmark.
 
 In the app the wordmark appears only in the home top bar (18px), splash (30px) and sign in (18px). The beat's colour follows the active persona's `--accent` in the app; the static files use platinum `#d3dbe8`.
