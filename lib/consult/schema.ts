@@ -5,8 +5,25 @@ import { rewriteAvoid, scrubDeep, squish, wordCount } from "@/lib/text";
 
 const text = (min: number, max: number) => z.string().trim().min(min).max(max);
 
-export const MODES = ["persona", "care", "decline"] as const;
+/**
+ * persona  full advice for a situation with enough to work with
+ * care     someone is struggling; warmth over tactics
+ * decline  out of bounds
+ * meta     what the app is, who the persona is, a greeting, an off topic ask
+ * clarify  a real situation, but too thin to answer without inventing facts
+ *
+ * meta and clarify exist because every input used to be forced down the
+ * persona path: asking "what can you do" produced a reading of a crisis, a
+ * three move plan and billed hours, because the contract below required them.
+ */
+export const MODES = ["persona", "care", "decline", "meta", "clarify"] as const;
 export type Mode = (typeof MODES)[number];
+
+/**
+ * Modes that must carry the full advice payload. decline keeps the existing
+ * requirement: it refuses the tactic but still owes a legal route.
+ */
+const FULL_ADVICE: ReadonlySet<string> = new Set(["persona", "decline"]);
 
 /**
  * The reply contract (PRD.md section 7). Keys are emitted with mode and line first
@@ -21,19 +38,27 @@ export const ReplySchema = z
     followup: text(0, 600),
     matter: text(2, 80),
     read: text(3, 600),
-    play: z.array(text(3, 400)).min(1).max(3),
+    play: z.array(text(3, 400)).min(0).max(3),
     avoid: text(0, 320),
     principle: z.string().trim().max(90),
     intent: z.enum(INTENT_KEYS).nullable(),
     stakes: z.enum(["low", "medium", "high"]).nullable(),
-    hours: z.number().min(0.1).max(0.6),
+    hours: z.number().min(0).max(0.6),
   })
   .strict()
   .superRefine((r, ctx) => {
-    if (r.mode !== "care") {
+    if (FULL_ADVICE.has(r.mode)) {
       if (r.play.length !== 3) ctx.addIssue({ code: "custom", path: ["play"], message: "play must have exactly three moves" });
       if (r.principle.length < 2) ctx.addIssue({ code: "custom", path: ["principle"], message: "principle is required" });
       if (r.avoid.length < 3) ctx.addIssue({ code: "custom", path: ["avoid"], message: "avoid is required" });
+    }
+    // clarify asks for what is missing, so play holds questions, not moves.
+    if (r.mode === "clarify" && r.play.length < 1) {
+      ctx.addIssue({ code: "custom", path: ["play"], message: "clarify must ask for at least one thing" });
+    }
+    // meta answers in the line. A plan here is the bug this mode exists to stop.
+    if (r.mode === "meta" && r.read.length > 240) {
+      ctx.addIssue({ code: "custom", path: ["read"], message: "meta read must stay under 240 characters" });
     }
   });
 
@@ -107,17 +132,20 @@ export function normalizeReply(input: unknown): unknown {
   if (r.mode === undefined && typeof r.care === "boolean") r.mode = r.care ? "care" : "persona";
   if (typeof r.mode === "string") r.mode = r.mode.trim().toLowerCase();
   const care = r.mode === "care";
+  // Modes that carry no plan, so an absent avoid or principle is correct
+  // rather than a validation failure.
+  const light = care || r.mode === "meta" || r.mode === "clarify";
   const unmark = (v: unknown) => (typeof v === "string" ? squish(v.replace(/\s*\|+\s*/g, " ")) : v);
   const tidy = (v: unknown) => (typeof v === "string" ? squish(v) : v);
   for (const k of ["matter", "principle", "read", "avoid"]) r[k] = unmark(r[k]);
   for (const k of ["line", "followup"]) r[k] = care ? unmark(r[k]) : tidy(r[k]);
   if (r.followup === undefined || r.followup === null) r.followup = "";
   if (r.principle === undefined || r.principle === null) r.principle = "";
-  if (r.avoid === undefined || r.avoid === null) r.avoid = care ? "" : r.avoid;
+  if (r.avoid === undefined || r.avoid === null) r.avoid = light ? "" : r.avoid;
   if (typeof r.avoid === "string") r.avoid = rewriteAvoid(r.avoid);
   if (Array.isArray(r.play)) r.play = r.play.map(unmark).filter((x) => typeof x === "string" && x.length > 0).slice(0, 3);
   if (typeof r.hours === "string") r.hours = Number(r.hours);
-  if (care && (typeof r.hours !== "number" || !Number.isFinite(r.hours))) r.hours = 0.1;
+  if (light && (typeof r.hours !== "number" || !Number.isFinite(r.hours))) r.hours = 0.1;
   if (typeof r.hours === "number" && Number.isFinite(r.hours)) r.hours = Math.min(0.6, Math.max(0.1, Math.round(r.hours * 10) / 10));
   if (typeof r.intent === "string") {
     const k = r.intent.trim().toLowerCase().replace(/[\s-]+/g, "_");

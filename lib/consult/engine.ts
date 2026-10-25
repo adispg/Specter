@@ -33,7 +33,7 @@ You must respond with ONLY a JSON object. Nothing else. Not a single word outsid
 
 Your response must start with { and end with }. No markdown. No backticks. No "Here is..." or "Sure," or any other text.
 
-Required keys in this exact order: mode, line, followup, matter, read, play (array of exactly three strings unless mode is "care"), avoid, principle, intent, stakes, hours (number 0.1 to 0.6).
+Required keys in this exact order: mode, line, followup, matter, read, play, avoid, principle, intent, stakes, hours (number 0.1 to 0.6). play holds exactly three strings for mode "persona" and "decline", one to three for "care" and "clarify", and zero to three for "meta". avoid and principle may be "" for "care", "meta" and "clarify".
 
 Pause marks (| and ||) only inside "line" and "followup" strings, never in care mode. No em dashes or en dashes anywhere.
 

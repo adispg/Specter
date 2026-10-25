@@ -214,7 +214,7 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
           saved={saved}
           onToggleSave={toggleSave}
         />
-        <AdviceCards persona={persona} reply={first.reply} />
+        <AdviceCards persona={persona} reply={first.reply} onPick={(q) => setText(q)} />
         <MomentRow caseId={caseRow.id} momentAt={caseRow.moment_at} />
         <div className="row-actions" style={{ display: "grid", gridTemplateColumns: first.mode === "decline" ? "1fr 1fr" : "1fr 1fr 1fr" }}>
           <button type="button" className="soft" onClick={() => void perf.play(speakReq(first))} style={{ justifyContent: "center" }}>

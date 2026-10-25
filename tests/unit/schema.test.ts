@@ -55,6 +55,26 @@ describe("ReplySchema", () => {
     expect(ReplySchema.safeParse(care).success).toBe(true);
   });
 
+  it("lets meta mode answer with no plan at all", () => {
+    const meta = { ...good, mode: "meta", read: "They are asking what this is for.", play: [], principle: "", avoid: "", hours: 0.1 };
+    expect(ReplySchema.safeParse(meta).success).toBe(true);
+  });
+
+  it("rejects a meta reply that pads the read into a full analysis", () => {
+    const meta = { ...good, mode: "meta", read: "x".repeat(241), play: [], principle: "", avoid: "", hours: 0.1 };
+    expect(ReplySchema.safeParse(meta).success).toBe(false);
+  });
+
+  it("lets clarify mode ask for what is missing instead of giving three moves", () => {
+    const clarify = { ...good, mode: "clarify", play: ["What did your manager actually say?"], principle: "", avoid: "", hours: 0.1 };
+    expect(ReplySchema.safeParse(clarify).success).toBe(true);
+  });
+
+  it("rejects a clarify reply that asks for nothing", () => {
+    const clarify = { ...good, mode: "clarify", play: [], principle: "", avoid: "", hours: 0.1 };
+    expect(ReplySchema.safeParse(clarify).success).toBe(false);
+  });
+
   it("rejects hours outside 0.1 to 0.6", () => {
     expect(ReplySchema.safeParse({ ...good, hours: 2 }).success).toBe(false);
   });
@@ -141,7 +161,8 @@ describe("generateReply with repair", () => {
     expect(llm.calls).toHaveLength(2);
     const repairTurn = llm.calls[1]!.messages.at(-1)!;
     expect(repairTurn.role).toBe("user");
-    expect(repairTurn.content).toContain("did not match the required format");
+    expect(repairTurn.content).toContain("rejected");
+    expect(repairTurn.content).toContain("JSON object");
     expect(llm.calls[1]!.messages.at(-2)!.role).toBe("assistant");
   });
 

@@ -196,22 +196,82 @@ export function IntensitySegmented() {
 
 // ---------------------------------------------------------------- advice cards
 
-export function AdviceCards({ persona, reply }: { persona: PersonaId; reply: Reply }) {
+export function AdviceCards({
+  persona,
+  reply,
+  onPick,
+}: {
+  persona: PersonaId;
+  reply: Reply;
+  /** clarify mode: tapping a question puts it in the composer. */
+  onPick?: (text: string) => void;
+}) {
   const p = PERSONAS[persona];
+
+  // A capability question or a greeting gets an answer, not a case file. The
+  // line already carries it, so everything below would be padding.
+  if (reply.mode === "meta") {
+    if (!reply.play.length) return null;
+    return (
+      <section className="stack" data-testid="advice-cards">
+        <div className="card">
+          <h3>What to bring me</h3>
+          <ul>
+            {reply.play.map((m, i) => (
+              <li key={i}>{m}</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    );
+  }
+
+  // clarify: play holds what the persona needs to know, not moves to make.
+  if (reply.mode === "clarify") {
+    return (
+      <section className="stack" data-testid="advice-cards">
+        {reply.read && (
+          <div className="card">
+            <h3>{p.labels.read}</h3>
+            <p>{reply.read}</p>
+          </div>
+        )}
+        <div className="card">
+          <h3>What I need</h3>
+          <ul>
+            {reply.play.map((m, i) => (
+              <li key={i}>
+                {onPick ? (
+                  <button type="button" className="askback" onClick={() => onPick(m)}>
+                    {m}
+                  </button>
+                ) : (
+                  m
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="stack" data-testid="advice-cards">
       <div className="card">
         <h3>{p.labels.read}</h3>
         <p>{reply.read}</p>
       </div>
-      <div className="card">
-        <h3>{p.labels.play}</h3>
-        <ol>
-          {reply.play.map((m, i) => (
-            <li key={i}>{m}</li>
-          ))}
-        </ol>
-      </div>
+      {reply.play.length > 0 && (
+        <div className="card">
+          <h3>{p.labels.play}</h3>
+          <ol>
+            {reply.play.map((m, i) => (
+              <li key={i}>{m}</li>
+            ))}
+          </ol>
+        </div>
+      )}
       {reply.avoid && (
         <div className="card avoid">
           <h3>{p.labels.avoid}</h3>

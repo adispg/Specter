@@ -417,6 +417,16 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 /* Home screen: who is across the desk, then a way in. The persona block is
    centred because it is identity; the starters are left aligned because they
    are content to read. */
+/* clarify mode: the questions are tappable, they prefill the composer. */
+.askback {
+  display: block; width: 100%; text-align: left; padding: 0;
+  background: none; border: 0; color: inherit; font: inherit;
+  cursor: pointer; text-decoration: underline; text-decoration-color: var(--hair-2);
+  text-underline-offset: 3px;
+}
+.askback:hover { text-decoration-color: var(--accent-2); }
+.askback:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
 /* Sign in and offline: a single centred column, no app chrome. */
 .authscr {
   min-height: 100dvh; display: flex; align-items: center; justify-content: center;
