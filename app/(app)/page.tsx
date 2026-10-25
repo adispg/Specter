@@ -26,22 +26,20 @@ export default function HomePage() {
   }
 
   return (
-    <div className="screen">
-      <header className="screen-header">
+    <div className="scr">
+      <div className="topbar">
         <PersonaRail value={persona} onChange={setPersona} />
         <IntensityControl />
-      </header>
+      </div>
 
-      <main className="screen-main">
+      <main className="body stack">
         <OfflineBanner />
         {consult.error && (
           <ErrorBanner onRetry={consult.retry}>{consult.error}</ErrorBanner>
         )}
-        <div className="home-prompt">
-          <p className="home-prompt-text">
-            Bring the situation. Leave with the line.
-          </p>
-        </div>
+        <p className="t3" style={{ marginTop: 24, color: "var(--fg-2)" }}>
+          Bring the situation. Leave with the line.
+        </p>
       </main>
 
       <Composer
