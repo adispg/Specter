@@ -1,5 +1,4 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { BRAND, PERSONAS, personaList, type PersonaId } from "@/lib/personas/config";
 import { Wordmark } from "@/components/Wordmark";
@@ -13,7 +12,6 @@ const PERSONA_PITCHES: Record<PersonaId, string> = {
 };
 
 function WelcomeInner() {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +29,7 @@ function WelcomeInner() {
         const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
         throw new Error(body.error?.message ?? "Something went wrong. Try again.");
       }
-      router.push("/");
+      window.location.href = "/";
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
       setBusy(false);
