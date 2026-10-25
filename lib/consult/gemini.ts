@@ -12,34 +12,50 @@ import { LlmError, type Completion, type CompletionRequest, type LlmClient } fro
  * Note: Gemini does not support prompt caching the same way Anthropic does, so
  * SystemBlocks.cached and .dynamic are concatenated into a single system prompt.
  */
+/**
+ * Tried in order when GEMINI_MODEL is not set. Flash capacity is shared and a
+ * popular model returns 503 "high demand" under load, so a single hardcoded
+ * model makes the whole app fail for reasons nothing here controls.
+ */
+const DEFAULT_MODEL_CHAIN = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"];
+
 export class GeminiClient implements LlmClient {
   private readonly client: GoogleGenerativeAI;
+  private readonly chain: string[];
+  readonly model: string;
 
   constructor(
     private readonly apiKey: string,
-    readonly model: string = "gemini-3.8-flash",
+    model?: string,
     private readonly timeoutMs = 45_000,
   ) {
     if (!apiKey) throw new LlmError("GEMINI_API_KEY is not set", "not_configured");
     this.client = new GoogleGenerativeAI(apiKey);
+    // An explicit GEMINI_MODEL pins one model and disables the fallback.
+    this.chain = model ? [model] : [...DEFAULT_MODEL_CHAIN];
+    this.model = this.chain[0] ?? DEFAULT_MODEL_CHAIN[0]!;
   }
 
   async complete(req: CompletionRequest): Promise<Completion> {
     let lastErr: unknown;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        return await this.once(req);
-      } catch (e) {
-        lastErr = e;
-        const retryable = e instanceof LlmError && (e.code === "overloaded" || (e.status ?? 0) >= 500);
-        if (!retryable || attempt === 1) throw e;
-        await new Promise((r) => setTimeout(r, 800 + Math.random() * 600));
+    for (const model of this.chain) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          return await this.once(req, model);
+        } catch (e) {
+          lastErr = e;
+          const retryable = e instanceof LlmError && (e.code === "overloaded" || (e.status ?? 0) >= 500);
+          // A bad key or a malformed request fails the same way on every model.
+          if (!retryable) throw e;
+          if (attempt === 0) await new Promise((r) => setTimeout(r, 600 + Math.random() * 500));
+        }
       }
+      console.warn(`[gemini] ${model} unavailable, trying next model in the chain`);
     }
     throw lastErr;
   }
 
-  private async once(req: CompletionRequest): Promise<Completion> {
+  private async once(req: CompletionRequest, modelId: string): Promise<Completion> {
     const systemInstruction =
       typeof req.system === "string" ? req.system : systemText(req.system as SystemBlocks);
 
@@ -66,7 +82,7 @@ export class GeminiClient implements LlmClient {
     };
 
     const model = this.client.getGenerativeModel({
-      model: this.model,
+      model: modelId,
       systemInstruction,
       generationConfig: {
         maxOutputTokens: req.maxTokens ?? 1000,
@@ -122,7 +138,7 @@ export class GeminiClient implements LlmClient {
       }
       if (status === 404 || lower.includes("is not found for api version")) {
         throw new LlmError(
-          `Gemini model "${this.model}" is not available. Set GEMINI_MODEL to a current model. (${msg})`,
+          `Gemini model "${modelId}" is not available. Set GEMINI_MODEL to a current model. (${msg})`,
           "not_configured",
           404,
         );

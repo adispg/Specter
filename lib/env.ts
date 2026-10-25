@@ -32,7 +32,8 @@ export const env = {
 
   /** Gemini (primary LLM). Override the model with GEMINI_MODEL when Google retires an id. */
   geminiKey: () => process.env.GEMINI_API_KEY ?? "",
-  geminiModel: () => process.env.GEMINI_MODEL || "gemini-3.8-flash",
+  /** Empty means "use the client's fallback chain"; set it to pin one model. */
+  geminiModel: () => process.env.GEMINI_MODEL || "",
 
   /**
    * TTS: browser speechSynthesis is used by default (free, no key needed).
