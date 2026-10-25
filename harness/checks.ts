@@ -30,9 +30,27 @@ export function stripMarks(s: string): string {
  * Sentence count. Abbreviations are rare in this copy and a decimal such as
  * 0.3 is not followed by a space, so a terminator plus whitespace or end of
  * string is accurate enough for a binary check.
+ *
+ * Quoted speech is masked out first. The contract asks for "words to say where
+ * it helps", so a move such as: say 'That does not work for me. What else have
+ * you got?' and wait, is one instruction, not three sentences. Counting the
+ * terminators inside the quotation marks would fail the copy the contract asks
+ * for.
  */
+const QUOTED = /(["\u201c\u201d\u2018\u2019'])((?:(?!\1).){0,200}?)\1/gs;
+/** A word internal apostrophe ("doesn't") is not a quote delimiter. */
+const APOSTROPHE = /(?<=\p{L})['\u2019](?=\p{L})/gu;
+const APO_HOLD = "\u0001";
+
+export function maskQuotes(s: string): string {
+  return s
+    .replace(APOSTROPHE, APO_HOLD)
+    .replace(QUOTED, (m, q: string, inner: string) => q + inner.replace(/[.!?]/g, "\u00b7") + q)
+    .replaceAll(APO_HOLD, "'");
+}
+
 export function sentenceCount(s: string): number {
-  const t = stripMarks(s);
+  const t = maskQuotes(stripMarks(s));
   if (!t) return 0;
   return t.split(/[.!?]+(?:\s+|$)/).filter((x) => x.trim().length > 0).length;
 }
@@ -141,8 +159,12 @@ export function runChecks(reply: Reply, persona: PersonaId, expectedMode: Mode):
       if (!v.includes("|")) continue;
       const trimmed = v.trim();
       add(`${f} marks not at edges`, !/^\|/.test(trimmed) && !/\|$/.test(trimmed));
-      // Spaced on both sides, and no run longer than two
-      add(`${f} marks spaced`, !/\S\|/.test(v) && !/\|\S/.test(v));
+      // Spaced on both sides. A long pause is the two character token "||", so
+      // it collapses to one mark before the test; otherwise the second bar of
+      // every long pause reads as a mark jammed against a non space character
+      // and no reply with a long pause could ever pass.
+      const one = v.replace(/\|{2,}/g, "|");
+      add(`${f} marks spaced`, !/\S\|/.test(one) && !/\|\S/.test(one));
       add(`${f} no mark runs over two`, !/\|{3,}/.test(v));
       // Adjacent marks separated only by spaces, for example "| |"
       add(`${f} no adjacent marks`, !/\|\s+\|/.test(v.replace(/\|\|/g, "L")));

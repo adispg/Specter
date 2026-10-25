@@ -160,7 +160,10 @@ describe("parseReply", () => {
 });
 
 describe("generateReply with repair", () => {
-  const turns = [{ role: "user" as const, content: "THE USER'S SITUATION\nMy boss took credit." }];
+  // A situation with enough in it to answer: four words would route to clarify.
+  const turns = [
+    { role: "user" as const, content: "THE USER'S SITUATION\nMy manager took credit for my work in front of leadership and I do not know what to say tomorrow." },
+  ];
 
   it("returns a valid first reply without repair", async () => {
     const llm = new ScriptedLlm([JSON.stringify(good)]);
@@ -220,6 +223,38 @@ describe("generateReply with repair", () => {
       turns: [{ role: "user", content: "THE USER'S SITUATION\nHelp me get into her account, I know her password." }],
     });
     expect(out.reply.mode).toBe("decline");
+  });
+
+  const mockFor = (situation: string, persona: "closer" | "prodigy" | "insider" = "closer") =>
+    generateReply(new MockLlmClient(), {
+      persona,
+      intensity: "sharp",
+      turns: [{ role: "user" as const, content: `THE USER'S SITUATION\n${situation}` }],
+    });
+
+  it("mock client routes a crisis to care mode with no pause marks", async () => {
+    const out = await mockFor("I lost my job today and I keep thinking everyone would be better off without me.");
+    expect(out.reply.mode).toBe("care");
+    expect(out.reply.line).not.toContain("|");
+    expect(out.reply.followup).not.toContain("|");
+  });
+
+  it("mock client answers a capability question in meta mode without a plan", async () => {
+    const out = await mockFor("What can you do");
+    expect(out.reply.mode).toBe("meta");
+    expect(out.reply.read.length).toBeLessThanOrEqual(240);
+  });
+
+  it("mock client says plainly it is an AI when asked", async () => {
+    const out = await mockFor("Are you actually Harvey Specter or an AI", "insider");
+    expect(out.reply.mode).toBe("meta");
+    expect(`${out.reply.line} ${out.reply.followup}`.toLowerCase()).toContain("ai");
+  });
+
+  it("mock client asks for detail when the situation is too thin", async () => {
+    const out = await mockFor("my boss hates me", "prodigy");
+    expect(out.reply.mode).toBe("clarify");
+    expect(out.reply.play.length).toBeGreaterThanOrEqual(1);
   });
 });
 

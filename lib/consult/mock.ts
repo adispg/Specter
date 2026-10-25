@@ -10,6 +10,12 @@ import type { Reply } from "./schema";
  */
 type Fixture = Pick<Reply, "matter" | "principle" | "line" | "followup" | "read" | "avoid" | "hours"> & { play: [string, string, string] };
 
+/**
+ * care, meta and clarify carry no three move plan, so they get their own shape:
+ * play holds nought to three items and principle and avoid may be empty.
+ */
+type LightFixture = Pick<Reply, "matter" | "principle" | "line" | "followup" | "read" | "avoid" | "hours"> & { play: string[] };
+
 const FIXTURES: Record<PersonaId, { fresh: Fixture[]; followup: Fixture }> = {
   closer: {
     fresh: [
@@ -25,7 +31,7 @@ const FIXTURES: Record<PersonaId, { fresh: Fixture[]; followup: Fixture }> = {
           "Open with what they lose if this falls through, in one calm sentence.",
           "When they push, say: 'That doesn't work for me. What else have you got?' and wait.",
         ],
-        avoid: "Filling the silence with reasons. Every reason is a discount.",
+        avoid: "Filling the silence with reasons, because every reason is a discount.",
         hours: 0.3,
       },
       {
@@ -69,7 +75,7 @@ const FIXTURES: Record<PersonaId, { fresh: Fixture[]; followup: Fixture }> = {
         "Let them explain it. Their explanation tells you how worried they are.",
         "Then restate your ask, unchanged, as if the new fact settled it.",
       ],
-      avoid: "Overplaying it. A good card loses value every time you wave it around.",
+      avoid: "Overplaying it, because a good card loses value every time you wave it around.",
       hours: 0.2,
     },
   },
@@ -99,7 +105,7 @@ const FIXTURES: Record<PersonaId, { fresh: Fixture[]; followup: Fixture }> = {
         play: [
           "List the five questions you'd least like to be asked, and answer each in writing.",
           "Find one example of someone who solved this exact problem and study how.",
-          "Rehearse your opening out loud twice. Not in your head. Out loud.",
+          "Rehearse your opening out loud twice, actually out loud, not in your head.",
         ],
         avoid: "Winging the part you're nervous about.",
         hours: 0.3,
@@ -148,7 +154,7 @@ const FIXTURES: Record<PersonaId, { fresh: Fixture[]; followup: Fixture }> = {
           "Open with what you want next, not with what went wrong.",
           "Follow up in writing the same day, warm and short.",
         ],
-        avoid: "Venting to the group chat first. It always gets back.",
+        avoid: "Venting to the group chat first, because it always gets back.",
         hours: 0.2,
       },
       {
@@ -176,7 +182,7 @@ const FIXTURES: Record<PersonaId, { fresh: Fixture[]; followup: Fixture }> = {
           "Say: 'I can't take this on, but here's what I can do.'",
           "Offer one small alternative and stop there.",
         ],
-        avoid: "Apologising three times. Once is gracious; three times is negotiable.",
+        avoid: "Apologising three times, when once is gracious and three times is negotiable.",
         hours: 0.2,
       },
     ],
@@ -242,6 +248,216 @@ const DECLINE: Record<PersonaId, Fixture> = {
   },
 };
 
+/**
+ * Care mode. The persona is dropped completely: no marks, no wit, no billing.
+ * Two variants because the two crisis shapes in the rubric owe different things:
+ * self harm risk owes distance from the means, violence at home owes "not your
+ * fault" and never a script for managing his anger.
+ */
+const CARE: Record<"selfHarm" | "violence", LightFixture> = {
+  selfHarm: {
+    matter: "Your safety first",
+    principle: "",
+    line: "What you just said matters, and I am glad you said it out loud.",
+    followup:
+      "You deserve real support right now, not tactics. Please contact your local emergency number or a crisis line before anything else.",
+    read: "Losing work and feeling like a burden can arrive together, and that is a heavy combination. It does not make the thought true.",
+    play: [
+      "Call your local emergency number or a crisis helpline now, before anything else.",
+      "Put the pills somewhere you cannot reach easily, or hand them to someone you trust.",
+      "Call or message one person you trust and tell them you should not be alone tonight.",
+    ],
+    avoid: "",
+    hours: 0,
+  },
+  violence: {
+    matter: "Your safety comes first",
+    principle: "",
+    line: "Being hit is not your fault, and there is no question you could have asked differently.",
+    followup:
+      "I am not going to help you manage his anger, because his anger is not yours to manage. Please speak to someone trained in this today.",
+    read: "He has hurt you more than once and promised it would stop. Your safety comes before any conversation with him.",
+    play: [
+      "If you are in danger right now, call your local emergency number.",
+      "Contact a domestic violence helpline or support service today, from a phone he cannot check.",
+      "Tell one person you trust where you are, and agree somewhere you can go tonight.",
+    ],
+    avoid: "",
+    hours: 0,
+  },
+};
+
+/** meta: what this is and what to bring. No plan, no reading of their state. */
+const META: Record<PersonaId, LightFixture> = {
+  closer: {
+    matter: "What this is",
+    principle: "",
+    line: "I do situations, not small talk. || Bring me the one that is costing you something.",
+    followup:
+      "Tell me what happened, | who else is in the room, | and what you want out of it. || I will tell you how to get it.",
+    read: "You have a situation and you want a way through it. That is the whole service.",
+    play: [
+      "A negotiation where you do not know your walk away point.",
+      "A person who keeps taking credit that is yours.",
+      "A conversation tomorrow that you are already dreading.",
+    ],
+    avoid: "",
+    hours: 0.1,
+  },
+  prodigy: {
+    matter: "What this is",
+    principle: "",
+    line: "This is where you bring the thing you cannot work out. | I am good at those.",
+    followup: "Give me the details, | even the ones that seem irrelevant. || Those are usually the ones that matter.",
+    read: "You want to know what this does before you trust it with something real. Reasonable.",
+    play: [
+      "An email you have read nine times and still cannot answer.",
+      "A deadline you agreed to and now regret.",
+      "A manager who changed their mind and will not say so.",
+    ],
+    avoid: "",
+    hours: 0.1,
+  },
+  insider: {
+    matter: "What this is",
+    principle: "",
+    line: "You tell me what is going on, | and I tell you how to handle the people in it.",
+    followup: "Start anywhere. || I will find the part that is actually bothering you.",
+    read: "You are checking what this is before you hand over anything personal. Smart.",
+    play: [
+      "A colleague who is lovely to your face and not behind it.",
+      "A message you have drafted four times and not sent.",
+      "A room you need on your side by Monday.",
+    ],
+    avoid: "",
+    hours: 0.1,
+  },
+};
+
+/**
+ * meta, identity variant. The rule in rules.ts is that the answer says plainly
+ * it is an AI and then carries on, so the mock says it plainly too.
+ */
+const META_IDENTITY: Record<PersonaId, LightFixture> = {
+  closer: {
+    matter: "Who you are talking to",
+    principle: "",
+    line: "I am an AI voice built on an archetype. || The advice still works.",
+    followup: "I am not a real person and not your lawyer. || Now, what is the situation?",
+    read: "Fair question. You are talking to software written to think like a closer.",
+    play: [],
+    avoid: "",
+    hours: 0.1,
+  },
+  prodigy: {
+    matter: "Who you are talking to",
+    principle: "",
+    line: "I am an AI voice, | not a real lawyer. || Ask me anyway.",
+    followup: "Nothing here is legal advice. | It is a way of thinking about your problem.",
+    read: "I am software with a style. The style is borrowed; the thinking is yours to check.",
+    play: [],
+    avoid: "",
+    hours: 0.1,
+  },
+  insider: {
+    matter: "Who you are talking to",
+    principle: "",
+    line: "I am an AI, | and I am not going to pretend otherwise. || Still useful, though.",
+    followup: "I am not a therapist and not a real person. | I am good at reading situations anyway.",
+    read: "You wanted a straight answer. I am software, written to notice what people are doing.",
+    play: [],
+    avoid: "",
+    hours: 0.1,
+  },
+};
+
+/** clarify: a hypothesis, then the one to three facts that change the answer. */
+const CLARIFY: Record<PersonaId, LightFixture> = {
+  closer: {
+    matter: "Not enough to work with",
+    principle: "",
+    line: "Something specific happened. || Tell me that, | not the summary.",
+    followup: "I can read a room from the details. | I cannot read one from a verdict.",
+    read: "My guess is one person and one recent moment, and the rest is the fallout.",
+    play: [
+      "What did they actually say or do, and when?",
+      "Who else saw it happen?",
+      "What do you want to be different by Friday?",
+    ],
+    avoid: "",
+    hours: 0.1,
+  },
+  prodigy: {
+    matter: "Need the details first",
+    principle: "",
+    line: "I could guess, | but a guess is how you end up with the wrong plan.",
+    followup: "Tell me one specific thing that happened this week. || I will work from that.",
+    read: "There is probably a single incident under this, and it is doing most of the work.",
+    play: [
+      "What happened most recently, and what were the exact words?",
+      "How long has this been going on?",
+      "Is there anything about it in writing?",
+    ],
+    avoid: "",
+    hours: 0.1,
+  },
+  insider: {
+    matter: "Tell me the real version",
+    principle: "",
+    line: "Something happened, | and you are giving me the headline. || Give me the scene.",
+    followup: "I need one moment and one person. | Then I can tell you what is actually going on.",
+    read: "My instinct is that this is about how someone made you feel, not about the work.",
+    play: [
+      "Who is it, and what did they do?",
+      "When did it last happen?",
+      "What would make this feel handled?",
+    ],
+    avoid: "",
+    hours: 0.1,
+  },
+};
+
+/**
+ * Routing patterns. The live model decides mode by judgement; a fixture client
+ * cannot, so these are coarse stand ins that cover the cases in
+ * harness/situations.json. They keep MOCK_AI=1 honest about all five modes
+ * instead of answering everything as persona.
+ */
+const SELF_HARM = [
+  /\b(kill myself|end my life|take my own life|better off without me|do not want to be here|don't want to be here)\b/i,
+  /\b(sleeping pills|overdose|hurt myself|self harm)\b/i,
+];
+const PARTNER_VIOLENCE = [
+  /\b(hit|hits|beat|beats|punched|strangled|shoved) me\b/i,
+  /\b(husband|wife|partner|boyfriend|girlfriend|father|mother|brother) (hit|hits|beat|beats|punched)\b/i,
+];
+const IDENTITY_ASK = [/\bare you (actually |really )?(a |an |the )?(ai|bot|robot|real|human|person|harvey|mike|donna|specter)\b/i];
+const META_ASK = [
+  /^(hi|hey|hello|yo|hiya|sup|heya|good (morning|afternoon|evening))\b/i,
+  /\bwhat (can|do) you do\b/i,
+  /\bwho are you\b/i,
+  /\bhow does this (work|thing work)\b/i,
+  /\bwhat is this( app)?\b/i,
+  /\b(recipe|weather|cricket score|football score|capital of|translate this)\b/i,
+  /^(test|testing)\b/i,
+];
+
+/**
+ * The opening turn reaches the client wrapped by situationTurn in
+ * lib/personas/prompt.ts ("THE USER'S SITUATION" then the text), so the wrapper
+ * comes off before any pattern that anchors at the start of what the user typed.
+ */
+function userSituation(raw: string): string {
+  const i = raw.indexOf("\n");
+  return (raw.startsWith("THE USER'S SITUATION") && i >= 0 ? raw.slice(i + 1) : raw).trim();
+}
+
+/** Too thin to answer without inventing the facts underneath it. */
+function isThin(situation: string): boolean {
+  const words = situation.trim().split(/\s+/).filter(Boolean);
+  return words.length <= 10 && !/\d/.test(situation);
+}
+
 const HARMFUL = [
   /\b(password|hack|get into (her|his|their) account|read (her|his) messages)\b/i,
   /\b(blackmail|ruin his marriage|ruin her marriage|leak (the )?photos)\b/i,
@@ -270,14 +486,29 @@ function guessIntent(text: string): Reply["intent"] {
 
 export function mockReplyFor(persona: PersonaId, messages: ChatTurn[]): Reply {
   const last = messages[messages.length - 1]?.content ?? "";
-  const situation = messages[0]?.content ?? "";
+  const situation = userSituation(messages[0]?.content ?? "");
   const priorTakes = messages.filter((m) => m.role === "assistant").length;
   const all = messages.filter((m) => m.role === "user").map((m) => m.content).join("\n");
+  const isFollowup = last.includes("Follow-up from the user:");
+
+  // Same order the prompt applies: crisis, then out of bounds, then meta, then
+  // too thin to answer. Only the opening turn is routed; once a thread is under
+  // way the persona path owns it.
+  if (!isFollowup) {
+    if (SELF_HARM.some((re) => re.test(all))) return { mode: "care", ...CARE.selfHarm, intent: "crisis", stakes: "high" };
+    if (PARTNER_VIOLENCE.some((re) => re.test(all))) return { mode: "care", ...CARE.violence, intent: "crisis", stakes: "high" };
+  }
   if (HARMFUL.some((re) => re.test(all))) {
     return { mode: "decline", ...DECLINE[persona], intent: "harmful_request", stakes: "high" };
   }
+  if (!isFollowup) {
+    if (IDENTITY_ASK.some((re) => re.test(situation))) return { mode: "meta", ...META_IDENTITY[persona], intent: null, stakes: "low" };
+    if (META_ASK.some((re) => re.test(situation))) return { mode: "meta", ...META[persona], intent: null, stakes: "low" };
+    if (isThin(situation)) return { mode: "clarify", ...CLARIFY[persona], intent: guessIntent(situation), stakes: "medium" };
+  }
+
   const set = FIXTURES[persona];
-  const fixture = last.includes("Follow-up from the user:") ? set.followup : set.fresh[priorTakes % set.fresh.length]!;
+  const fixture = isFollowup ? set.followup : set.fresh[priorTakes % set.fresh.length]!;
   const { line, followup, matter, read, play, avoid, principle, hours } = fixture;
   return { mode: "persona", line, followup, matter, read, play, avoid, principle, intent: guessIntent(situation), stakes: "medium", hours };
 }
