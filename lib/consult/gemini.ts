@@ -5,8 +5,9 @@ import { LlmError, type Completion, type CompletionRequest, type LlmClient } fro
 
 /**
  * Gemini client implementing the same LlmClient interface as AnthropicClient.
- * Uses gemini-2.0-flash by default (free tier: 1500 req/day, 1M tokens/min).
- * Falls back to gemini-1.5-flash if the model env var is set to that.
+ * Uses gemini-3.8-flash by default. Override with GEMINI_MODEL. Note that Google
+ * retires model ids: gemini-2.0-flash, the previous default here, has been shut
+ * down and returns 404, so check the current model list before pinning one.
  *
  * Note: Gemini does not support prompt caching the same way Anthropic does, so
  * SystemBlocks.cached and .dynamic are concatenated into a single system prompt.
@@ -16,7 +17,7 @@ export class GeminiClient implements LlmClient {
 
   constructor(
     private readonly apiKey: string,
-    readonly model: string = "gemini-2.0-flash",
+    readonly model: string = "gemini-3.8-flash",
     private readonly timeoutMs = 45_000,
   ) {
     if (!apiKey) throw new LlmError("GEMINI_API_KEY is not set", "not_configured");
@@ -110,12 +111,26 @@ export class GeminiClient implements LlmClient {
     } catch (e) {
       if ((e as Error).name === "AbortError") throw new LlmError("Gemini API timed out", "timeout");
       const msg = (e as Error).message ?? "";
-      if (msg.includes("429") || msg.toLowerCase().includes("quota")) {
+      // The SDK reports HTTP status either on the error or as "[404] ..." in the
+      // message. Read it properly: the old check was `msg.includes("5")`, which
+      // matched almost any message and reported a dead model as a 5xx overload.
+      const status =
+        (e as { status?: number }).status ?? Number(msg.match(/\[(\d{3})\]/)?.[1] ?? 0);
+      const lower = msg.toLowerCase();
+      if (status === 429 || lower.includes("quota") || lower.includes("rate limit")) {
         throw new LlmError(`Gemini rate limited: ${msg}`, "overloaded", 429);
       }
-      if (msg.includes("5")) {
-        throw new LlmError(`Gemini upstream error: ${msg}`, "upstream", 500);
+      if (status === 404 || lower.includes("is not found for api version")) {
+        throw new LlmError(
+          `Gemini model "${this.model}" is not available. Set GEMINI_MODEL to a current model. (${msg})`,
+          "not_configured",
+          404,
+        );
       }
+      if (status === 400 || status === 401 || status === 403) {
+        throw new LlmError(`Gemini rejected the request (${status}): ${msg}`, "not_configured", status);
+      }
+      if (status >= 500) throw new LlmError(`Gemini upstream error: ${msg}`, "upstream", status);
       throw new LlmError(`Gemini error: ${msg}`, "upstream");
     } finally {
       clearTimeout(timer);

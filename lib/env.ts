@@ -30,9 +30,9 @@ export const env = {
     return truthy(process.env.MOCK_AUTH) || !(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   },
 
-  /** Gemini (primary LLM). Free tier: 1500 req/day, 1M tokens/min on gemini-2.0-flash. */
+  /** Gemini (primary LLM). Override the model with GEMINI_MODEL when Google retires an id. */
   geminiKey: () => process.env.GEMINI_API_KEY ?? "",
-  geminiModel: () => process.env.GEMINI_MODEL || "gemini-2.0-flash",
+  geminiModel: () => process.env.GEMINI_MODEL || "gemini-3.8-flash",
 
   /**
    * TTS: browser speechSynthesis is used by default (free, no key needed).
