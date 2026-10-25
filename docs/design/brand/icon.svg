@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Specter app icon">
+  <title>Specter</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#121826"/><stop offset=".55" stop-color="#090c12"/><stop offset="1" stop-color="#0b0e15"/></linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="90"/></filter>
+    <filter id="beat-glow" x="-60%" y="-300%" width="220%" height="700%"><feGaussianBlur stdDeviation="24.7"/></filter>
+    <clipPath id="clip"><rect width="1024" height="1024" rx="230"/></clipPath>
+  </defs>
+  <rect width="1024" height="1024" rx="230" fill="url(#bg)"/>
+  <g clip-path="url(#clip)"><ellipse cx="250" cy="1010" rx="330" ry="210" fill="#5880c6" opacity=".55" filter="url(#soft)"/><ellipse cx="540" cy="1050" rx="300" ry="190" fill="#c99650" opacity=".42" filter="url(#soft)"/><ellipse cx="820" cy="1010" rx="330" ry="210" fill="#cd4868" opacity=".5" filter="url(#soft)"/><ellipse cx="512" cy="-60" rx="520" ry="300" fill="#5880c6" opacity=".22" filter="url(#soft)"/></g>
+  <path fill="#eef1f6" transform="translate(126.8 766.6) scale(0.95)" d="M267 14Q214 14 168.5 3.5Q123 -7 89.5 -30Q56 -53 38.5 -91.5Q21 -130 24 -185L165 -197Q167 -164 180 -142.5Q193 -121 216 -111Q239 -101 272 -101Q303 -101 325.5 -111.5Q348 -122 348 -147Q348 -160 340 -168.5Q332 -177 310.5 -184.5Q289 -192 248 -202Q197 -215 156 -228Q115 -241 86 -259Q57 -277 42 -303.5Q27 -330 27 -369Q27 -424 56.5 -462.5Q86 -501 138 -521.5Q190 -542 258 -542Q319 -542 372 -523Q425 -504 455.5 -461Q486 -418 478 -347L340 -334Q343 -363 332 -383.5Q321 -404 300 -414.5Q279 -425 249 -425Q215 -425 196.5 -412.5Q178 -400 178 -381Q178 -366 189.5 -355.5Q201 -345 225.5 -337.5Q250 -330 289 -321Q323 -314 360 -303Q397 -292 429 -273.5Q461 -255 481 -225Q501 -195 501 -149Q501 -100 474 -63Q447 -26 395 -6Q343 14 267 14Z"/>
+  <rect x="633.1" y="694.4" width="218.5" height="72.2" rx="36.1" fill="#d3dbe8" filter="url(#beat-glow)" opacity=".8"/>
+  <rect x="633.1" y="694.4" width="218.5" height="72.2" rx="36.1" fill="#d3dbe8"/>
+</svg>

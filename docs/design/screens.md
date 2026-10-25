@@ -1,6 +1,6 @@
 # Specter MVP screens
 
-Version 1.0. Read with `design-system.md` (tokens and components) and open `mockups.html` to see each screen. Component names below refer to section 6 of the design system. All copy here is final unless marked as config; persona-flavoured strings come from persona config so they swap with the characters.
+Version 1.1 (revised after founder review: sans type system, new brand, geometric persona marks, intensity separated from names). Read with `design-system.md` (tokens and components) and open `mockups.html` to see each screen. Component names below refer to section 6 of the design system. All copy here is final unless marked as config; persona-flavoured strings come from persona config so they swap with the characters.
 
 ## Global rules
 
@@ -11,6 +11,9 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 - **Errors**: inline banners with Retry, never modal alerts, except destructive confirmations.
 - **Loading**: skeletons that match the final layout. Spinners only inside buttons (three dots).
 - **Daily limit**: a persistent count is not shown; at 2 consults left a toast says "Two consults left today." When the limit is hit, the next attempt opens the limit screen.
+- **Persona naming** (design-system.md section 10): full name on hero surfaces only (home hero, result hero, persona sheet, onboarding cards); first name everywhere else. A persona name never shares a chip or line with another label.
+- **Intensity** (design-system.md 6.16): always its own pill with a dial icon, reading "Intensity: Sharp". Shown on home under the talk button, in voice mode while listening, and in settings. Never inside the persona chip, rail, composer or case rows.
+- **Type**: Bricolage Grotesque for the spoken line, headings and persona names; Geist for everything the app says; Geist Mono for numbers only. No serif anywhere.
 - **Copy**: no em dashes or en dashes.
 
 ---
@@ -19,7 +22,7 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **Purpose**: cover the PWA launch while the session is restored; set the tone in under a second.
 
-**Layout**: neutral tint background recipe. Centred wordmark "SPECTER" (mono, 0.42em tracking, 13px) above a 64px row of three overlapping xl avatars (HS, MR, DP), each with its own persona gradient. A 1px hairline below grows from 0 to 120px wide as the session resolves. Bottom: `fine` text "Original lines. Stock voices. Your cases stay private." in `--muted`.
+**Layout**: neutral tint background recipe. A 64px row of three overlapping xl persona avatars (Harvey chevron, Mike grid, Donna waves) on their gradients, above the SVG wordmark at 30px tall (lowercase "specter" with the glowing beat). A 1px hairline below grows from 0 to 120px wide as the session resolves. Bottom: `fine` text "Original lines. Stock voices. Your cases stay private." in `--muted`.
 
 **Components**: persona avatar (xl), wordmark.
 
@@ -35,7 +38,7 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **Purpose**: explain the product in one breath.
 
-**Layout**: top: progress of three segments (2px bars, active `--fg`, inactive `--hair-2`) and Skip text button right. Middle: a mini line card demo using the neutral tint, auto-performing one original sample line with word lighting and a glowing pause, so the first thing a user sees is the signature interaction. Below: `title-1` "Bring the situation. Leave with the line." and `body` in `--fg-2`: "Describe what's happening at work or in life, by voice or text. You get a line worth repeating, a read on the room, three moves and one thing to avoid." Bottom: primary button "Continue".
+**Layout**: top: progress of three segments (2px bars, active `--fg`, inactive `--hair-2`) and Skip text button right. Middle: a mini line card demo using the neutral tint, auto-performing one original sample line with word lighting and a glowing pause, so the first thing a user sees is the signature interaction. Below: `display-hero` "Bring the situation. Leave with the line." and `body` in `--fg-2`: "Describe what's happening at work or in life, by voice or text. You get a line worth repeating, a read on the room, three moves and one thing to avoid." Bottom: primary button "Continue".
 
 **Components**: progress bar, line card (demo), primary button, text button.
 
@@ -49,7 +52,7 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **Purpose**: introduce the personas and let the user pick a default. This is where the app first re-tints.
 
-**Layout**: title `title-1` "Pick who's in your corner." Three stacked selectable persona cards (radius 16, `--surface`, each card locally tinted by its persona): lg avatar, name in `title-3`, role line in `small`, one-word mode in mono label ("THE CLOSER", "THE PRODIGY", "THE READER"), and a tiny play button that speaks a 3 second original greeting in that persona's stock voice. The selected card gets an `--accent` border and its persona tints the whole screen. Under the cards: `fine` disclaimer from config: "Unofficial fan project. Every line is original and written in the spirit of the characters. Voices are stock voices, not the actors." Bottom: primary "Continue with Harvey" (name follows selection).
+**Layout**: title `title-1` "Pick who's in your corner." Three stacked selectable persona cards (radius 16, `--surface`, each card locally tinted by its persona): lg avatar, full name in `title-3` ("Harvey Specter", hero rule), role line in `small`, mode in `overline` ("The closer", "The prodigy", "The reader"), and a tiny play button that speaks a 3 second original greeting in that persona's stock voice. The selected card gets an `--accent` border and its persona tints the whole screen. Under the cards: `fine` disclaimer from config: "Unofficial fan project. Every line is original and written in the spirit of the characters. Voices are stock voices, not the actors." Bottom: primary "Continue with Harvey" (name follows selection).
 
 **Components**: persona avatar (lg), selectable card, mini play button, primary button.
 
@@ -63,7 +66,7 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **Purpose**: earn microphone permission with context, before the OS prompt.
 
-**Layout**: neutral tint returns to keep it trustworthy. A 2xl avatar of the chosen persona with a still waveform under it. `title-1` "Talk it through." `body`: "Specter listens only while the button is lit. Audio is turned into text and not stored." Two small rows with icons: "Tap to talk, tap to finish" and "Captions are always on while they speak". Bottom: primary "Allow microphone" (triggers the browser prompt), ghost "Not now, I'll type".
+**Layout**: neutral tint returns to keep it trustworthy. A 2xl avatar of the chosen persona with a still waveform under it. `display-hero` "Talk it through." `body`: "Specter listens only while the button is lit. Audio is turned into text and not stored." Two small rows with icons: "Tap to talk, tap to finish" and "Captions are always on while they speak". Bottom: primary "Allow microphone" (triggers the browser prompt), ghost "Not now, I'll type".
 
 **Components**: avatar (2xl), list rows (icon), primary and ghost buttons.
 
@@ -78,9 +81,9 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **Purpose**: create an account or sign in with an email magic link or Google. Placed after onboarding so value is shown first.
 
-**Layout**: neutral tint. Wordmark top centre. `title-1` "Your cases, kept private." `small` muted "Sign in to save cases and lines across devices." Google button (white, full width, 52). Divider with "or" in mono. Email text field (label "EMAIL", placeholder "you@work.com", `inputmode="email"`, autocomplete email). Primary "Send me a link". Bottom `fine`: "By continuing you agree to the Terms and Privacy Policy." with both as links.
+**Layout**: neutral tint. Wordmark top centre. `display-hero` "Your cases, kept private." `small` muted "Sign in to save cases and lines across devices." Google button (white, full width, 52). Divider with "or" in `overline`. Email text field (label "Email" in `section` style, placeholder "you@work.com", `inputmode="email"`, autocomplete email). Primary "Send me a link". Bottom `fine`: "By continuing you agree to the Terms and Privacy Policy." with both as links.
 
-**Variant: link sent**: the form is replaced by a success block: 40px mail icon in `--success`, `title-2` "Check your inbox.", `small` "We sent a sign-in link to aditya@example.com. It expires in 15 minutes.", text buttons "Open mail app" and "Resend in 30s" (counts down, then "Resend link"), and "Use a different email".
+**Variant: link sent**: the form is replaced by a success block: 40px mail icon in `--success`, `display-hero` "Check your inbox.", `small` "We sent a sign-in link to aditya@example.com. It expires in 15 minutes.", text buttons "Open mail app" and "Resend in 30s" (counts down, then "Resend link"), and "Use a different email".
 
 **Components**: Google button, text field, primary button, text buttons, banner.
 
@@ -95,12 +98,12 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 **Purpose**: start a consult in one tap, by voice first; pick up recent cases.
 
 **Layout** (top to bottom):
-1. Top bar: wordmark left; settings icon button right.
+1. Top bar: SVG wordmark (18px tall) left; settings icon button right.
 2. Persona rail.
-3. Hero line under the rail: persona name in `title-1` and role in `small` muted, centred.
-4. Talk button, centred, with label "Tap to talk to Harvey" and sub-label "or hold to talk, release to send". Text button "Type instead" under it opens the composer dock with the keyboard.
-5. Quick situations: mono label "QUICK SITUATIONS" with a horizontal row of situation chips, led by the intensity chip ("SHARP"). Situations are config: "They lowballed my offer", "My boss took credit", "A client wants out", "Asking for a raise", "Talked over in a meeting", "Letting someone go", "First week, new job".
-6. Recent cases: mono label "RECENT CASES" with "See all" text button; list group of up to 3 case rows (avatar, matter, line excerpt in serif italic, relative time).
+3. Hero line under the rail: persona full name in `title-1` ("Harvey Specter") and role in `small` muted, centred.
+4. Talk button, centred, with label "Tap to talk to Harvey" and sub-label "or hold to talk, release to send". Sub-label "Hold to talk, release to send. Or type instead." where "type instead" is a link that opens the composer dock with the keyboard. Under it, the intensity control "Intensity: Sharp" (dial icon), tap to change.
+5. Quick situations: `section` label "Quick situations" with a horizontal row of situation chips (situations only; intensity lives under the talk button). Situations are config: "They lowballed my offer", "My boss took credit", "A client wants out", "Asking for a raise", "Talked over in a meeting", "Letting someone go", "First week, new job".
+6. Recent cases: `section` label "Recent cases" with "See all" text button; list group of up to 3 case rows (avatar, matter, line excerpt in `excerpt` style, relative time in mono).
 7. Tab bar (Consult active).
 
 **Components**: top bar, persona rail, talk button, chips, list rows, tab bar, composer (on Type instead).
@@ -118,12 +121,13 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 **Purpose**: the full-screen conversation surface. Listening, then thinking, then speaking with live captions and visible pauses. Tap anywhere to interrupt.
 
 **Layout**: full screen dialog, persona wash background, no tab bar.
-- Top row: close icon button (left), persona chip with sm avatar, "Harvey" and intensity in mono ("SHARP") centre, keyboard icon button (right) to switch to typing.
-- Upper middle: 2xl avatar with halo; under it a mono state label ("LISTENING", "THINKING", "SPEAKING", "PAUSE").
+- Top row: close icon button (left), persona chip centre holding only the sm avatar and the first name "Harvey", keyboard icon button (right) to switch to typing.
+- Upper middle: 2xl avatar with halo; under it a state label in `overline` ("Listening", "Thinking", "Speaking", "Pause", shown uppercase).
 - Middle: the text area.
-  - Listening: live transcript in `transcript` style, final words `--fg`, interim words `--muted`, left aligned, newest line kept in view.
-  - Thinking: the user's words collapse to a one-line "You" echo at top; centre shows rotating persona thinking copy in serif italic `title-2` with dots.
-  - Speaking: principle eyebrow, then the line in `display-voice` with word lighting and pause marks, followed by the two-liner in `body-lg`. These are the captions and cannot be hidden.
+  - Listening: live transcript in `transcript` style (Geist 20), final words `--fg`, interim words `--muted`, left aligned, newest line kept in view.
+  - Thinking: the user's words collapse to a one-line "You" echo at top; centre shows rotating persona thinking copy in `title-2` (Bricolage 600, 26px here) with dots.
+  - Listening also shows the intensity control, centred between the waveform and the hint, so the level can be changed before the reply. It is hidden while thinking and speaking.
+  - Speaking: principle eyebrow, then the line in `display-voice` (Bricolage 600, 34px) with word lighting and pause marks, followed by the two-liner in `body-lg`. These are the captions and cannot be hidden.
 - Lower: voice waveform (28 bars).
 - Bottom: controls row. Listening: ghost "Cancel" left, 76px talk control (stop square) centre, empty right. Speaking: hint in `small` muted "Tap anywhere to interrupt", then ghost "Stop" left, 76px control showing pause glyph centre, text button "Full play" right.
 
@@ -145,7 +149,7 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **Layout** (scrolls; dock fixed at bottom):
 1. Top bar: back icon button; centre the matter title from the model ("Cofounder's CTO pick") in `body-strong`; right overflow icon (Copy line, Share, Delete case).
-2. Compact hero: xl avatar (halo while speaking), name `title-2`, role `small`.
+2. Compact hero: lg avatar (halo while speaking), full name `title-2` (hero rule), role `small`.
 3. Situation echo: "YOU" tag chip then the situation in `small` muted, max 3 lines with "More".
 4. Line card: principle eyebrow, the line, the two-liner, mini player (play or stop, waveform, beat label, meta), bookmark icon top right to save the line (filled `--accent` when saved, toast "Saved to your lines").
 5. Cards: Read, Play (three numbered moves), Avoid. Headings from persona config.
@@ -160,7 +164,7 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **States**
 - Empty: not applicable (always has a reply); arriving from a deep link to a deleted case shows "This case was deleted." with a button to home.
-- Loading: when opened from typing, the line card shows the thinking overlay from the prototype (blurred surface, serif italic rotating copy, dots, "Harvey is on it", ghost Stop) while the cards below show skeletons. Another take and Ask another persona show the same overlay on the card only.
+- Loading: when opened from typing, the line card shows the thinking overlay from the prototype (blurred surface, rotating copy in `title-2`, dots, "Harvey is on it", ghost Stop) while the cards below show skeletons. Another take and Ask another persona show the same overlay on the card only.
 - Error: banner above the action row: "The answer came back garbled. Try again." (invalid output), "Too many requests right now. Give it a minute." (rate limit), "That one won't work as written. Reframe it and try again." (refused). Each with Retry. The previous answer stays visible.
 - Safety response (crisis or self-harm signals): the screen switches to the neutral tint, the persona hero is replaced by a plain heading "Let's pause the advice for a moment.", the line card shows a calm, warm message in `body-lg` with no pause marks, no principle and no billing meta, followed by a card "If you're in danger or thinking about hurting yourself, contact local emergency services now." with buttons "Call emergency services" (tel: link from region config) and "Find a crisis line" (opens a vetted directory link). It is spoken, if at all, in a neutral voice without performance. Another take, Ask another persona and the intensity chip are hidden.
 - Offline: replay works if the audio was cached (otherwise falls back to device voice), Another take, Push back and Ask another persona are disabled with "Needs a connection", the banner shows.
@@ -169,7 +173,7 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **Purpose**: find and reopen any past case.
 
-**Layout**: top bar with `title-1` "Cases" left aligned and settings icon right. Search field (40 tall, search icon, placeholder "Search your cases"). Filter chips: All, Harvey, Mike, Donna (each persona chip shows an xs avatar). Grouped list: mono section labels "TODAY", "THIS WEEK", "EARLIER". Case rows: md avatar of the persona who answered last (a small stacked second avatar when more than one persona answered), title is the matter, subtitle the line excerpt in serif italic, trailing relative time. Swipe left to delete (confirmation sheet). Tab bar with Cases active.
+**Layout**: top bar with `title-1` "Cases" left aligned and settings icon right. Search field (40 tall, search icon, placeholder "Search your cases"). Filter chips: All, Harvey, Mike, Donna (each persona chip shows an xs avatar). Grouped list: `section` labels "Today", "This week", "Earlier". Case rows: md avatar of the persona who answered last (a small stacked second avatar when more than one persona answered), title is the matter, subtitle the line excerpt in `excerpt` style (Bricolage 500), trailing relative time in mono. Swipe left to delete (confirmation sheet). Tab bar with Cases active.
 
 **Components**: search input, filter chips, list rows, avatar, tab bar, sheet.
 
@@ -185,8 +189,8 @@ Version 1.0. Read with `design-system.md` (tokens and components) and open `mock
 
 **Layout**: top bar with back, matter title, overflow (Rename, Delete). Thread, newest at the bottom:
 - User turns: right aligned bubbles (`--surface-2`, radius 18 with a 6 corner bottom right, `body`), with a mic glyph when spoken.
-- Persona turns: left aligned compact line cards, tinted locally by the persona that answered: xs avatar and name row, principle eyebrow, the line in `title-3` serif, the two-liner in `small`, a mini player, and a "Full play" text button that expands the read, play and avoid cards inline.
-- Persona switch dividers: centred mono label "ASKED DONNA" with xs avatar, hairlines either side.
+- Persona turns: left aligned compact line cards, tinted locally by the persona that answered: xs avatar and name row, principle eyebrow, the line in `title-3` (19px), the two-liner in `small`, a mini player, and a "Full play" text button that expands the read, play and avoid cards inline.
+- Persona switch dividers: centred `overline` "Asked Donna" with xs avatar, hairlines either side.
 - Another take markers: "TAKE 2" eyebrow on the reply.
 Dock: composer addressed to the persona of the latest reply, with a small persona switch chip on the left of the composer to change who answers next.
 
@@ -217,9 +221,9 @@ Dock: composer addressed to the persona of the latest reply, with a small person
 **Purpose**: tune delivery per persona and manage the account.
 
 **Layout**: top bar with back and `title-1` "Settings". Grouped list:
-1. **Voices** (label "VOICES"): one row per persona: md avatar, "Harvey's voice", value "Low and steady" with chevron; tapping opens a sheet listing the stock voices from config, each with a Preview button. Hint: "Stock voices chosen to fit each character. Not the actors' voices."
-2. **Delivery** (label "DELIVERY"): Pace slider (0.8x to 1.2x, value in mono), Intensity segmented control (Measured, Sharp, No mercy), switch "Speak replies out loud". A fixed note row: "Captions are always on while a persona speaks."
-3. **Account** (label "ACCOUNT"): email row with sign-in method ("Google" or "Email link"), "Daily consults" row showing "6 of 10 used today", Privacy policy, Terms.
+1. **Voices** (section label "Voices"): one row per persona: md avatar, "Harvey's voice", value "Low and steady" with chevron; tapping opens a sheet listing the stock voices from config, each with a Preview button. Hint: "Stock voices chosen to fit each character. Not the actors' voices."
+2. **Delivery** (section label "Delivery"): Pace slider (0.8x to 1.2x, value in mono), "Intensity" segmented control with the dial icon (Measured, Sharp, No mercy), switch "Speak replies out loud". A fixed note row: "Captions are always on while a persona speaks."
+3. **Account** (section label "Account"): email row with sign-in method ("Google" or "Email link"), "Daily consults" row showing "6 of 10 used today", Privacy policy, Terms.
 4. Secondary button "Sign out" (full width).
 5. Destructive button "Delete account" (full width), opening a confirmation sheet: `title-2` "Delete your account?", body "This permanently deletes your cases, saved lines and settings. It can't be undone.", text field "Type DELETE to confirm", destructive primary "Delete everything", ghost "Keep my account".
 6. `fine` footer: disclaimer from config and app version.
@@ -236,7 +240,7 @@ Dock: composer addressed to the persona of the latest reply, with a small person
 
 **Purpose**: end the day gracefully, keep the user's goodwill and show what still works.
 
-**Layout**: persona tint of the current persona. Centred: xl avatar with no halo, a clock-like mono countdown "RESETS IN 06:42:10". `title-1` serif persona line from config, for Harvey: "That's a full day of billable hours." `small` muted: "You've used all 10 consults for today. They reset at midnight, your time. Everything you've saved is still here." Primary "Open saved lines", secondary "Read past cases", text button "Notify me at reset" (schedules a local notification if permission exists). Talk button on home shows the disabled state until reset.
+**Layout**: persona tint of the current persona. Centred: xl avatar with no halo, a mono countdown "RESETS IN 06:42:10" (`meta`, tracked). `display-hero` persona line from config, for Harvey: "That's a full day of billable hours." `small` muted: "You've used all 10 consults for today. They reset at midnight, your time. Everything you've saved is still here." Primary "Open saved lines", secondary "Read past cases", text button "Notify me at reset" (schedules a local notification if permission exists). Talk button on home shows the disabled state until reset.
 
 **Components**: avatar, countdown, buttons.
 
