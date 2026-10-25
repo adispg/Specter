@@ -27,7 +27,17 @@ export class ConsultError extends Error {
 }
 
 export function repairPrompt(error: string): string {
-  return `Your last reply did not match the required format (${error.slice(0, 400)}). Reply again with only the corrected JSON object, keys in this order: mode, line, followup, matter, read, play (exactly three strings unless mode is care), avoid, principle, intent, stakes, hours (0.1 to 0.6). Pause marks only in line and followup, none in care mode. No em dashes or en dashes. No markdown, no other text.`;
+  return `STOP. Your last response was rejected because it did not contain a valid JSON object. Error: ${error.slice(0, 300)}
+
+You must respond with ONLY a JSON object. Nothing else. Not a single word outside the JSON.
+
+Your response must start with { and end with }. No markdown. No backticks. No "Here is..." or "Sure," or any other text.
+
+Required keys in this exact order: mode, line, followup, matter, read, play (array of exactly three strings unless mode is "care"), avoid, principle, intent, stakes, hours (number 0.1 to 0.6).
+
+Pause marks (| and ||) only inside "line" and "followup" strings, never in care mode. No em dashes or en dashes anywhere.
+
+Respond now with only the corrected JSON object:`;
 }
 
 export type GenerateResult = { reply: Reply; repaired: boolean; raw: string; usage: Usage };

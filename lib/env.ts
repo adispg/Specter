@@ -34,10 +34,14 @@ export const env = {
   geminiKey: () => process.env.GEMINI_API_KEY ?? "",
   geminiModel: () => process.env.GEMINI_MODEL || "gemini-2.0-flash",
 
-  /** ElevenLabs (TTS only). STT has been moved to Deepgram. */
+  /**
+   * TTS: browser speechSynthesis is used by default (free, no key needed).
+   * The /api/tts route returns 501 so the client always falls back to the browser voice.
+   * ElevenLabs keys are kept here for future paid upgrade only.
+   */
   elevenLabsKey: () => process.env.ELEVENLABS_API_KEY ?? "",
   elevenLabsModel: () => process.env.ELEVENLABS_MODEL || "eleven_flash_v2_5",
-  ttsConfigured: () => truthy(process.env.MOCK_AI) || Boolean(process.env.ELEVENLABS_API_KEY),
+  ttsConfigured: () => false, // Always use browser speechSynthesis (free). Set to true only when ElevenLabs key is present and paid TTS is desired.
 
   /** Deepgram (STT). Free tier: 12,000 min/year on Nova-3. */
   deepgramKey: () => process.env.DEEPGRAM_API_KEY ?? "",

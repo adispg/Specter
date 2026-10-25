@@ -27,7 +27,7 @@ export const INTENT_KEYS = [...INTENTS.map((i) => i.key), ...SAFETY_ROUTES] as c
 export type IntentKey = (typeof INTENT_KEYS)[number];
 
 /** Bump when prompts change; stored on every consult so regressions can be traced. */
-export const PROMPT_VERSION = "2026-10-25.2";
+export const PROMPT_VERSION = "2026-10-25.3";
 
 export const COMMON_RULES = `SHARED RULES
 
@@ -77,6 +77,8 @@ export function intentHints(): string {
 
 /** Field order matters: mode and line come first so speech can start early. */
 export const OUTPUT_CONTRACT = `OUTPUT
+CRITICAL: Your entire response must be a single valid JSON object. Start your response with "{" and end with "}". No markdown code fences. No backticks. No text before or after the JSON. No explanation. No preamble. If you write anything other than a JSON object, the response will be rejected.
+
 Reply with only one JSON object, no markdown fences and no other text, with the keys in exactly this order:
 {"mode": "persona" | "care" | "decline",
  "line": "the one-liner with pause marks, at most 24 words, the most quotable thing in the reply",

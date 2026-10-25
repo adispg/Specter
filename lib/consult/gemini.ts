@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import type { ChatTurn, SystemBlocks } from "@/lib/personas/prompt";
 import { systemText } from "@/lib/personas/prompt";
 import { LlmError, type Completion, type CompletionRequest, type LlmClient } from "./llm";
@@ -42,11 +42,35 @@ export class GeminiClient implements LlmClient {
     const systemInstruction =
       typeof req.system === "string" ? req.system : systemText(req.system as SystemBlocks);
 
+    // Native JSON schema enforcement: Gemini Flash sometimes wraps JSON in markdown
+    // or adds prose before/after. responseMimeType + responseSchema forces pure JSON out.
+    // Type assertions are required because the SDK's Schema union is discriminated on
+    // the literal SchemaType enum value, not the general SchemaType type.
+    const responseSchema = {
+      type: SchemaType.OBJECT as const,
+      properties: {
+        mode: { type: SchemaType.STRING as const },
+        line: { type: SchemaType.STRING as const },
+        followup: { type: SchemaType.STRING as const },
+        matter: { type: SchemaType.STRING as const },
+        read: { type: SchemaType.STRING as const },
+        play: { type: SchemaType.ARRAY as const, items: { type: SchemaType.STRING as const } },
+        avoid: { type: SchemaType.STRING as const },
+        principle: { type: SchemaType.STRING as const },
+        intent: { type: SchemaType.STRING as const },
+        stakes: { type: SchemaType.STRING as const },
+        hours: { type: SchemaType.NUMBER as const },
+      },
+      required: ["mode", "line", "followup", "matter", "read", "play", "avoid", "principle", "intent", "stakes", "hours"],
+    };
+
     const model = this.client.getGenerativeModel({
       model: this.model,
       systemInstruction,
       generationConfig: {
         maxOutputTokens: req.maxTokens ?? 1000,
+        responseMimeType: "application/json",
+        responseSchema,
         ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
       },
     });
