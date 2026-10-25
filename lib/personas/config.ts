@@ -561,19 +561,19 @@ export const DEFAULT_PERSONA: PersonaId = "closer";
  */
 export const PERSONA_STARTERS: Record<PersonaId, string[]> = {
   closer: [
+    "A meeting just ended and I let someone talk over me the whole time.",
+    "My manager says we when he means me, and I when he means nothing.",
     "They lowballed my salary offer and I negotiate tomorrow.",
-    "My boss took credit for my work in front of leadership.",
-    "A client is threatening to walk unless I drop the price.",
   ],
   prodigy: [
-    "I have to argue against a decision my whole team already agreed on.",
-    "I missed something important and need to raise it before anyone notices.",
-    "I am the least senior person in the room and I know the plan is wrong.",
+    "I know the plan is wrong and I am the most junior person in the room.",
+    "I found a mistake in something that already shipped.",
+    "Someone asked me to explain my own work and I froze.",
   ],
   insider: [
-    "Two people on my team are in a cold war and it is slowing everything down.",
-    "My manager has gone quiet on me since I asked about promotion.",
-    "I need a senior stakeholder on side before a meeting next week.",
+    "My boss replied with one word and I have read it nine times.",
+    "I was not invited to a meeting I should have been in.",
+    "Two people on my team are in a cold war and I am stuck in the middle.",
   ],
 };
 
