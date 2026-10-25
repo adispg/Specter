@@ -1,0 +1,858 @@
+<title>The Harvey Specter App</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a one-screen phone app. Persona rail on top, the spoken line centre stage,
+   a composer dock at the bottom. Each persona re-tints the whole app through three tokens. */
+:root {
+  --bg: #090c12;
+  --surface: #121722;
+  --surface-2: #19202e;
+  --hair: rgba(255,255,255,0.08);
+  --hair-2: rgba(255,255,255,0.14);
+  --fg: #eef1f6;
+  --muted: #8b95a7;
+  --dim: rgba(238,241,246,0.26);
+  --accent: #d3dbe8;
+  --accent-2: #7d9bcb;
+  --glow: rgba(88,128,198,0.34);
+  --on-accent: #0b0f16;
+  --danger: #e58a8a;
+  --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: "Geist", "Segoe UI", -apple-system, system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+.app[data-persona="mike"]  { --accent: #ead3a6; --accent-2: #c9995a; --glow: rgba(201,150,80,0.28); }
+.app[data-persona="donna"] { --accent: #f2b6a4; --accent-2: #cf5670; --glow: rgba(205,72,104,0.32); }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 400 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased;
+  display: flex; justify-content: center; align-items: center;
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.app {
+  position: relative; width: 100%; max-width: 440px; height: 100%;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background:
+    radial-gradient(120% 55% at 50% -8%, var(--glow), transparent 62%),
+    linear-gradient(180deg, #0d1119 0%, var(--bg) 46%);
+  transition: background .6s ease;
+}
+@media (min-width: 560px) and (min-height: 700px) {
+  .app { height: min(100%, 900px); border-radius: 34px; border: 1px solid var(--hair-2);
+         box-shadow: 0 40px 120px -40px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.05); }
+  body { background: radial-gradient(80% 60% at 50% 40%, #121826, #06080c); }
+}
+
+/* Top bar */
+.bar { display: flex; align-items: center; justify-content: space-between; padding-block: 14px 6px; }
+.mark { font: 500 11px/1 var(--mono); letter-spacing: 0.42em; color: var(--muted); }
+.bar-actions { display: flex; gap: 6px; align-items: center; }
+.pill-btn { background: var(--surface); border: 1px solid var(--hair); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-weight: 500; color: var(--fg); }
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--hair); }
+.icon-btn svg { width: 16px; height: 16px; }
+
+/* Persona rail */
+.rail { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-block: 8px 4px; }
+.who { background: none; border: 0; padding: 6px 0; display: grid; justify-items: center; gap: 6px; color: var(--muted); }
+.who .av { width: 46px; height: 46px; font-size: 18px; opacity: .55; transition: opacity .3s, transform .3s; }
+.who span { font-size: 12px; font-weight: 500; letter-spacing: .01em; }
+.who[aria-selected="true"] { color: var(--fg); }
+.who[aria-selected="true"] .av { opacity: 1; transform: scale(1.06); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent); }
+
+.av {
+  position: relative; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--serif); color: #fff; letter-spacing: .02em;
+}
+.av[data-p="harvey"] { background: radial-gradient(circle at 30% 25%, #6f89b6, #1c2740 70%); }
+.av[data-p="mike"]   { background: radial-gradient(circle at 30% 25%, #c9a46a, #3b2b17 72%); }
+.av[data-p="donna"]  { background: radial-gradient(circle at 30% 25%, #e0788c, #4a1422 72%); }
+
+/* Stage */
+.stage { flex: 1; overflow-y: auto; overscroll-behavior: contain; display: grid; align-content: start; gap: 18px; padding-block: 12px 18px; scrollbar-width: none; }
+.stage::-webkit-scrollbar { display: none; }
+
+.hero { display: flex; align-items: center; gap: 14px; }
+.hero .av { width: 64px; height: 64px; font-size: 24px; flex: none; }
+.halo { position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--accent); opacity: 0; pointer-events: none; }
+.app.speaking .halo { animation: halo 1.6s ease-out infinite; }
+@keyframes halo { 0% { transform: scale(.92); opacity: .7; } 100% { transform: scale(1.28); opacity: 0; } }
+.hero h1 { margin: 0; font: 400 28px/1.05 var(--serif); letter-spacing: -0.005em; }
+.hero p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+
+.you { margin: 0; display: flex; gap: 10px; align-items: baseline; font-size: 13.5px; color: var(--muted); min-width: 0; }
+.you .tag { flex: none; font: 500 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--hair-2); border-radius: 999px; padding: 4px 8px; }
+.you span:last-child { overflow-wrap: anywhere; }
+
+.take { position: relative; display: grid; gap: 14px; padding: 22px 20px 16px; border-radius: 22px;
+  background: linear-gradient(160deg, var(--surface-2), var(--surface) 60%);
+  border: 1px solid var(--hair); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); min-width: 0; }
+.eyebrow { margin: 0; font: 500 10.5px/1.3 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.line { margin: 0; font: 400 31px/1.16 var(--serif); letter-spacing: -0.01em; text-wrap: balance; }
+.follow { margin: 0; font-size: 16px; line-height: 1.55; color: #cfd5df; }
+.w { transition: color .18s ease, opacity .18s ease; }
+.take.performing .w { opacity: .26; }
+.take.performing .w.lit { opacity: 1; }
+.pause { display: inline-block; vertical-align: middle; height: 2px; border-radius: 2px; background: var(--dim); margin: 0 .28em; transition: background .2s, box-shadow .2s; }
+.pause[data-len="short"] { width: .55em; }
+.pause[data-len="long"]  { width: 1.4em; }
+.pause.on { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+.player { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--hair); padding-top: 12px; margin-top: 2px; }
+.play { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex: none; }
+.play svg { width: 16px; height: 16px; }
+.wave { display: flex; align-items: center; gap: 3px; height: 22px; }
+.wave i { width: 3px; height: 4px; border-radius: 2px; background: var(--accent); opacity: .5; }
+.app.speaking .wave i { animation: bar .9s ease-in-out infinite; opacity: .95; }
+.app.speaking .wave i:nth-child(2) { animation-delay: .12s } .app.speaking .wave i:nth-child(3) { animation-delay: .24s }
+.app.speaking .wave i:nth-child(4) { animation-delay: .06s } .app.speaking .wave i:nth-child(5) { animation-delay: .3s }
+.app.speaking .wave i:nth-child(6) { animation-delay: .18s } .app.speaking .wave i:nth-child(7) { animation-delay: .36s }
+@keyframes bar { 0%,100% { height: 4px } 50% { height: 20px } }
+.beat { font: 500 10px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); opacity: 0; transition: opacity .2s; }
+.app.pausing .beat { opacity: 1; }
+.meta { margin-left: auto; font: 400 11px/1.2 var(--mono); color: var(--muted); text-align: right; }
+
+.thinking { position: absolute; inset: 0; border-radius: 22px; display: grid; place-items: center; text-align: center; padding: 20px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.thinking p { margin: 0; font: italic 400 24px/1.2 var(--serif); }
+.thinking small { display: block; margin-top: 8px; font: 500 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.thinking button { margin-top: 14px; background: transparent; border: 1px solid var(--hair-2); border-radius: 999px; padding: 6px 14px; font-size: 12.5px; }
+.dots { display: inline-flex; gap: 5px; margin-top: 12px; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: dot 1.2s ease-in-out infinite; }
+.dots i:nth-child(2) { animation-delay: .15s } .dots i:nth-child(3) { animation-delay: .3s }
+@keyframes dot { 0%,100% { opacity: .2 } 50% { opacity: 1 } }
+
+.cards { display: grid; gap: 10px; }
+.card { background: var(--surface); border: 1px solid var(--hair); border-radius: 16px; padding: 14px 16px; min-width: 0; }
+.card h3 { margin: 0 0 6px; font: 500 10.5px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.card p { margin: 0; }
+.card ol { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
+.card ol li::marker { font: 500 12px var(--mono); color: var(--accent); }
+.card.avoid { border-color: color-mix(in srgb, var(--accent-2) 45%, transparent); }
+.card.avoid h3 { color: var(--accent-2); }
+
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.soft { background: var(--surface); border: 1px solid var(--hair); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 500; display: inline-flex; gap: 7px; align-items: center; }
+.soft svg { width: 14px; height: 14px; }
+.soft.lead { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.soft:disabled { opacity: .4; cursor: default; }
+.status { margin: 0; font-size: 13px; color: var(--muted); }
+.status.warn { color: var(--fg); border-left: 2px solid var(--accent-2); padding-left: 10px; }
+.fine { margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--muted); opacity: .8; }
+
+/* Dock */
+.dock { padding-block: 8px 14px; display: grid; gap: 8px; border-top: 1px solid var(--hair); background: linear-gradient(180deg, transparent, rgba(0,0,0,.25)); }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-inline: -2px; padding-inline: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; background: transparent; border: 1px solid var(--hair-2); border-radius: 999px; padding: 6px 11px; font-size: 12.5px; color: #c9cfda; white-space: nowrap; }
+.level { flex: none; background: var(--surface-2); border: 1px solid var(--hair-2); border-radius: 999px; padding: 6px 11px; font: 500 11px/1.4 var(--mono); letter-spacing: .06em; color: var(--accent); white-space: nowrap; }
+.composer { display: flex; align-items: flex-end; gap: 8px; background: var(--surface); border: 1px solid var(--hair-2); border-radius: 26px; padding: 6px; }
+.composer textarea { flex: 1; min-width: 0; background: transparent; border: 0; resize: none; padding: 9px 4px; max-height: 120px; line-height: 1.4; font-size: 15px; outline: none; }
+.composer textarea::placeholder { color: var(--muted); }
+.mic, .send { width: 40px; height: 40px; border-radius: 50%; border: 0; display: grid; place-items: center; flex: none; }
+.mic { background: var(--surface-2); color: var(--fg); position: relative; }
+.mic svg, .send svg { width: 18px; height: 18px; }
+.mic.on { background: var(--accent-2); color: #fff; }
+.mic.on::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--accent-2); animation: halo 1.2s ease-out infinite; }
+.send { background: var(--accent); color: var(--on-accent); }
+.send:disabled { opacity: .35; cursor: default; }
+.listening { margin: 0; font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent-2); text-align: center; }
+
+/* Toast and sheet */
+.toast { position: absolute; left: 50%; bottom: 128px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 40px);
+  background: #f2f4f8; color: #0b0f16; font-size: 13px; padding: 9px 14px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.4); z-index: 5; text-align: center; }
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,.5); z-index: 8; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; background: #121722; border-top: 1px solid var(--hair-2); border-radius: 24px 24px 0 0;
+  padding: 10px max(20px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 16px; max-height: 85%; overflow-y: auto; }
+.grab { width: 38px; height: 4px; border-radius: 4px; background: var(--hair-2); justify-self: center; }
+.sheet h2 { margin: 0; font: 400 24px/1.1 var(--serif); }
+.field { display: grid; gap: 8px; }
+.field > label, .field > span { font: 500 10.5px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface-2); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { border: 0; background: transparent; border-radius: 9px; padding: 8px 4px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+select { width: 100%; background: var(--surface-2); border: 1px solid var(--hair-2); border-radius: 12px; padding: 10px 12px; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.switch { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; }
+.switch input { width: 20px; height: 20px; accent-color: var(--accent); }
+.hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="app" id="app" data-persona="harvey">
+  <header class="bar">
+    <span class="mark">SPECTER</span>
+    <div class="bar-actions">
+      <button class="pill-btn" id="newcase" type="button" hidden>New case</button>
+      <button class="icon-btn" id="settings-btn" type="button" aria-label="Voice and style settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="rail" role="tablist" aria-label="Who you're talking to">
+    <button class="who" role="tab" id="tab-harvey" data-p="harvey" aria-selected="true"><span class="av" data-p="harvey">HS</span><span>Harvey</span></button>
+    <button class="who" role="tab" id="tab-mike" data-p="mike" aria-selected="false"><span class="av" data-p="mike">MR</span><span>Mike</span></button>
+    <button class="who" role="tab" id="tab-donna" data-p="donna" aria-selected="false"><span class="av" data-p="donna">DP</span><span>Donna</span></button>
+  </nav>
+
+  <main class="stage" id="stage">
+    <section class="hero">
+      <div class="av" id="hero-av" data-p="harvey"><span id="hero-init">HS</span><i class="halo"></i></div>
+      <div><h1 id="hero-name">Harvey Specter</h1><p id="hero-role">Senior partner. Reads the room before he walks in.</p></div>
+    </section>
+
+    <p class="you"><span class="tag" id="you-tag">Example</span><span id="you-text"></span></p>
+
+    <article class="take" id="take" aria-live="polite">
+      <p class="eyebrow" id="principle"></p>
+      <p class="line" id="line"></p>
+      <p class="follow" id="follow"></p>
+      <div class="player">
+        <button class="play" id="play" type="button" aria-label="Hear it">
+          <svg id="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+          <svg id="ico-stop" viewBox="0 0 24 24" fill="currentColor" hidden><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>
+        </button>
+        <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <span class="beat" aria-hidden="true">Pause</span>
+        <span class="meta" id="meta"></span>
+      </div>
+      <div class="thinking" id="thinking" hidden>
+        <div>
+          <p id="thinking-text">Reading the room.</p>
+          <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <small id="thinking-who">Harvey is on it</small>
+          <button type="button" id="stop">Stop</button>
+        </div>
+      </div>
+    </article>
+
+    <section class="cards">
+      <div class="card"><h3 id="h-read">The read</h3><p id="read"></p></div>
+      <div class="card"><h3 id="h-play">The play</h3><ol id="moves"></ol></div>
+      <div class="card avoid"><h3 id="h-avoid">Don't</h3><p id="avoid"></p></div>
+    </section>
+
+    <div class="row-actions">
+      <button class="soft lead" id="ask-other" type="button" hidden></button>
+      <button class="soft" id="another" type="button" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg>Another take</button>
+      <button class="soft" id="copy" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>Copy line</button>
+    </div>
+    <p class="status" id="status"></p>
+    <p class="fine">Unofficial fan project for personal use. Every line is original, written in the spirit of the characters. Voices come from your device and are not the actors' voices. For real legal, money or medical decisions, see a professional.</p>
+  </main>
+
+  <footer class="dock">
+    <div class="chips" id="chips"></div>
+    <form class="composer" id="composer">
+      <button class="mic" id="mic" type="button" aria-label="Speak your situation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+      </button>
+      <textarea id="input" rows="1" placeholder="Tell Harvey what's going on" aria-label="Your situation"></textarea>
+      <button class="send" id="send" type="submit" aria-label="Send" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+      </button>
+    </form>
+    <p class="listening" id="listening" hidden>Listening. Tap the mic to finish.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <div class="scrim" id="scrim" hidden></div>
+  <section class="sheet" id="sheet" hidden aria-label="Settings">
+    <div class="grab"></div>
+    <h2>Delivery</h2>
+    <div class="switch"><label for="speak-replies">Speak every reply out loud</label><input type="checkbox" id="speak-replies" checked></div>
+    <div class="field">
+      <span>How hard they hit</span>
+      <div class="seg" id="seg-level">
+        <button type="button" id="lvl-measured" data-level="measured" aria-pressed="false">Measured</button>
+        <button type="button" id="lvl-sharp" data-level="sharp" aria-pressed="true">Sharp</button>
+        <button type="button" id="lvl-nomercy" data-level="nomercy" aria-pressed="false">No mercy</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="voice-select" id="voice-label">Harvey's voice</label>
+      <select id="voice-select"></select>
+      <p class="hint" id="voice-hint">Pick the deepest, most natural voice your device offers. Voices named Natural or Online usually sound best.</p>
+    </div>
+    <div class="field">
+      <label for="speed">Pace</label>
+      <input type="range" id="speed" min="0.8" max="1.2" step="0.05" value="1">
+    </div>
+    <button class="soft lead" id="test-voice" type="button">Hear the current line</button>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const app = $("app");
+
+  /* ---------- Personas ---------- */
+  const COMMON = `
+RULES
+- Every line must be ORIGINAL and fitted to this exact situation. Never quote, paraphrase or reproduce actual dialogue or catchphrases from the TV show Suits.
+- Don't mention other characters or plot events from the show. Talk about the user's world.
+- Advice must be practical, specific and legal. Never advise fraud, lying, harassment, threats, revenge or harming anyone. If the user wants that, talk them out of it in character.
+- If it's a real legal matter, tell them to hire an actual lawyer where they live, in character.
+- If the user seems in danger or in crisis, or mentions harming themselves, drop the act: answer with plain warmth and tell them to contact local emergency services or a crisis line now. No pause marks, no swagger.
+- Never use em dashes or en dashes. Use commas, colons and full stops.
+
+PAUSE MARKS
+The line and followup are spoken aloud by a voice engine. Mark where the speaker pauses for effect:
+"|" for a beat, "||" for a long, deliberate pause. Put marks only between phrases, with spaces around them.
+
+OUTPUT
+Reply with only one JSON object, no other text:
+{"matter": "3 to 6 word case title",
+ "principle": "the principle at work, 3 to 7 words, an original maxim",
+ "line": "the one-liner with pause marks, at most 24 words, the most quotable thing in the reply",
+ "followup": "exactly two sentences with pause marks that turn the line into direction",
+ "read": "one or two sentences on what is really going on",
+ "play": ["three concrete moves in order, one sentence each, including what to say where it helps"],
+ "avoid": "one sentence: the mistake they are about to make",
+ "hours": a number from 0.1 to 0.6 in tenth-hour steps}`;
+
+  const P = {
+    harvey: {
+      name: "Harvey Specter", short: "Harvey", init: "HS",
+      role: "Senior partner. Reads the room before he walks in.",
+      labels: ["The read", "The play", "Don't"],
+      thinking: ["Reading the room.", "Finding the leverage.", "Straightening the tie.", "Writing the line."],
+      meta: (h) => h.toFixed(1) + " hrs billed",
+      voice: { prefs: ["andrew", "guy", "davis", "christopher", "brian", "roger", "eric", "aaron", "evan", "alex", "daniel", "uk english male", "male"], female: false, rate: 0.88, pitch: 0.8 },
+      gaps: { short: 420, long: 1050 },
+      bible: `You are Harvey Specter, the fictional senior partner and legendary closer, speaking in a personal coaching app. The user brings a real situation. You tell them what's really going on and how to play it.
+
+HOW HE THINKS
+- Everything is a negotiation and every negotiation turns on leverage. Find it, create it, or stop pretending you have it.
+- He reads the person, not the paperwork: pride, fear, motive.
+- Confidence is strategy. Never let the other side see you need it more.
+- No excuses, no self-pity, no waiting for permission. He respects people who own their mess and move.
+- He wins, but he has a code. Loyalty is non-negotiable. He bends rules; he never breaks the law or hurts the innocent.
+- Under the swagger he cares, and shows it by telling the truth nobody else will.
+
+HOW HE TALKS
+- Few words. Short declarative sentences. Dry, cocky, amused. Never rambles, never preaches.
+- One-liners built on reversal or a twist at the end. Speaks to the user as "you".
+- Light references to poker, basketball, boxing, old movies, closing deals.
+- He lets silence do the work: use long pauses "||" before the punch and short beats "|" inside phrases. At least one "||" in the line.`,
+      example: {
+        situation: "They lowballed my salary offer and I negotiate tomorrow.",
+        r: {
+          principle: "Never negotiate against yourself",
+          line: "They didn't lowball you. || They asked a question. | Tomorrow, you answer it.",
+          followup: "Name your number once, | say it like it's already approved, | and then stop talking. || The first one to fill the silence | pays for it.",
+          read: "A low first offer is a test of how you see yourself. They budgeted higher, and they're checking whether you know it.",
+          play: ["Open by restating what they get from you, in one sentence, before any number comes up.", "Name a specific figure above your target and hold eye contact while you say it.", "If they push back, ask what it would take to get there, then stay quiet."],
+          avoid: "Don't justify your number with your expenses. They're paying for your value, not your rent.",
+          hours: 0.3
+        }
+      }
+    },
+    mike: {
+      name: "Mike Ross", short: "Mike", init: "MR",
+      role: "Associate. Remembers everything he has ever read.",
+      labels: ["The precedent", "The angle", "Watch out"],
+      thinking: ["Checking the precedent.", "Rereading page forty-seven.", "Wait. Found something."],
+      meta: (h) => h.toFixed(1) + " hrs, billed to Harvey",
+      voice: { prefs: ["brian", "eric", "steffan", "christopher", "ryan", "tom", "aaron", "alex", "andrew", "guy", "male"], female: false, rate: 1.0, pitch: 0.98 },
+      gaps: { short: 300, long: 700 },
+      bible: `You are Mike Ross, the fictional brilliant young associate with a photographic memory, speaking in a personal coaching app. The user brings a real situation. You find the angle nobody else saw.
+
+HOW HE THINKS
+- Details win. The answer is usually in the fine print, the history, or the thing everyone skimmed.
+- There's always a precedent: someone, somewhere, already faced this. He reaches for facts, examples and patterns.
+- He came from nothing and outworks everyone. Preparation beats pedigree.
+- He has a conscience. He looks for the move that wins without leaving someone wrecked.
+- He's scrappy and creative: when the front door is locked, he finds the window.
+
+HOW HE TALKS
+- Quick, warm, a little nerdy, self-deprecating. More words than Harvey but still crisp.
+- Sparks with a fact or an analogy, then lands a sharp line. Speaks to the user as "you".
+- Pauses are quick beats "|", with one "||" just before the turn of the line.`,
+      example: {
+        situation: "I have an interview for a role I'm not sure I'm qualified for.",
+        r: {
+          principle: "Prepared beats qualified",
+          line: "Nobody in that room ticks every box. | They just did more reading. || So read more.",
+          followup: "Learn their three biggest problems cold, | and walk in with a one-page idea for the worst one. || The CV gets you the meeting; | the homework gets you the job.",
+          read: "Most hires don't tick every box. They go to the person who understood the job best by the end of the hour.",
+          play: ["Read their annual report, two recent earnings calls and the job post until you can paraphrase them.", "Write one page on how you'd attack their biggest problem in your first 90 days.", "When the gap comes up, name it first, then explain exactly how you'd close it."],
+          avoid: "Don't bluff about something you haven't done. Getting caught costs more than the gap ever would.",
+          hours: 0.4
+        }
+      }
+    },
+    donna: {
+      name: "Donna Paulsen", short: "Donna", init: "DP",
+      role: "Knows what you need before you do.",
+      labels: ["What's really going on", "What you do", "What you don't"],
+      thinking: ["I already know.", "Just confirming.", "Getting a coffee for this one."],
+      meta: () => "Donna doesn't bill",
+      voice: { prefs: ["ava", "aria", "jenny", "emma", "michelle", "samantha", "allison", "susan", "us english", "zira", "female"], female: true, rate: 0.97, pitch: 1.0 },
+      gaps: { short: 360, long: 900 },
+      bible: `You are Donna Paulsen, the fictional legendary right hand at a top law firm, speaking in a personal coaching app. The user brings a real situation. You already know what they're feeling and what they need to do.
+
+HOW SHE THINKS
+- She reads people instantly: what they feel, what they want, what they're not saying. She names the user's real feeling first.
+- She understands office politics, timing, relationships, and exactly what to say to whom.
+- Supremely self-assured. She is never wrong about people, and she knows it.
+- Fiercely loyal. She protects her people and tells them the truth to their face.
+- Practical: the right word, the right gesture, the right person to have coffee with.
+
+HOW SHE TALKS
+- Witty, warm, a little theatrical, with a knowing smile in every sentence. Speaks to the user as "you".
+- Confident statements, never hedging. Occasionally teasing, never mean.
+- She takes a knowing pause "||" right before the punchline, and short beats "|" for rhythm.`,
+      example: {
+        situation: "My manager took credit for my work in front of leadership.",
+        r: {
+          principle: "Everyone noticed. Act like it.",
+          line: "Oh, they know it was yours. || The question is whether you let them forget it.",
+          followup: "Be gracious in public | and very, very visible in private. || And starting today, | nothing leaves your desk without your name on it.",
+          read: "You're more hurt than angry, and you're worried that saying something makes you look small. It won't, if you do it right.",
+          play: ["Have a five-minute coffee with someone senior who was in the room and talk about the next phase of the work.", "Send your manager a friendly note offering to present the follow-up yourself.", "Keep a running log of what you delivered and when. You'll want it at review time."],
+          avoid: "Don't vent about it at work, not even to the people you trust. Especially not to them.",
+          hours: 0.2
+        }
+      }
+    }
+  };
+
+  const LEVELS = {
+    measured: "Measured: controlled and warmer underneath. Still direct. Mentoring, not performing.",
+    sharp: "Sharp: the full character. Confident, quick, cutting where it helps.",
+    nomercy: "No mercy: the hard truth with zero cushioning, aimed at the problem and the user's mistakes. Never mocks who the user is."
+  };
+  const LEVEL_NAMES = { measured: "Measured", sharp: "Sharp", nomercy: "No mercy" };
+
+  const CHIPS = [
+    "They lowballed my salary offer",
+    "My boss took credit for my work",
+    "A client is threatening to walk",
+    "Interview for a role I'm unsure about",
+    "Someone talked over me in a meeting",
+    "I have to let someone go",
+    "I'm starting a new job Monday"
+  ];
+
+  /* ---------- Settings (per browser) ---------- */
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("specter." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("specter." + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  const settings = Object.assign({ speak: true, level: "sharp", speed: 1, voices: {} }, store.get("settings", {}));
+  const saveSettings = () => store.set("settings", settings);
+
+  /* ---------- State ---------- */
+  let persona = "harvey";
+  const cases = { harvey: null, mike: null, donna: null };
+  let lastSituation = null;
+  let shown = null;   // what's on stage: {r, situation, example}
+  let segs = [];      // spoken segments for the stage
+  let busy = false, ctl = null;
+
+  const samplePromise = (window.claude && window.claude.use) ? window.claude.use("sample") : Promise.resolve(null);
+  let sample = null;
+  samplePromise.then((s) => { sample = s; if (!s) setStatus("New cases work when this page is open in Claude. The example is ready to hear.", true); }).catch(() => {});
+
+  /* ---------- Helpers ---------- */
+  function setStatus(msg, warn) { const s = $("status"); s.textContent = msg || ""; s.classList.toggle("warn", !!warn); }
+  function toast(msg, ms) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, ms || 2600); }
+  const noDash = (s) => String(s).replace(/\s*[–—]\s*/g, ", ");
+  const plain = (s) => noDash(s).replace(/\s*\|+\s*/g, " ").replace(/\s+/g, " ").trim();
+
+  /* Build words + pause marks into an element; return spoken segments */
+  function buildSpoken(el, text) {
+    el.textContent = "";
+    const out = [];
+    const parts = noDash(text).split(/\s*(\|\|?)\s*/);
+    let cur = null;
+    parts.forEach((part) => {
+      if (part === "|" || part === "||") {
+        if (cur) {
+          const p = document.createElement("span");
+          p.className = "pause"; p.dataset.len = part === "||" ? "long" : "short"; p.setAttribute("aria-hidden", "true");
+          el.append(p);
+          cur.pause = p.dataset.len; cur.pauseEl = p;
+        }
+        return;
+      }
+      const t = part.trim(); if (!t) return;
+      const words = t.split(/\s+/);
+      cur = { text: words.join(" "), words: [], starts: [], pause: null, pauseEl: null };
+      let off = 0;
+      words.forEach((w, i) => {
+        if (el.childNodes.length) el.append(document.createTextNode(" "));
+        const s = document.createElement("span"); s.className = "w"; s.textContent = w;
+        el.append(s); cur.words.push(s); cur.starts.push(off); off += w.length + 1;
+        if (i < words.length - 1) {}
+      });
+      out.push(cur);
+    });
+    // spaces after pause marks
+    el.querySelectorAll(".pause").forEach((p) => { if (p.nextSibling && p.nextSibling.nodeType !== 3) p.after(document.createTextNode(" ")); });
+    return out;
+  }
+
+  /* ---------- Render ---------- */
+  function applyPersona() {
+    const p = P[persona];
+    app.dataset.persona = persona;
+    document.querySelectorAll(".who").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.p === persona)));
+    $("hero-av").dataset.p = persona; $("hero-init").textContent = p.init;
+    $("hero-name").textContent = p.name; $("hero-role").textContent = p.role;
+    [$("h-read").textContent, $("h-play").textContent, $("h-avoid").textContent] = p.labels;
+    $("thinking-who").textContent = p.short + " is on it";
+    $("voice-label").textContent = p.short + "'s voice";
+    updateComposer();
+    fillVoiceSelect();
+  }
+
+  function render(r, situation, example) {
+    stopSpeaking();
+    const p = P[persona];
+    shown = { r, situation, example };
+    $("you-tag").textContent = example ? "Example" : "You";
+    $("you-text").textContent = situation;
+    $("principle").textContent = noDash(r.principle);
+    const lineSegs = buildSpoken($("line"), r.line);
+    const followSegs = buildSpoken($("follow"), r.followup);
+    if (lineSegs.length && !lineSegs[lineSegs.length - 1].pause) lineSegs[lineSegs.length - 1].pause = "long";
+    segs = lineSegs.concat(followSegs);
+    $("read").textContent = noDash(r.read);
+    const ol = $("moves"); ol.textContent = "";
+    r.play.forEach((m) => { const li = document.createElement("li"); li.textContent = noDash(m); ol.append(li); });
+    $("avoid").textContent = noDash(r.avoid);
+    $("meta").textContent = p.meta(Number(r.hours) || 0.2);
+    $("another").disabled = !cases[persona] || busy;
+    $("newcase").hidden = !cases[persona];
+    const ask = $("ask-other");
+    if (example && lastSituation) { ask.hidden = false; ask.textContent = "Get " + p.short + "'s take on your case"; }
+    else ask.hidden = true;
+    $("stage").scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function showCurrent() {
+    applyPersona();
+    const c = cases[persona];
+    if (c) render(c.r, c.situation, false);
+    else render(P[persona].example.r, P[persona].example.situation, true);
+  }
+
+  function clean(r) {
+    if (!r || typeof r !== "object") throw { code: "invalid_json" };
+    const s = (v, f) => (typeof v === "string" && v.trim() ? v.trim() : f);
+    if (!s(r.line, "")) throw { code: "invalid_json" };
+    let play = Array.isArray(r.play) ? r.play.map((x) => s(x, "")).filter(Boolean).slice(0, 4) : [];
+    if (!play.length) play = ["Decide what you actually want before you walk in."];
+    let hours = Math.round(Number(r.hours) * 10) / 10;
+    if (!(hours >= 0.1 && hours <= 0.6)) hours = 0.2;
+    return { matter: s(r.matter, "Open matter"), principle: s(r.principle, "Know what you want"), line: s(r.line, ""),
+      followup: s(r.followup, ""), read: s(r.read, ""), play, avoid: s(r.avoid, "Don't blink first."), hours };
+  }
+
+  /* ---------- Voice output ---------- */
+  const synth = window.speechSynthesis || null;
+  let voices = [];
+  function loadVoices() { if (!synth) return; voices = synth.getVoices().filter((v) => /^en/i.test(v.lang)); fillVoiceSelect(); }
+  if (synth) { loadVoices(); synth.onvoiceschanged = loadVoices; } else { $("play").hidden = true; }
+
+  function pickVoice() {
+    const p = P[persona];
+    const chosen = settings.voices[persona];
+    if (chosen) { const v = voices.find((x) => x.name === chosen); if (v) return v; }
+    let best = null, bestScore = -1;
+    voices.forEach((v) => {
+      const n = v.name.toLowerCase(); let score = 0;
+      const idx = p.voice.prefs.findIndex((k) => n.includes(k));
+      if (idx >= 0) score += 100 - idx * 4;
+      if (/natural|online|neural|premium|enhanced/.test(n)) score += 30;
+      if (/en[-_]us/i.test(v.lang)) score += 8;
+      if (!p.voice.female && /female|zira|aria|jenny|ava|samantha|susan|emma/.test(n)) score -= 80;
+      if (p.voice.female && /\bmale\b|guy|andrew|davis|brian|eric|david|mark|daniel/.test(n)) score -= 80;
+      if (score > bestScore) { best = v; bestScore = score; }
+    });
+    return best;
+  }
+
+  let speakToken = 0;
+  const wait = (ms, tok) => new Promise((res) => setTimeout(res, ms));
+  function setSpeaking(on) {
+    app.classList.toggle("speaking", on);
+    $("ico-play").hidden = on; $("ico-stop").hidden = !on;
+    $("play").setAttribute("aria-label", on ? "Stop" : "Hear it");
+  }
+  function stopSpeaking() {
+    speakToken++;
+    if (synth) synth.cancel();
+    $("take").classList.remove("performing");
+    app.classList.remove("pausing");
+    document.querySelectorAll(".pause.on").forEach((p) => p.classList.remove("on"));
+    setSpeaking(false);
+  }
+
+  function speakSeg(seg, tok) {
+    return new Promise((resolve) => {
+      const p = P[persona];
+      const u = new SpeechSynthesisUtterance(seg.text);
+      const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; }
+      u.rate = p.voice.rate * settings.speed; u.pitch = p.voice.pitch;
+      let i = 0, timer = null, started = false, done = false;
+      const light = (n) => { while (i <= n && i < seg.words.length) seg.words[i++].classList.add("lit"); };
+      const per = 60000 / (160 * u.rate);
+      const finish = () => { if (done) return; done = true; clearInterval(timer); light(seg.words.length); resolve(); };
+      u.onstart = () => { started = true; light(0); timer = setInterval(() => { if (tok !== speakToken) return finish(); light(i); }, per); };
+      u.onboundary = (e) => {
+        if (e.name && e.name !== "word") return;
+        let k = 0; while (k + 1 < seg.starts.length && seg.starts[k + 1] <= e.charIndex) k++;
+        light(k);
+      };
+      u.onend = finish; u.onerror = finish;
+      synth.speak(u);
+      setTimeout(() => { if (!started) finish(); }, 4000);
+    });
+  }
+
+  async function perform() {
+    if (!synth || !segs.length) return;
+    stopSpeaking();
+    const tok = speakToken;
+    const take = $("take");
+    take.querySelectorAll(".w").forEach((w) => w.classList.remove("lit"));
+    take.classList.add("performing");
+    setSpeaking(true);
+    const gaps = P[persona].gaps;
+    for (const seg of segs) {
+      if (tok !== speakToken) return;
+      await speakSeg(seg, tok);
+      if (tok !== speakToken) return;
+      if (seg.pause) {
+        app.classList.add("pausing"); if (seg.pauseEl) seg.pauseEl.classList.add("on");
+        await wait(seg.pause === "long" ? gaps.long : gaps.short);
+        app.classList.remove("pausing"); if (seg.pauseEl) seg.pauseEl.classList.remove("on");
+      }
+    }
+    if (tok !== speakToken) return;
+    take.classList.remove("performing");
+    setSpeaking(false);
+  }
+
+  function unlockSpeech() { // iOS needs speech started inside a tap
+    if (!synth) return;
+    try { synth.cancel(); const u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); } catch (e) {}
+  }
+
+  $("play").addEventListener("click", () => { if (app.classList.contains("speaking")) stopSpeaking(); else perform(); });
+
+  /* ---------- Asking ---------- */
+  const ERRORS = {
+    not_granted: "This page needs your permission to use Claude. Reload and allow it when asked.",
+    sampling_disabled: "Claude isn't available on this account, so new cases can't run here.",
+    rate_limited: "Too many cases at once. Give it a minute, then try again.",
+    session_expired: "Your Claude session expired. Sign in again, then retry.",
+    refused: "That one won't work as written. Reframe the situation and try again.",
+    invalid_json: "The answer came back garbled. Try again.",
+    empty_completion: "Nothing came back. Try a shorter description.",
+    prompt_too_large: "That's a novel, not a brief. Cut it down and try again."
+  };
+
+  let tick = null;
+  function working(on) {
+    busy = on;
+    $("thinking").hidden = !on;
+    $("send").disabled = on || !$("input").value.trim();
+    $("another").disabled = on || !cases[persona];
+    clearInterval(tick);
+    if (on) {
+      const lines = P[persona].thinking; let i = 0;
+      $("thinking-text").textContent = lines[0];
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) tick = setInterval(() => { i = (i + 1) % lines.length; $("thinking-text").textContent = lines[i]; }, 2400);
+    }
+  }
+  $("stop").addEventListener("click", () => ctl && ctl.abort());
+
+  function brief(key, situation) {
+    return P[key].bible + "\n" + COMMON + "\n\nINTENSITY\n" + LEVELS[settings.level] + "\n\nTHE USER'S SITUATION\n" + situation.slice(0, 4000);
+  }
+
+  async function ask(key, turns, situation) {
+    if (!sample) sample = await samplePromise.catch(() => null);
+    if (!sample) { setStatus("New cases work when this page is open in Claude, on your phone or desktop.", true); return; }
+    stopSpeaking();
+    ctl = new AbortController();
+    working(true);
+    setStatus("");
+    try {
+      const raw = await sample.json(turns, { signal: ctl.signal, cache: false });
+      const r = clean(raw);
+      let t = turns.concat([{ role: "assistant", content: JSON.stringify(r) }]);
+      if (t.length > 9) t = [t[0]].concat(t.slice(-8));
+      cases[key] = { r, situation, turns: t };
+      lastSituation = situation;
+      if (key === persona) {
+        render(r, situation, false);
+        if (settings.speak) perform();
+      }
+      updateComposer();
+    } catch (e) {
+      if (e && e.code === "cancelled") setStatus("Stopped.");
+      else setStatus((e && ERRORS[e.code]) || "Something interrupted the call. Try again.", true);
+    } finally {
+      working(false);
+    }
+  }
+
+  function submitText(text) {
+    text = text.trim();
+    if (busy) return;
+    if (text.length < 8) { toast("Give them a little more than that."); return; }
+    unlockSpeech();
+    $("input").value = ""; autoGrow(); $("send").disabled = true;
+    const c = cases[persona];
+    if (c) {
+      ask(persona, c.turns.concat([{ role: "user", content: "Follow-up from the user: " + text.slice(0, 1500) + "\nAdjust your advice. Same JSON shape with pause marks, only the JSON." }]), c.situation + " Then: " + text);
+    } else {
+      ask(persona, [{ role: "user", content: brief(persona, text) }], text);
+    }
+  }
+
+  $("composer").addEventListener("submit", (e) => { e.preventDefault(); submitText($("input").value); });
+  $("input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !matchMedia("(pointer: coarse)").matches) { e.preventDefault(); submitText($("input").value); }
+  });
+  function autoGrow() { const t = $("input"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 120) + "px"; }
+  $("input").addEventListener("input", () => { autoGrow(); $("send").disabled = busy || !$("input").value.trim(); });
+
+  $("another").addEventListener("click", () => {
+    const c = cases[persona]; if (!c || busy) return;
+    unlockSpeech();
+    ask(persona, c.turns.concat([{ role: "user", content: "Same situation. Give me a completely different line and followup from a new angle, adjusting the read and play if needed. Intensity: " + LEVELS[settings.level] + " Same JSON shape with pause marks, only the JSON." }]), c.situation);
+  });
+
+  $("ask-other").addEventListener("click", () => {
+    if (!lastSituation || busy) return;
+    unlockSpeech();
+    ask(persona, [{ role: "user", content: brief(persona, lastSituation) }], lastSituation);
+  });
+
+  $("newcase").addEventListener("click", () => {
+    cases[persona] = null; stopSpeaking(); showCurrent(); $("input").focus();
+  });
+
+  $("copy").addEventListener("click", () => {
+    const text = plain(shown.r.line) + " " + plain(shown.r.followup) + " (" + P[persona].short + ")";
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents($("line")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selected. Copy it from here."); };
+    try { navigator.clipboard.writeText(text).then(() => toast("Copied"), fallback); } catch (e) { fallback(); }
+  });
+
+  /* ---------- Composer: chips, level, placeholder ---------- */
+  function updateComposer() {
+    const p = P[persona];
+    $("input").placeholder = cases[persona] ? "Push back, or tell " + p.short + " what happened next" : "Tell " + p.short + " what's going on";
+    const box = $("chips"); box.textContent = "";
+    const lv = document.createElement("button");
+    lv.type = "button"; lv.className = "level"; lv.textContent = LEVEL_NAMES[settings.level];
+    lv.setAttribute("aria-label", "Intensity: " + LEVEL_NAMES[settings.level] + ". Tap to change.");
+    lv.addEventListener("click", () => { const order = ["measured", "sharp", "nomercy"]; setLevel(order[(order.indexOf(settings.level) + 1) % 3]); toast("Intensity: " + LEVEL_NAMES[settings.level], 1400); });
+    box.append(lv);
+    if (!cases[persona]) CHIPS.forEach((c) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = c;
+      b.addEventListener("click", () => { $("input").value = c + ". "; autoGrow(); $("send").disabled = false; $("input").focus(); });
+      box.append(b);
+    });
+  }
+  function setLevel(l) {
+    settings.level = l; saveSettings();
+    document.querySelectorAll("#seg-level button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.level === l)));
+    updateComposer();
+  }
+
+  /* ---------- Persona switching ---------- */
+  document.querySelector(".rail").addEventListener("click", (e) => {
+    const b = e.target.closest(".who"); if (!b || b.dataset.p === persona) return;
+    stopSpeaking(); persona = b.dataset.p; showCurrent();
+  });
+
+  /* ---------- Voice input ---------- */
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null, listening = false, finalText = "";
+  function dictationHint() {
+    $("input").focus();
+    toast("The mic is blocked in this window. Tap the mic on your keyboard to dictate instead.", 4200);
+  }
+  function setListening(on) { listening = on; $("mic").classList.toggle("on", on); $("listening").hidden = !on; }
+  $("mic").addEventListener("click", () => {
+    if (listening && rec) { rec.stop(); return; }
+    if (!SR) { dictationHint(); return; }
+    unlockSpeech(); stopSpeaking();
+    try {
+      rec = new SR();
+      rec.lang = navigator.language || "en-US"; rec.interimResults = true; rec.continuous = false;
+      finalText = "";
+      rec.onresult = (e) => {
+        let interim = ""; finalText = "";
+        for (let i = 0; i < e.results.length; i++) { const t = e.results[i][0].transcript; if (e.results[i].isFinal) finalText += t; else interim += t; }
+        $("input").value = (finalText + interim).trim(); autoGrow(); $("send").disabled = !$("input").value.trim();
+      };
+      rec.onerror = (e) => {
+        setListening(false);
+        if (["not-allowed", "service-not-allowed", "audio-capture"].includes(e.error)) dictationHint();
+        else if (e.error !== "aborted" && e.error !== "no-speech") toast("Didn't catch that. Try again.");
+      };
+      rec.onend = () => {
+        const was = listening; setListening(false);
+        if (was && finalText.trim().length >= 8) submitText(finalText);
+      };
+      rec.start(); setListening(true);
+    } catch (err) { setListening(false); dictationHint(); }
+  });
+
+  /* ---------- Settings sheet ---------- */
+  function openSheet(on) { $("sheet").hidden = !on; $("scrim").hidden = !on; }
+  $("settings-btn").addEventListener("click", () => openSheet(true));
+  $("scrim").addEventListener("click", () => openSheet(false));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") openSheet(false); });
+  $("speak-replies").checked = !!settings.speak;
+  $("speak-replies").addEventListener("change", (e) => { settings.speak = e.target.checked; saveSettings(); });
+  $("speed").value = settings.speed;
+  $("speed").addEventListener("input", (e) => { settings.speed = Number(e.target.value); saveSettings(); });
+  $("seg-level").addEventListener("click", (e) => { const b = e.target.closest("button[data-level]"); if (b) setLevel(b.dataset.level); });
+  setLevel(settings.level);
+
+  function fillVoiceSelect() {
+    const sel = $("voice-select"); if (!sel) return;
+    sel.textContent = "";
+    if (!synth) { sel.disabled = true; $("voice-hint").textContent = "This device doesn't offer spoken voices here."; return; }
+    const auto = document.createElement("option"); auto.value = ""; auto.textContent = "Best match" + (pickVoiceAuto() ? " (" + pickVoiceAuto().name + ")" : "");
+    sel.append(auto);
+    voices.forEach((v) => { const o = document.createElement("option"); o.value = v.name; o.textContent = v.name + " · " + v.lang; sel.append(o); });
+    sel.value = settings.voices[persona] || "";
+  }
+  function pickVoiceAuto() { const keep = settings.voices[persona]; settings.voices[persona] = ""; const v = pickVoice(); settings.voices[persona] = keep; return v; }
+  $("voice-select").addEventListener("change", (e) => { settings.voices[persona] = e.target.value; saveSettings(); });
+  $("test-voice").addEventListener("click", () => { unlockSpeech(); openSheet(false); perform(); });
+
+  /* ---------- Boot ---------- */
+  showCurrent();
+})();
+</script>
