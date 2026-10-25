@@ -4,6 +4,7 @@ import { BRAND, personaList, type PersonaId } from "@/lib/personas/config";
 import { Wordmark } from "@/components/Wordmark";
 import { Avatar } from "@/components/Persona";
 import { ErrorBanner } from "@/components/ui";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const PERSONA_PITCHES: Record<PersonaId, string> = {
   closer: "Reads the room. Moves first. Already three steps ahead.",
@@ -41,17 +42,33 @@ function WelcomeInner() {
     setBusy(true);
     setError(null);
     try {
+      // Sign in anonymously from the browser so the Supabase session cookies are
+      // written by the browser itself. Signing in inside the route handler created
+      // the user server-side but the Set-Cookie never reached the browser, so the
+      // middleware saw no session and bounced straight back here.
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (url && anonKey) {
+        const sb = createSupabaseBrowserClient(url, anonKey);
+        const { data: current } = await sb.auth.getSession();
+        if (!current.session) {
+          const { error: signInError } = await sb.auth.signInAnonymously();
+          if (signInError) throw new Error("Guest mode is unavailable. Sign in to continue.");
+        }
+      }
+
+      // Records the 18+ and AI disclosure acknowledgements against the session
+      // the browser just established, so the app layout lets us through.
       const res = await fetch("/api/auth/guest", {
         method: "POST",
         headers: { "content-type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ ageConfirmed: true, disclosureAck: true, persona: selected }),
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
         throw new Error(body.error?.message ?? "Something went wrong. Try again.");
       }
-      // Hard redirect so the browser sends the new Supabase session cookies
-      // on the next request; client-side router.push would skip that round-trip.
       window.location.href = "/";
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
