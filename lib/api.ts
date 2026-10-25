@@ -34,10 +34,18 @@ export function errorResponse(e: unknown): Response {
     return jsonError(e.code, e.message, e.status, headers, extra);
   }
   if (e instanceof LlmError) {
-    if (e.code === "not_configured") return jsonError("not_configured", "The advice engine is not configured.", 503);
+    // The model error never carries situation text, only provider detail such as
+    // a retired model id or a rejected key. Log it: without this the real cause
+    // is invisible and every failure looks like a rate limit.
+    console.error(`[api] llm error (${e.code}${e.status ? ` ${e.status}` : ""}): ${e.message}`);
+    const detail = e.message.slice(0, 300);
+    if (e.code === "not_configured")
+      return jsonError("not_configured", "The advice engine is not configured.", 503, {}, { detail });
     if (e.code === "refused") return jsonError("refused", "That one won't work as written. Reframe it and try again.", 422);
     if (e.code === "timeout") return jsonError("timeout", "That took too long. Try again.", 504);
-    return jsonError("upstream", "Too many requests right now. Give it a minute.", 502);
+    if (e.code === "overloaded")
+      return jsonError("overloaded", "Too many requests right now. Give it a minute.", 429, {}, { detail });
+    return jsonError("upstream", "The advice engine had a problem. Try again.", 502, {}, { detail });
   }
   if (e instanceof TtsError) return jsonError("tts_failed", "Voice unavailable. Here it is in writing.", e.status);
   // Never log situation text; the error message is enough.
