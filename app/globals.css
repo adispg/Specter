@@ -414,6 +414,43 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .menu button:hover { background: var(--surface-3); }
 .menu button.danger { color: var(--danger); }
 
+/* Home screen: who is across the desk, then a way in. The persona block is
+   centred because it is identity; the starters are left aligned because they
+   are content to read. */
+/* Scoped rather than put on .body, so the list screens keep their behaviour. */
+.body.home { overflow-y: auto; scrollbar-width: none; }
+.body.home::-webkit-scrollbar { display: none; }
+
+.deskhead { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 28px 0 4px; }
+.deskhead .av { box-shadow: 0 0 0 1px var(--hair-2), 0 14px 34px -16px var(--glow); }
+.deskhead .nm { margin: 6px 0 0; font: 700 30px/1.06 var(--display); letter-spacing: -0.03em; color: var(--fg); }
+.deskhead .rl { margin: 0; max-width: 24ch; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.deskhead .sy {
+  margin: 14px 0 0; max-width: 26ch;
+  font: 600 17px/1.32 var(--display); letter-spacing: -0.01em;
+  color: var(--accent-2-text); text-wrap: balance;
+}
+
+.starters { display: grid; gap: 8px; margin-top: 26px; }
+.starters > .rule { height: 1px; background: var(--hair); margin: 0 0 4px; }
+.starter {
+  display: block; width: 100%; text-align: left;
+  padding: 13px 14px 13px 16px;
+  border: 1px solid var(--hair); border-left: 2px solid var(--accent-2);
+  border-radius: 10px; background: var(--surface);
+  color: var(--fg-2); font-size: 14px; line-height: 1.4;
+  cursor: pointer; transition: background var(--dur-instant) var(--ease-standard), border-color var(--dur-instant) var(--ease-standard);
+}
+.starter:hover { background: var(--surface-2); }
+.starter:active { background: var(--surface-3); }
+.starter:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-height: 700px) {
+  .deskhead { padding-top: 14px; gap: 7px; }
+  .deskhead .sy { margin-top: 10px; }
+  .starters { margin-top: 16px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0ms !important; }
 }

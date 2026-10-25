@@ -2,7 +2,13 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { personaPlaceholder, useApp } from "@/components/AppProvider";
-import { PERSONA_STARTERS } from "@/lib/personas/config";
+import { PERSONAS, PERSONA_STARTERS } from "@/lib/personas/config";
+import { Avatar } from "@/components/Persona";
+
+/** Persona copy carries "|" and "||" speech pause markers for the voice engine. */
+function spoken(s: string): string {
+  return s.replace(/\|\|/g, " ").replace(/\|/g, " ").replace(/\s+/g, " ").trim();
+}
 import { TabBar, PersonaRail, Composer, IntensityControl, OfflineBanner, ErrorBanner } from "@/components/ui";
 import { useConsult } from "@/lib/client/useConsult";
 import { dictationSupported, startDictation, type DictationSession } from "@/lib/client/dictation";
@@ -26,6 +32,11 @@ export function HomeScreen() {
   }, [config.sttEnabled]);
 
   useEffect(() => () => dictRef.current?.cancel(), []);
+
+  const p = PERSONAS[persona];
+  // The desk head and starters are the empty state: they step aside as soon as
+  // there is something to send.
+  const idle = !text.trim() && !consult.busy && !listening;
 
   const toggleMic = useCallback(() => {
     if (dictRef.current) {
@@ -94,52 +105,29 @@ export function HomeScreen() {
         <IntensityControl />
       </div>
 
-      <main className="body stack">
+      <main className="body home stack">
         <OfflineBanner />
         {consult.error && (
           <ErrorBanner onRetry={consult.retry}>{consult.error}</ErrorBanner>
         )}
-        <p className="t3" style={{ marginTop: 24, color: "var(--fg-2)" }}>
-          Bring the situation. Leave with the line.
-        </p>
+        {idle && (
+          <>
+            <div className="deskhead">
+              <Avatar persona={persona} size="xl" />
+              <h1 className="nm">{p.name}</h1>
+              <p className="rl">{p.role}</p>
+              <p className="sy">{spoken(p.emptyStates.home)}</p>
+            </div>
 
-        {!text.trim() && !consult.busy && (
-          <div style={{ marginTop: 28 }}>
-            <p
-              style={{
-                fontSize: 11,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "var(--fg-3)",
-                marginBottom: 10,
-              }}
-            >
-              Try one of these
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="starters">
+              <div className="rule" />
               {PERSONA_STARTERS[persona].map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setText(s)}
-                  style={{
-                    textAlign: "left",
-                    padding: "12px 14px",
-                    borderRadius: 10,
-                    border: "1px solid var(--border)",
-                    background: "var(--surface)",
-                    color: "var(--fg-1)",
-                    fontSize: 14,
-                    lineHeight: 1.4,
-                    cursor: "pointer",
-                    width: "100%",
-                  }}
-                >
+                <button key={s} type="button" className="starter" onClick={() => setText(s)}>
                   {s}
                 </button>
               ))}
             </div>
-          </div>
+          </>
         )}
       </main>
 
