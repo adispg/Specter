@@ -16,7 +16,7 @@ function CaseCard({ c }: { c: CaseSummary }) {
         alignItems: "flex-start",
         gap: 12,
         padding: "14px 16px",
-        borderBottom: "1px solid var(--border)",
+        borderBottom: "1px solid var(--hair)",
         textDecoration: "none",
         color: "inherit",
       }}
@@ -28,7 +28,7 @@ function CaseCard({ c }: { c: CaseSummary }) {
           style={{
             fontWeight: 600,
             fontSize: 14,
-            color: "var(--fg-1)",
+            color: "var(--fg)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -50,7 +50,7 @@ function CaseCard({ c }: { c: CaseSummary }) {
             {c.latest_line}
           </div>
         )}
-        <div style={{ fontSize: 12, color: "var(--fg-3)", marginTop: 4 }}>
+        <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>
           {relTime(c.last_activity_at)}
         </div>
       </div>
@@ -78,7 +78,7 @@ export default async function CasesPage() {
               justifyContent: "center",
               flex: 1,
               gap: 12,
-              color: "var(--fg-3)",
+              color: "var(--muted)",
               textAlign: "center",
               padding: "60px 24px",
             }}

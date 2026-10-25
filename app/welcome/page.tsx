@@ -136,8 +136,8 @@ function WelcomeInner() {
                   gap: 16,
                   padding: "14px 16px",
                   borderRadius: 12,
-                  border: isSelected ? "2px solid var(--accent, #6366f1)" : "1px solid var(--border)",
-                  background: isSelected ? "var(--surface-raised, var(--surface))" : "var(--surface)",
+                  border: isSelected ? "2px solid var(--accent)" : "1px solid var(--hair)",
+                  background: isSelected ? "var(--surface)" : "var(--surface)",
                   cursor: busy ? "default" : "pointer",
                   textAlign: "left",
                   width: "100%",
@@ -147,7 +147,7 @@ function WelcomeInner() {
               >
                 <Avatar persona={p.id} size="lg" />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 15, color: "var(--fg-1)", marginBottom: 2 }}>
+                  <div style={{ fontWeight: 600, fontSize: 15, color: "var(--fg)", marginBottom: 2 }}>
                     {p.short}
                   </div>
                   <div style={{ fontSize: 13, color: "var(--fg-2)", lineHeight: 1.4 }}>
@@ -168,7 +168,7 @@ function WelcomeInner() {
         <p
           style={{
             fontSize: 11,
-            color: "var(--fg-3)",
+            color: "var(--muted)",
             textAlign: "center",
             lineHeight: 1.5,
             marginBottom: 16,

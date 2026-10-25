@@ -13,14 +13,14 @@ function Row({ label, value, href, onClick }: { label: string; value?: string; h
         alignItems: "center",
         justifyContent: "space-between",
         padding: "14px 16px",
-        borderBottom: "1px solid var(--border)",
+        borderBottom: "1px solid var(--hair)",
         cursor: onClick || href ? "pointer" : "default",
         textDecoration: "none",
         color: "inherit",
       }}
     >
-      <span style={{ fontSize: 15, color: "var(--fg-1)" }}>{label}</span>
-      {value && <span style={{ fontSize: 14, color: "var(--fg-3)" }}>{value}</span>}
+      <span style={{ fontSize: 15, color: "var(--fg)" }}>{label}</span>
+      {value && <span style={{ fontSize: 14, color: "var(--muted)" }}>{value}</span>}
     </div>
   );
 
@@ -40,7 +40,7 @@ function SectionHeader({ title }: { title: string }) {
         padding: "20px 16px 6px",
         fontSize: 12,
         fontWeight: 600,
-        color: "var(--fg-3)",
+        color: "var(--muted)",
         textTransform: "uppercase",
         letterSpacing: "0.08em",
       }}
@@ -91,7 +91,7 @@ export default function SettingsPage() {
                 margin: "8px 16px",
                 padding: 16,
                 background: "var(--surface)",
-                border: "1px solid var(--border)",
+                border: "1px solid var(--hair)",
                 borderRadius: 12,
               }}
             >
@@ -124,10 +124,10 @@ export default function SettingsPage() {
         <Row label="Terms of service" href="/legal/terms" />
 
         <div style={{ padding: "40px 16px 24px", textAlign: "center" }}>
-          <p style={{ fontSize: 12, color: "var(--fg-3)", lineHeight: 1.6 }}>
+          <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.6 }}>
             Advice is for perspective only. Not professional legal, financial, or other counsel.
           </p>
-          <p style={{ fontSize: 12, color: "var(--fg-4)", marginTop: 8 }}>
+          <p style={{ fontSize: 12, color: "var(--dim)", marginTop: 8 }}>
             {BRAND.appName} &copy; {new Date().getFullYear()}
           </p>
         </div>

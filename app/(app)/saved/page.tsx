@@ -12,21 +12,21 @@ function LineCard({ line }: { line: SavedLine }) {
       data-testid="saved-line-card"
       style={{
         padding: "16px var(--gutter-r) 16px var(--gutter-l)",
-        borderBottom: "1px solid var(--border)",
+        borderBottom: "1px solid var(--hair)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
         <Avatar persona={line.persona} size="xs" />
-        <span style={{ fontSize: 12, color: "var(--fg-3)" }}>{relTime(line.created_at)}</span>
+        <span style={{ fontSize: 12, color: "var(--muted)" }}>{relTime(line.created_at)}</span>
         {line.matter && (
           <span
             style={{
               fontSize: 11,
-              color: "var(--fg-3)",
+              color: "var(--muted)",
               padding: "2px 6px",
               background: "var(--surface)",
               borderRadius: 4,
-              border: "1px solid var(--border)",
+              border: "1px solid var(--hair)",
               textTransform: "uppercase",
               letterSpacing: "0.04em",
             }}
@@ -41,7 +41,7 @@ function LineCard({ line }: { line: SavedLine }) {
           fontSize: 16,
           fontWeight: 600,
           lineHeight: 1.4,
-          color: "var(--fg-1)",
+          color: "var(--fg)",
           margin: "0 0 6px",
         }}
       >
@@ -97,7 +97,7 @@ export default async function SavedPage() {
               justifyContent: "center",
               flex: 1,
               gap: 12,
-              color: "var(--fg-3)",
+              color: "var(--muted)",
               textAlign: "center",
               padding: "60px 24px",
             }}
