@@ -67,6 +67,31 @@ export function parseConsultRequest(body: unknown): ConsultRequest {
  * downgrade, generate a validated reply, persist, meter, log safety events.
  */
 export async function runConsult(ctx: ConsultContext): Promise<ConsultResult> {
+  // Keys consumed on this request, so anything that fails afterwards hands the
+  // allowance back instead of charging a guest for a consult they never got.
+  const consumed: string[] = [];
+  try {
+    return await runConsultInner(ctx, consumed);
+  } catch (e) {
+    await refundGuestQuota(ctx, consumed);
+    throw e;
+  }
+}
+
+/** Refunds anything consumed and empties the list, so it is safe to call twice. */
+async function refundGuestQuota(ctx: ConsultContext, consumed: string[]): Promise<void> {
+  if (!consumed.length || !ctx.guest) return;
+  const keys = consumed.splice(0, consumed.length);
+  for (const k of keys) {
+    try {
+      await ctx.guest.throttle.release(k);
+    } catch {
+      // Already on a failure path; never mask the original error.
+    }
+  }
+}
+
+async function runConsultInner(ctx: ConsultContext, consumed: string[]): Promise<ConsultResult> {
   const { store, llm, request, limits } = ctx;
   const now = ctx.now ?? new Date();
 
@@ -115,8 +140,15 @@ export async function runConsult(ctx: ConsultContext): Promise<ConsultResult> {
     if (request.action === "new" && ctx.guest) {
       const { throttle, deviceKey, ipKey } = ctx.guest;
       const okDevice = deviceKey ? await throttle.consume(`d:${deviceKey}`, limits.guestPerDevice, 24) : true;
+      if (okDevice && deviceKey) consumed.push(`d:${deviceKey}`);
       const okIp = okDevice && ipKey ? await throttle.consume(`i:${ipKey}`, limits.guestPerIp, 24) : okDevice;
-      if (!okDevice || !okIp) throw new ConsultError("guest_limit", "Sign in to keep going. Guest consults on this device are used up for today.", 403);
+      if (okIp && okDevice && ipKey) consumed.push(`i:${ipKey}`);
+      if (!okDevice || !okIp) {
+        // The device allowance was already spent before the IP check refused
+        // the request, so hand it back rather than charging for a 403.
+        await refundGuestQuota(ctx, consumed);
+        throw new ConsultError("guest_limit", "Sign in to keep going. Guest consults on this device are used up for today.", 403);
+      }
     }
   }
 

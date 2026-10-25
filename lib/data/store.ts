@@ -88,4 +88,11 @@ export interface DataStore {
 export interface GuestThrottle {
   /** Atomically consume one guest consult for this key if under the limit in the window. */
   consume(keyHash: string, limit: number, windowHours: number): Promise<boolean>;
+  /**
+   * Give one consumed consult back. Consuming happens before the model is
+   * called, so that it stays atomic against concurrent requests; without a
+   * refund a provider outage permanently spends a first-time guest's only
+   * attempt. Best effort: a failed refund must never fail the request.
+   */
+  release(keyHash: string): Promise<void>;
 }

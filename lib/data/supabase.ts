@@ -274,4 +274,12 @@ export class SupabaseGuestThrottle implements GuestThrottle {
     if (res.error) throw new Error(`guest quota: ${res.error.message}`);
     return res.data === true;
   }
+
+  async release(keyHash: string): Promise<void> {
+    // Swallowed deliberately: this runs on a path that is already failing, and
+    // the caller is about to surface the real error. Tolerates the function not
+    // existing yet so the refund can ship ahead of the migration.
+    const res = await this.sb.rpc("release_guest_quota", { p_key: keyHash });
+    if (res.error) console.warn(`[guest quota] refund failed: ${res.error.message}`);
+  }
 }

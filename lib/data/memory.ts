@@ -304,4 +304,15 @@ export class MemoryGuestThrottle implements GuestThrottle {
     d.guest.push({ key: keyHash, created_at: Date.now() });
     return true;
   }
+
+  async release(keyHash: string): Promise<void> {
+    const d = db();
+    // Newest entry for this key only, mirroring release_guest_quota.
+    for (let i = d.guest.length - 1; i >= 0; i--) {
+      if (d.guest[i]!.key === keyHash) {
+        d.guest.splice(i, 1);
+        return;
+      }
+    }
+  }
 }
