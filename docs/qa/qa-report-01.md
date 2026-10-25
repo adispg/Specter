@@ -15,10 +15,10 @@ Tester: QA agent
 | 5. Persona harness | SKIP (no harness/run.ts or harness/run.js found) |
 | 6. Naming + copy sweep | PASS |
 | 7. Accessibility | ADVISORY |
-| 8. Phone-width | FAIL |
+| 8. Phone-width | PASS |
 | 9. Screenshots | DONE |
 
-Overall: FAIL
+Overall: PASS
 
 ---
 
@@ -133,16 +133,19 @@ Verdict: **ADVISORY**
 
 Script launched a headless Chromium browser at 390x844 viewport, loaded `docs/design/mockups.html`, and evaluated `document.body.scrollWidth > document.body.clientWidth`.
 
-Result:
+Initial run returned `horizontal overflow: true`. Root cause: `.page` had 48px side padding and `.phone` was hard-coded at `width: 390px`, pushing elements to `right: 438px` at a 390px viewport.
+
+Fix applied (commit c451a79): added a `@media (max-width: 500px)` block collapsing `.page` padding to zero, making `.frame` use `100%` width, and overriding `.phone` to `width: 100%; max-width: 390px`.
+
+Re-run result:
 ```
-horizontal overflow: true
+bodyScrollWidth: 390 === bodyClientWidth: 390
+overflow: false
 ```
 
-The mockups page has horizontal overflow at iPhone 14 width. This is a **blocking failure** for the QA gate.
+Screenshot saved: `/tmp/claude-0/-home-claude/b79a3dcf-9a15-509d-bb42-5795e0db4b5c/scratchpad/qa-phone-v3.png`
 
-Screenshot saved: `/tmp/claude-0/-home-claude/b79a3dcf-9a15-509d-bb42-5795e0db4b5c/scratchpad/qa-phone.png`
-
-Verdict: **FAIL**
+Verdict: **PASS**
 
 ---
 
@@ -158,7 +161,7 @@ Verdict: **DONE**
 
 ## Blocking issues
 
-1. **Phone-width overflow (Check 8):** `docs/design/mockups.html` has horizontal overflow at 390px width. The mockups page must render without horizontal scroll at iPhone 14 viewport before this gate can pass. Likely cause: a fixed-width element or non-responsive layout in the mockup HTML.
+None. Phone-width overflow (originally Check 8 FAIL) was fixed in commit c451a79 and re-verified as PASS.
 
 ---
 
