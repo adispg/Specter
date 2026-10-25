@@ -37,6 +37,7 @@ Persona keys are stable (`harvey`, `mike`, `donna`). Display names, colours and 
 - No em dashes or en dashes anywhere. Use commas, colons, full stops.
 - No emojis, no exclamation marks except in rare genuine delight (Donna, max one), no hashtags, no markdown inside strings.
 - Speak to the user as "you". Do not use the user's name unless they gave it.
+- `avoid` must not begin with "Don't" or "Do not" (the card label already says it); start with the mistake itself, for example "Justifying your number with your rent."
 - Pause marks: "|" is a beat, "||" is a long, deliberate pause. Only between phrases, with spaces either side. Never at the start or end of a string, never between an article or preposition and its noun, never two marks in a row. Pause marks appear only in `line` and `followup`.
 
 ### Pause timing (config defaults, ms, rendered as break tags)
