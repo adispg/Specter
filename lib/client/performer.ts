@@ -299,8 +299,20 @@ export function pickBrowserVoice(persona: PersonaId, chosen?: string | null): Sp
     if (idx >= 0) score += 100 - idx * 4;
     if (/natural|online|neural|premium|enhanced/.test(n)) score += 30;
     if (/en[-_]us/i.test(v.lang)) score += 8;
-    if (!pref.female && /female|zira|aria|jenny|ava|samantha|susan|emma/.test(n)) score -= 80;
-    if (pref.female && /\bmale\b|guy|andrew|davis|brian|eric|david|mark|daniel/.test(n)) score -= 80;
+    // Android's Google voices are named like "en-us-x-tpf-local" with no gender
+    // word, so name-based detection misses entirely and every voice ties at
+    // zero, leaving whatever the device happens to list first. Match the codes.
+    const uri = (v.voiceURI || "").toLowerCase();
+    const id = `${n} ${uri}`;
+    const femaleHit = /female|zira|aria|jenny|ava|samantha|susan|emma|en-us-x-tpf|en-us-x-sfg|en-us-x-iog|en-us-x-tpc|en-gb-x-gba|en-gb-x-gbc/.test(id);
+    const maleHit = /\bmale\b|guy|andrew|davis|brian|eric|david|mark|daniel|en-us-x-iom|en-us-x-iob|en-us-x-tpd|en-gb-x-gbb|en-gb-x-gbd/.test(id);
+    if (!pref.female) {
+      if (femaleHit) score -= 80;
+      if (maleHit) score += 40;
+    } else {
+      if (maleHit) score -= 80;
+      if (femaleHit) score += 40;
+    }
     if (score > bestScore) {
       best = v;
       bestScore = score;

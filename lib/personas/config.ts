@@ -276,10 +276,15 @@ const VOICE_BASE: Record<PersonaId, Omit<PersonaVoice, "options">> = {
     speed: 0.9,
     gaps: { short: 420, long: 1050 },
     browser: {
-      prefs: ["andrew", "guy", "davis", "christopher", "brian", "roger", "eric", "aaron", "evan", "alex", "daniel", "uk english male", "male"],
+      prefs: [
+        "andrew", "guy", "davis", "christopher", "brian", "roger", "eric", "aaron", "evan", "alex", "daniel",
+        "uk english male", "male",
+        // Google/Android voice ids carry no gender word, only these codes.
+        "en-us-x-iom", "en-us-x-iob", "en-us-x-tpd", "en-gb-x-gbb", "en-gb-x-gbd",
+      ],
       female: false,
-      rate: 0.88,
-      pitch: 0.8,
+      rate: 0.96,
+      pitch: 0.78,
     },
   },
   prodigy: {
@@ -290,10 +295,13 @@ const VOICE_BASE: Record<PersonaId, Omit<PersonaVoice, "options">> = {
     speed: 1.03,
     gaps: { short: 300, long: 700 },
     browser: {
-      prefs: ["brian", "eric", "steffan", "christopher", "ryan", "tom", "aaron", "alex", "andrew", "guy", "male"],
+      prefs: [
+        "brian", "eric", "steffan", "christopher", "ryan", "tom", "aaron", "alex", "andrew", "guy", "male",
+        "en-us-x-iom", "en-us-x-iob", "en-us-x-tpd", "en-gb-x-gbb", "en-gb-x-gbd",
+      ],
       female: false,
-      rate: 1.0,
-      pitch: 0.98,
+      rate: 1.04,
+      pitch: 0.96,
     },
   },
   insider: {
@@ -304,7 +312,10 @@ const VOICE_BASE: Record<PersonaId, Omit<PersonaVoice, "options">> = {
     speed: 0.98,
     gaps: { short: 360, long: 900 },
     browser: {
-      prefs: ["ava", "aria", "jenny", "emma", "michelle", "samantha", "allison", "susan", "us english", "zira", "female"],
+      prefs: [
+        "ava", "aria", "jenny", "emma", "michelle", "samantha", "allison", "susan", "us english", "zira", "female",
+        "en-us-x-tpf", "en-us-x-sfg", "en-us-x-iog", "en-us-x-tpc", "en-gb-x-gba", "en-gb-x-gbc",
+      ],
       female: true,
       rate: 0.97,
       pitch: 1.0,
@@ -542,6 +553,29 @@ export const ACTIVE_PACK: PersonaPack = process.env.NEXT_PUBLIC_PERSONA_PACK ===
 export const PERSONAS: Record<PersonaId, PersonaConfig> = PERSONA_PACKS[ACTIVE_PACK];
 
 export const DEFAULT_PERSONA: PersonaId = "closer";
+
+/**
+ * Starter situations offered on the home screen so a first-time user has
+ * something to tap instead of facing an empty box. Tapping one fills the
+ * composer; it is never sent on their behalf.
+ */
+export const PERSONA_STARTERS: Record<PersonaId, string[]> = {
+  closer: [
+    "They lowballed my salary offer and I negotiate tomorrow.",
+    "My boss took credit for my work in front of leadership.",
+    "A client is threatening to walk unless I drop the price.",
+  ],
+  prodigy: [
+    "I have to argue against a decision my whole team already agreed on.",
+    "I missed something important and need to raise it before anyone notices.",
+    "I am the least senior person in the room and I know the plan is wrong.",
+  ],
+  insider: [
+    "Two people on my team are in a cold war and it is slowing everything down.",
+    "My manager has gone quiet on me since I asked about promotion.",
+    "I need a senior stakeholder on side before a meeting next week.",
+  ],
+};
 
 export const INTENSITY_LABELS: Record<Intensity, string> = {
   measured: "Measured",
