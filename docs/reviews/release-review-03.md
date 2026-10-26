@@ -1,4 +1,4 @@
-# Release Review 03 — Specter App
+# Release Review 03: Specter App
 
 **Date:** 2026-10-26
 **Reviewer:** PM Agent (automated, unattended overnight run)
@@ -178,7 +178,7 @@ Walked on the preview build at 390 by 844, against `docs/qa/shots-02/`.
 
 ## Findings
 
-### P1 — blocks real users, founder only
+### P1, blocks real users, founder only
 
 **P1-A: Supabase Auth redirect URLs are still not configured.**
 Unchanged from review 02 and unchanged by this branch. Magic link and Google OAuth
@@ -186,7 +186,7 @@ return to `http://localhost:3000/auth/callback`, so every real sign-in fails sil
 The guest flow works without it, which is enough for your own testing but not enough
 to send the link to anyone who will want their cases to persist.
 
-### P2 — before public launch
+### P2, before public launch
 
 **P2-G: the rubric's release gates have never been run.**
 `npm run harness:mock` now passes 181 of 181, but that is the contract layer only:
@@ -215,7 +215,7 @@ unofficial fan project disclaimer. The original pack exists behind
 private testing. It is a blocker for charging anyone, and the names are a founder
 decision that nobody else should make.
 
-### N — nice to have
+### N, nice to have
 
 **N6: no `h1` on the welcome screen.** The wordmark is an accessible SVG, not a
 heading, so the first screen offers a screen reader user no landmark. One line to fix.
