@@ -53,7 +53,19 @@ export const env = {
    * selection logic can give those personas the right voice. Server speech is
    * the only thing that sounds the same everywhere.
    */
-  ttsConfigured: () => Boolean(process.env.ELEVENLABS_API_KEY),
+  ttsConfigured: () => Boolean(process.env.DEEPGRAM_API_KEY || process.env.ELEVENLABS_API_KEY),
+
+  /**
+   * Which provider speaks. Deepgram Aura first: one key already covers the
+   * microphone, and its free allowance is far larger than ElevenLabs's, which
+   * a single demo could exhaust. "browser" means no key, so the client falls
+   * back to the device voice.
+   */
+  ttsProvider: (): "deepgram" | "elevenlabs" | "browser" => {
+    if (process.env.DEEPGRAM_API_KEY) return "deepgram";
+    if (process.env.ELEVENLABS_API_KEY) return "elevenlabs";
+    return "browser";
+  },
 
   /** Deepgram (STT). Free tier: 12,000 min/year on Nova-3. */
   deepgramKey: () => process.env.DEEPGRAM_API_KEY ?? "",

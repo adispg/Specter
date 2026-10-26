@@ -5,7 +5,7 @@ import { env } from "@/lib/env";
 import { PERSONAS } from "@/lib/personas/config";
 import { PersonaIdSchema } from "@/lib/consult/schema";
 import { checkQuota, windowStart } from "@/lib/ratelimit";
-import { prepareSpeech, speechHash, speedFor, synthesizeElevenLabs, synthesizeMock, voiceIdFor, type SpeechInput } from "@/lib/tts/speech";
+import { auraModelFor, prepareSpeech, speechHash, speedFor, synthesizeDeepgramAura, synthesizeElevenLabs, synthesizeMock, voiceIdFor, type SpeechInput } from "@/lib/tts/speech";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,9 +59,12 @@ export const POST = withSession(async (session, req) => {
         : { persona: s.persona, line: p.example.reply.line, followup: p.example.reply.followup, pace: body.pace, voiceId: profile.settings.voices?.[s.persona] ?? null };
   }
 
-  const model = env.mockAI() ? "mock" : env.elevenLabsModel();
+  // The cache key has to carry the provider's own model and voice, or audio
+  // made by one provider would be served for the other.
+  const provider = env.mockAI() ? "mock" : env.ttsProvider();
+  const model = provider === "mock" ? "mock" : provider === "deepgram" ? auraModelFor(input.persona, input.care) : env.elevenLabsModel();
   const { text } = prepareSpeech(input);
-  const voice = voiceIdFor(input.persona, input.voiceId, input.care);
+  const voice = provider === "deepgram" ? model : voiceIdFor(input.persona, input.voiceId, input.care);
   const hash = speechHash(text, voice, speedFor(input), model);
   const cached = await session.store.getAudio(hash).catch(() => null);
   if (cached) {
@@ -72,7 +75,12 @@ export const POST = withSession(async (session, req) => {
   const q = checkQuota(used, env.ttsDailyCap());
   if (!q.allowed) return jsonError("rate_limited", "Voice is resting for today. Here it is in writing.", 429, { "Retry-After": String(q.retryAfter) });
 
-  const result = env.mockAI() ? synthesizeMock(input) : await synthesizeElevenLabs(input, { apiKey: env.elevenLabsKey(), model });
+  const result =
+    provider === "mock"
+      ? synthesizeMock(input)
+      : provider === "deepgram"
+        ? await synthesizeDeepgramAura(input, { apiKey: env.deepgramKey() })
+        : await synthesizeElevenLabs(input, { apiKey: env.elevenLabsKey(), model });
   await session.store.recordUsage("tts", { chars: result.chars, persona: input.persona, model });
   await session.store
     .putAudio({ hash, case_id: caseId, mime: result.mime, audio_b64: result.audio, timeline: result.timeline, chars: result.chars })

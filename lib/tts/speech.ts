@@ -9,7 +9,7 @@ export type SpeechResult = {
   audio: string;
   mime: string;
   timeline: Timeline;
-  source: "elevenlabs" | "mock" | "cache";
+  source: "elevenlabs" | "deepgram" | "mock" | "cache";
   voice: string;
   chars: number;
 };
@@ -116,6 +116,53 @@ export async function synthesizeElevenLabs(input: SpeechInput, opts: { apiKey: s
     if ((alt.matched ?? 0) > (timeline.matched ?? 0)) timeline = alt;
   }
   return { audio: data.audio_base64, mime: "audio/mpeg", timeline, source: "elevenlabs", voice: voiceId, chars: text.length };
+}
+
+/**
+ * Deepgram Aura voices, one per persona, cast to the archetype rather than
+ * imitating any real person. Every one is a Deepgram stock voice.
+ *
+ *   closer   zeus     deep, trustworthy, smooth. The senior partner.
+ *   prodigy  apollo   confident, comfortable, casual. The quick young associate.
+ *   insider  hera     smooth, warm, professional. Reads the room.
+ *   care     harmonia empathetic, clear, calm. No persona in care mode.
+ *
+ * Override any of them with DEEPGRAM_VOICE_CLOSER, _PRODIGY, _INSIDER, _CARE.
+ */
+export const AURA_VOICES: Record<PersonaId | "care", { env: string; model: string }> = {
+  closer: { env: "DEEPGRAM_VOICE_CLOSER", model: "aura-2-zeus-en" },
+  prodigy: { env: "DEEPGRAM_VOICE_PRODIGY", model: "aura-2-apollo-en" },
+  insider: { env: "DEEPGRAM_VOICE_INSIDER", model: "aura-2-hera-en" },
+  care: { env: "DEEPGRAM_VOICE_CARE", model: "aura-2-harmonia-en" },
+};
+
+export function auraModelFor(persona: PersonaId, care = false): string {
+  const slot = AURA_VOICES[care ? "care" : persona];
+  return envVoice(slot.env) ?? slot.model;
+}
+
+/**
+ * Deepgram Aura. Unlike ElevenLabs it returns audio only, with no word
+ * alignment, so the timeline is estimated from the script the same way the
+ * mock path does. Playback highlights by estimate rather than true timings.
+ */
+export async function synthesizeDeepgramAura(input: SpeechInput, opts: { apiKey: string }): Promise<SpeechResult> {
+  const { script, lengths, text } = prepareSpeech(input);
+  const model = auraModelFor(input.persona, input.care);
+  const res = await fetch(`https://api.deepgram.com/v1/speak?model=${encodeURIComponent(model)}&encoding=mp3`, {
+    method: "POST",
+    headers: { Authorization: `Token ${opts.apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new TtsError(`Deepgram Aura ${res.status}: ${body.slice(0, 200)}`, res.status === 429 ? 429 : 502);
+  }
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length === 0) throw new TtsError("Deepgram Aura returned no audio", 502);
+  // Aura has no speed control, so the pace setting shapes the gaps only.
+  const timeline = estimateTimeline(script, lengths, input.care ? 1 : input.pace);
+  return { audio: buf.toString("base64"), mime: "audio/mpeg", timeline, source: "deepgram", voice: model, chars: text.length };
 }
 
 /** Deterministic mock: a silent WAV as long as the estimated timeline. */
