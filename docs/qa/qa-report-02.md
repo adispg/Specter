@@ -39,8 +39,9 @@ built. Details in section 11.
 
 ### 1. Build
 
-`npm run build`. Next.js 15.5.28. 25 routes compiled: 14 dynamic API routes, 2 auth
-routes, 4 static, the rest server rendered on demand. No errors, no warnings.
+`npm run build`. Next.js 15.5.28. 25 routes compiled: 13 API routes, 2 auth routes, 4
+static (`/_not-found`, `/manifest.webmanifest`, `/offline`, `/welcome`), the rest
+server rendered on demand. No errors, no warnings.
 
 Verdict: **PASS**
 
