@@ -277,7 +277,11 @@ const VOICE_BASE: Record<PersonaId, Omit<PersonaVoice, "options">> = {
     gaps: { short: 420, long: 1050 },
     browser: {
       prefs: [
-        "andrew", "guy", "davis", "christopher", "brian", "roger", "eric", "aaron", "evan", "alex", "daniel",
+        // "richard" leads: Microsoft Richard is the voice chosen on the
+        // founder's own machine and was absent from this list entirely, which
+        // is why the automatic pick kept passing it over.
+        "richard", "andrew", "guy", "davis", "christopher", "brian", "roger", "eric", "aaron", "evan",
+        "alex", "daniel", "mark", "james", "george", "william", "ravi",
         "uk english male", "male",
         // Google/Android voice ids carry no gender word, only these codes.
         "en-us-x-iom", "en-us-x-iob", "en-us-x-tpd", "en-gb-x-gbb", "en-gb-x-gbd",

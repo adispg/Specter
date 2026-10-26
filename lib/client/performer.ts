@@ -335,7 +335,7 @@ export function pickBrowserVoice(persona: PersonaId, chosen?: string | null): Sp
     const uri = (v.voiceURI || "").toLowerCase();
     const id = `${n} ${uri}`;
     const femaleHit = /female|zira|aria|jenny|ava|samantha|susan|emma|en-us-x-tpf|en-us-x-sfg|en-us-x-iog|en-us-x-tpc|en-gb-x-gba|en-gb-x-gbc/.test(id);
-    const maleHit = /\bmale\b|guy|andrew|davis|brian|eric|david|mark|daniel|en-us-x-iom|en-us-x-iob|en-us-x-tpd|en-gb-x-gbb|en-gb-x-gbd/.test(id);
+    const maleHit = /\bmale\b|guy|andrew|davis|brian|eric|david|mark|daniel|richard|james|george|william|ravi|christopher|roger|steffan|ryan|en-us-x-iom|en-us-x-iob|en-us-x-tpd|en-gb-x-gbb|en-gb-x-gbd/.test(id);
     if (!pref.female) {
       if (femaleHit) score -= 80;
       if (maleHit) score += 40;
