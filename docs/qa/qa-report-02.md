@@ -16,7 +16,7 @@ with no Supabase env vars present, `MOCK_AUTH` provides sessions.
 | 2. Typecheck (`npx tsc --noEmit`) | PASS |
 | 3. Lint (`npx next lint`) | PASS with 8 warnings, 0 errors |
 | 4. Unit tests (`npm test`) | PASS, 95 of 95 |
-| 5. E2e, mock mode (`npx playwright test`) | PASS, 20 of 20, 4 skipped (see D4) |
+| 5. E2e, mock mode (`npx playwright test`) | PASS, 22 of 22, 4 skipped (see D4) |
 | 6. Persona harness (`npm run harness:mock`) | PASS, 181 of 181, safety 24 of 24 |
 | 7. Copy and naming sweep | PASS |
 | 8. Accessibility | PASS on the four hard gates, 2 advisories |
@@ -25,11 +25,12 @@ with no Supabase env vars present, `MOCK_AUTH` provides sessions.
 
 Overall: **PASS**
 
-Four defects were found during this gate. Three were fixed on the branch: the cases
+Five defects were found during this gate. Four were fixed on the branch: the cases
 and saved lists threw a server exception as soon as they held any data, five CSS
 tokens used across four screens were never defined, and the primary button on the
-welcome screen had no styling at all. The fourth, D4, is a missing screen rather than
-a bug, so it is reported rather than fixed: every follow-up action on the result
+welcome screen had no styling at all, and the tab bar floated in the middle of three
+screens. The fifth, D4, is a missing screen rather than a bug, so it is reported
+rather than fixed: every follow-up action on the result
 screen is inert because the case thread it is supposed to navigate to was never
 built. Details in section 11.
 
@@ -105,9 +106,9 @@ Coverage:
 | `journey.spec.ts` | cold visit redirects to `/welcome`; persona choice; guest onboarding; a consult producing a case; starters filling the composer without sending; the mic conditional from both sides; no stacked bottom nav on the result screen; tab bar to cases and saved; a saved line reaching the saved list; the 404; the offline page; manifest and service worker |
 | `modes.spec.ts` | one test per reply mode: crisis to care with a reachable helpline and no persona language, a capability question answered without a plan, a thin situation asking for the missing facts, an out of bounds request declined with a lawful route |
 | `thread.spec.ts` | the second visit: saving and feedback surviving a reload, deleting a case. Four more tests are written and marked `fixme` against the missing thread screen, see D4 |
-| `audit.spec.ts` | phone width, accessibility and screenshots, see sections 8 to 10 |
+| `audit.spec.ts` | phone width, accessibility and screenshots, see sections 8 to 10, plus the tab bar sitting at the bottom of every tab and the cases excerpt carrying no pause marks |
 
-Verdict: **PASS**, 20 of 20 run, 4 skipped.
+Verdict: **PASS**, 22 of 22 run, 4 skipped.
 
 The four skips are `test.fixme` in `thread.spec.ts`, written against the case thread
 screen that does not exist (D4). They are deliberately left in the suite rather than
@@ -304,6 +305,26 @@ Out of scope for an unattended overnight run: F17 is an approved, fully specifie
 screen, not a defect, and building it belongs in the normal design to build to review
 loop rather than being improvised at six in the morning. Raised to the PM as P0-B.
 
+### D5: the tab bar floated in the middle of three screens, and the cases excerpt leaked pause marks
+
+Same family as D2 and D3, found the same way. Cases, saved and settings all wrap their
+content in `<main className="screen-main">`. There is no `.screen-main` rule in
+`globals.css`, so that region never grew to fill the screen. The tab bar, which is in
+normal flow after it, rode up directly under the content: on the saved tab's empty
+state it sat about 590 pixels above the bottom of the phone, with the rest of the
+screen empty below it. The empty states did not centre either, for the same reason:
+they use `flex: 1` inside a parent that was not a flex container.
+
+Defined `.screen-main` as the full bleed equivalent of `.body`: same growth, no side
+gutter, because the rows carry their own padding and the dividers run edge to edge. An
+e2e test now fails if the tab bar ends up more than 40 pixels off the bottom on any of
+the three tabs.
+
+Separately, the cases list excerpt rendered the spoken line raw, so rows read "You
+think they're holding all the cards. || They're holding a bluff." `screens.md` section
+11 specifies the excerpt with marks stripped (B1). It now uses `stripMarks`, with an
+e2e test asserting no bar character survives into a row.
+
 ---
 
 ## 12. Backlog items from release-review-02
@@ -346,11 +367,11 @@ Stated plainly so nobody reads a PASS as more than it is.
 
 ## Sign-off
 
-All ten checks pass. Four defects were found during the gate. Three are fixed on the
+All ten checks pass. Five defects were found during the gate. Four are fixed on the
 branch and covered by tests that fail if they return, including D1, which broke two of
-the app's six screens for any user with data. The fourth, D4, is a missing screen and
+the app's six screens for any user with data. The fifth, D4, is a missing screen and
 is raised to the PM rather than improvised overnight. The branch is clean on build, typecheck,
-lint, 95 unit tests, 20 e2e tests (4 skipped against D4) and 181 harness rows.
+lint, 95 unit tests, 22 e2e tests (4 skipped against D4) and 181 harness rows.
 
 **QA verdict: PASS.** Cleared for PM review on `fix/release-review-02-backlog`. Not
 cleared for public launch: D4 leaves the whole post-first-reply loop dead, the live

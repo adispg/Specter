@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { TabBar } from "@/components/ui";
 import { relTime } from "@/lib/reltime";
+import { stripMarks } from "@/lib/spoken";
 import { Avatar } from "@/components/Persona";
 import type { CaseSummary } from "@/lib/data/types";
 
@@ -48,7 +49,7 @@ function CaseCard({ c }: { c: CaseSummary }) {
               whiteSpace: "nowrap",
             }}
           >
-            {c.latest_line}
+            {stripMarks(c.latest_line)}
           </div>
         )}
         <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>

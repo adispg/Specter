@@ -22,9 +22,9 @@ harness, now run and pass. The harness in particular was reporting 0 of 181 befo
 tonight, which meant the release process had a gate that could only ever say no.
 
 The more significant finding is what running the app turned up that reading it did
-not. Four defects shipped to production and survived two source-code reviews, a clean
-build and a clean typecheck. Three are fixed on this branch, one of which broke two of
-the six screens for any user who had actually used the app.
+not. Five defects shipped to production and survived two source-code reviews, a clean build
+and a clean typecheck. Four are fixed on this branch, one of which broke two of the six
+screens for any user who had actually used the app.
 
 The fourth is the headline and it is why this review is still BLOCKED. Every
 follow-up action on the result screen is inert: new take, ask another persona, and the
@@ -142,8 +142,9 @@ action needed, and nothing to redeploy.
 
 ## Defects found by running the app
 
-These are new. None appear in review 01 or review 02, and all three were live in
-production.
+These are new. None appears in review 01 or review 02, and all were live in
+production. Numbering matches docs/qa/qa-report-02.md section 11, where the missing
+thread screen is D4; here it is P0-B, above.
 
 ### D1: the cases and saved lists crashed as soon as they had anything in them
 
@@ -196,6 +197,22 @@ the design system already defines.
 The settings one also pointed at `/sign-up`, which does not exist in the app router,
 so a guest tapping "create an account" landed on the 404.
 
+### D5: the tab bar floated in the middle of the cases, saved and settings screens
+
+`.screen-main`, the class those three screens wrap their content in, is not defined
+anywhere either. The region never grew, so the tab bar sat directly under the content
+instead of at the bottom of the phone: on the saved tab's empty state, roughly 590
+pixels up, with nothing below it. Compare the before and after of
+`shots-02/05-cases.png` if you want to see how obvious it is once you look.
+
+The cases list also printed the spoken line raw, pause bars and all: "You think they're
+holding all the cards. || They're holding a bluff." The marks are a speech instruction,
+not punctuation, and screens.md section 11 already says the excerpt is stripped.
+
+Three defects now, D2, D3 and D5, all of the same kind: a class or token that is
+referenced but never defined, failing silently rather than loudly. Worth a lint rule
+eventually. For now the audit spec catches the visible consequences.
+
 ---
 
 ## User journey walkthrough
@@ -212,7 +229,7 @@ Walked on the preview build at 390 by 844, against `docs/qa/shots-02/`.
 | Guest: keep case upsell | READY | Unchanged |
 | Sign in (magic link, Google) | BLOCKED | P1-A. The form works; the callback has nowhere valid to return to |
 | Signed in: case thread | **MISSING** | P0-B. The screen does not exist; follow-ups, another take and persona switch are all inert |
-| Signed in: cases list | FIXED | Was a server error with any content. Now renders |
+| Signed in: cases list | FIXED | Was a server error with any content. Now renders, with the tab bar in the right place and the excerpt free of pause marks |
 | Signed in: saved lines | FIXED | Same |
 | Settings | FIXED | Guest upsell no longer links to a 404 |
 | PWA install and offline | READY | `/offline` precached and served as the navigation fallback |
@@ -230,7 +247,7 @@ Walked on the preview build at 390 by 844, against `docs/qa/shots-02/`.
 | Typecheck | PASS |
 | Lint | PASS, 8 pre-existing warnings, 0 errors |
 | Unit tests | PASS, 95 of 95 (was 75) |
-| E2e, mock mode | PASS, 20 of 20 run, 4 skipped against P0-B (was: no config, gate skipped) |
+| E2e, mock mode | PASS, 22 of 22 run, 4 skipped against P0-B (was: no config, gate skipped) |
 | Persona harness, contract layer | PASS, 181 of 181, safety 24 of 24 (was 0 of 181) |
 | Copy and naming sweep | PASS, zero em or en dashes in code, docs, copy or commit messages |
 | Accessibility hard gates | PASS |

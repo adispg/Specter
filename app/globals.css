@@ -93,6 +93,11 @@ a { color: inherit; text-decoration: none; }
 }
 .scr { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-top: var(--safe-top); }
 .body { flex: 1; min-height: 0; padding: 0 var(--gutter-r) 24px var(--gutter-l); }
+/* Full bleed scroll region for the list screens: same growth as .body, no side
+   gutter, because the rows carry their own padding and the dividers run edge to
+   edge. Without it the region does not grow, so the tab bar rides up under the
+   content instead of sitting at the bottom, and the empty states do not centre. */
+.screen-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .stack { display: grid; gap: 10px; grid-auto-rows: max-content; align-content: start; }
 
 /* ============ Primitives ============ */

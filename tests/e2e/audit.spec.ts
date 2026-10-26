@@ -118,13 +118,18 @@ test.describe("phone width and accessibility", () => {
     await checkScreen(page, "04-result");
 
     await page.goto("/cases");
+    await expect(page.getByTestId("case-row").first()).toBeVisible();
     await checkScreen(page, "05-cases");
 
     await page.getByTestId("tab-saved").click();
     await expect(page).toHaveURL(/\/saved$/);
+    // The URL changes before the server component streams, so without this the
+    // screenshot is of loading.tsx rather than the screen.
+    await expect(page.getByRole("heading", { name: "Saved" })).toBeVisible();
     await checkScreen(page, "06-saved-empty");
 
     await page.goto("/settings");
+    await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
     await checkScreen(page, "07-settings");
 
     await page.goto("/offline");
@@ -132,6 +137,33 @@ test.describe("phone width and accessibility", () => {
 
     await page.goto("/not-a-real-route");
     await checkScreen(page, "09-not-found");
+  });
+
+  test("the tab bar sits at the bottom of every tab, not under the content", async ({ page }) => {
+    await onboardAsGuest(page);
+    await consult(page, "My landlord wants a twenty percent rent rise and I have two weeks to answer.");
+
+    for (const path of ["/cases", "/saved", "/settings"]) {
+      await page.goto(path);
+      const bar = page.getByTestId("tab-cases").locator("..");
+      const box = await bar.boundingBox();
+      expect(box, `${path}: tab bar not found`).not.toBeNull();
+      const viewport = page.viewportSize()!;
+      // The screen container has to grow for the bar to reach the bottom. When
+      // .screen-main was undefined it did not, and the bar rode up under the
+      // content, roughly 600 pixels above where it belongs.
+      expect(viewport.height - (box!.y + box!.height), `${path}: gap below the tab bar`).toBeLessThan(40);
+    }
+  });
+
+  test("the cases list shows spoken lines without their pause marks", async ({ page }) => {
+    await onboardAsGuest(page);
+    await consult(page, "They lowballed my salary offer and I have to answer by Friday morning.");
+    await page.goto("/cases");
+    const row = page.getByTestId("case-row").first();
+    await expect(row).toBeVisible();
+    // screens.md section 11: the excerpt is the line with marks stripped (B1).
+    expect(await row.textContent()).not.toContain("|");
   });
 
   test("the crisis screen passes too, and keeps its helpline reachable", async ({ page }) => {
