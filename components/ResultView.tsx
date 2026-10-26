@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { BRAND, PERSONAS, personaList, themeVars, type PersonaId, type RegionHelp } from "@/lib/personas/config";
 import type { CaseRow, ConsultRow } from "@/lib/data/types";
+import type { ConsultRequest } from "@/lib/consult/schema";
 import { stripMarks } from "@/lib/spoken";
 import { api } from "@/lib/client/api";
-import { setPending } from "@/lib/client/pending";
 import { usePerformance } from "@/lib/client/usePerformance";
+import { useConsult } from "@/lib/client/useConsult";
 import { personaPlaceholder, useApp } from "./AppProvider";
 import { Avatar } from "./Persona";
 import { CareView } from "./CareView";
@@ -59,6 +60,7 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [voice, setVoice] = useState(false);
   const [moreSituation, setMoreSituation] = useState(false);
+  const consult = useConsult();
   const composerFocus = useRef(false);
   const [focusTick, setFocusTick] = useState(0);
   const played = useRef(false);
@@ -111,10 +113,25 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
 
   const others = personaList().filter((x) => x.id !== persona);
   const answered = new Set(consults.map((c) => c.persona));
-  const goThread = (req: Parameters<typeof setPending>[0] | null, hash?: string) => {
+
+  /**
+   * Run a follow-up, another take or another persona's view on this case.
+   *
+   * This used to stash the request with setPending and push to the route it was
+   * already on, which Next treats as a no-op, and nothing ever read the stash
+   * back. So Ask Mike, Ask Donna, New take and the follow-up composer all did
+   * nothing at all. Run it here and refresh so the server sends the new thread.
+   */
+  const goThread = async (req: ConsultRequest | null, hash?: string) => {
     perf.stop();
-    if (req) setPending(req);
-    router.push(`/cases/${caseRow.id}${hash ? `#${hash}` : ""}`);
+    if (!req) {
+      if (hash) router.push(`/cases/${caseRow.id}#${hash}`);
+      return;
+    }
+    const res = await consult.run(req);
+    if (!res) return;
+    setText("");
+    router.refresh();
   };
 
   async function toggleSave() {
@@ -188,6 +205,9 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
       </div>
       <OfflineBanner />
       <main className="body stack" style={{ gap: 16, paddingTop: 6 }}>
+        {consult.error && (
+          <ErrorBanner onRetry={() => void consult.retry()}>{consult.error}</ErrorBanner>
+        )}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <Avatar persona={persona} size="lg" halo={1} />
           <div>
@@ -226,12 +246,12 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
               type="button"
               className="soft"
               style={{ justifyContent: "center" }}
-              disabled={!online}
-              onClick={() => goThread({ request: { action: "another", caseId: caseRow.id, persona, intensity: settings.intensity }, speak: true })}
+              disabled={!online || consult.busy}
+              onClick={() => void goThread({ action: "another", caseId: caseRow.id, persona, intensity: settings.intensity })}
               data-testid="another-take"
             >
               <IconRedo />
-              New take
+              {consult.busy ? "Working" : "New take"}
             </button>
           )}
           <button
@@ -259,12 +279,12 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
                 type="button"
                 className="chip persona"
                 style={themeVars(o.theme) as CSSProperties}
-                disabled={!theirs && !online}
+                disabled={(!theirs && !online) || consult.busy}
                 data-testid={`ask-${o.id}`}
                 onClick={() =>
                   theirs
-                    ? goThread(null, `c-${theirs.id}`)
-                    : goThread({ request: { action: "switch", caseId: caseRow.id, persona: o.id as PersonaId, intensity: settings.intensity }, speak: true })
+                    ? void goThread(null, `c-${theirs.id}`)
+                    : void goThread({ action: "switch", caseId: caseRow.id, persona: o.id as PersonaId, intensity: settings.intensity })
                 }
               >
                 <Avatar persona={o.id} size="sm" />
@@ -283,7 +303,9 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
         onChange={setText}
         placeholder={personaPlaceholder(persona, true)}
         onMic={() => setVoice(true)}
-        onSubmit={() => goThread({ request: { action: "followup", caseId: caseRow.id, persona, intensity: settings.intensity, text: text.trim() }, speak: true })}
+        busy={consult.busy}
+        onStop={consult.stop}
+        onSubmit={() => void goThread({ action: "followup", caseId: caseRow.id, persona, intensity: settings.intensity, text: text.trim() })}
       />
       {voice && (
         <VoiceMode
