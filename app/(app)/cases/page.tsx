@@ -58,9 +58,24 @@ function CaseCard({ c }: { c: CaseSummary }) {
   );
 }
 
-export default async function CasesPage() {
+export default async function CasesPage({ searchParams }: { searchParams: Promise<{ debug?: string }> }) {
   const session = await getSession();
-  const cases: CaseSummary[] = session ? await session.store.listCases(50) : [];
+
+  // A list screen should not 500. It is one tap from the tab bar, so a query
+  // problem here used to take out a whole destination with no way back. Log the
+  // real reason, show the empty state, and surface the message only with
+  // ?debug=1 so it never reaches an ordinary visitor.
+  let cases: CaseSummary[] = [];
+  let loadError: string | null = null;
+  if (session) {
+    try {
+      cases = await session.store.listCases(50);
+    } catch (e) {
+      loadError = e instanceof Error ? e.message : String(e);
+      console.error(`[cases] list failed: ${loadError}`);
+    }
+  }
+  const debug = (await searchParams).debug === "1";
 
   return (
     <div className="screen">
@@ -69,6 +84,23 @@ export default async function CasesPage() {
       </header>
 
       <main className="screen-main" style={{ paddingTop: 8 }}>
+        {debug && loadError && (
+          <pre
+            style={{
+              margin: "0 16px 12px",
+              padding: 12,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              fontSize: 12,
+              color: "var(--danger)",
+              background: "var(--danger-bg)",
+              border: "1px solid var(--hair-2)",
+              borderRadius: 8,
+            }}
+          >
+            {loadError}
+          </pre>
+        )}
         {cases.length === 0 ? (
           <div
             style={{
