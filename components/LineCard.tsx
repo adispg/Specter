@@ -4,7 +4,7 @@ import { metaText, PERSONAS, type PersonaId } from "@/lib/personas/config";
 import { parseSpoken } from "@/lib/spoken";
 import type { PerformanceView } from "@/lib/client/usePerformance";
 import { SpokenText } from "./SpokenText";
-import { IconBookmark, IconBookmarkFilled, IconPlay, IconStop } from "./Icons";
+import { IconBookmark, IconBookmarkFilled, IconPlay, IconShare, IconStop } from "./Icons";
 
 export type LineCardData = { line: string; followup: string; principle?: string; hours?: number };
 
@@ -16,6 +16,8 @@ export function LineCard({
   onPlay,
   saved,
   onToggleSave,
+  onShare,
+  sharing = false,
   thinking,
   compact = false,
   showFollowup = true,
@@ -29,6 +31,9 @@ export function LineCard({
   onPlay: () => void;
   saved?: boolean;
   onToggleSave?: () => void;
+  /** Omitted where sharing is not offered, for example in care mode. */
+  onShare?: () => void;
+  sharing?: boolean;
   thinking?: ReactNode;
   compact?: boolean;
   showFollowup?: boolean;
@@ -58,6 +63,18 @@ export function LineCard({
           data-testid="save-line"
         >
           {saved ? <IconBookmarkFilled /> : <IconBookmark />}
+        </button>
+      )}
+      {onShare && (
+        <button
+          type="button"
+          className={`shareline${onToggleSave ? "" : " only"}`}
+          aria-label="Share this line"
+          onClick={onShare}
+          disabled={sharing}
+          data-testid="share-line"
+        >
+          <IconShare />
         </button>
       )}
       {data.principle ? <p className="eyebrow">{data.principle}</p> : null}

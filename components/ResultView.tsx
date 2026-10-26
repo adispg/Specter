@@ -8,6 +8,7 @@ import type { ConsultRequest } from "@/lib/consult/schema";
 import { stripMarks } from "@/lib/spoken";
 import { api } from "@/lib/client/api";
 import { usePerformance } from "@/lib/client/usePerformance";
+import { buildShareText, shareLine } from "@/lib/client/shareCard";
 import { useConsult } from "@/lib/client/useConsult";
 import { personaPlaceholder, useApp } from "./AppProvider";
 import { Avatar } from "./Persona";
@@ -40,11 +41,6 @@ export function useSpeakConsult() {
   });
 }
 
-export function copyLineText(c: ConsultRow): string {
-  const p = PERSONAS[c.persona];
-  return `${stripMarks(c.reply.line)} ${stripMarks(c.reply.followup)} (${p.short})`.replace(/\s+/g, " ").trim();
-}
-
 /** Consult result (screens.md 8): the first reply of a case. Everything after it goes to the thread. */
 export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSpeak }: ResultProps) {
   const router = useRouter();
@@ -60,6 +56,7 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [voice, setVoice] = useState(false);
   const [moreSituation, setMoreSituation] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const consult = useConsult();
   const composerFocus = useRef(false);
   const [focusTick, setFocusTick] = useState(0);
@@ -146,17 +143,27 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
     }
   }
 
-  async function share() {
-    const t = `${copyLineText(first)} via Specter`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ text: t });
-        return;
-      } catch {
-        return;
-      }
+  /**
+   * Share the first reply as a card: the line and the principle only.
+   *
+   * The previous version sent a helper that appended the persona's
+   * display name and the follow-up. The follow-up is direction aimed at this
+   * user's situation and reads as nonsense out of context, and the name turns
+   * a private reading into distribution under a character's identity. Neither
+   * belongs in something that leaves the app.
+   */
+  async function shareFirst() {
+    if (sharing || first.mode === "care") return;
+    setSharing(true);
+    try {
+      const outcome = await shareLine({ persona, line: first.reply.line, principle: first.reply.principle });
+      if (outcome === "copied") toast("Copied", { ok: true });
+      else if (outcome === "failed") toast("Couldn't share that. Select the line instead.");
+      // "shared" needs no toast, the share sheet is its own confirmation, and
+      // "cancelled" means the user backed out on purpose.
+    } finally {
+      setSharing(false);
     }
-    toast((await copyText(t)) ? "Copied" : "Couldn't copy. Select the line instead.");
   }
 
   async function deleteCase() {
@@ -188,13 +195,13 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
               role="menuitem"
               onClick={async () => {
                 setMenu(false);
-                toast((await copyText(copyLineText(first))) ? "Copied" : "Couldn't copy. Select the line instead.");
+                toast((await copyText(buildShareText({ persona, line: first.reply.line, principle: first.reply.principle }))) ? "Copied" : "Couldn't copy. Select the line instead.");
               }}
               data-testid="copy-line"
             >
               Copy line
             </button>
-            <button type="button" role="menuitem" onClick={() => (setMenu(false), void share())}>
+            <button type="button" role="menuitem" onClick={() => (setMenu(false), void shareFirst())}>
               Share
             </button>
             <button type="button" role="menuitem" className="danger" onClick={() => (setMenu(false), setConfirmDelete(true))}>
@@ -226,6 +233,10 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
             More
           </button>
         )}
+        {/* Care mode never reaches this card: it returns CareView above and
+            offers no share control. TypeScript narrows first.mode to prove it,
+            so a guard here would be dead code; shareFirst still checks at
+            runtime in case that early return ever moves. */}
         <LineCard
           persona={persona}
           data={first.reply}
@@ -233,6 +244,8 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
           onPlay={() => void perf.play(speakReq(first))}
           saved={saved}
           onToggleSave={toggleSave}
+          sharing={sharing}
+          onShare={shareFirst}
         />
         <AdviceCards persona={persona} reply={first.reply} onPick={(q) => setText(q)} />
 

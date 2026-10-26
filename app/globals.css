@@ -525,3 +525,19 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0ms !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   Share control on the line card.
+   Sits left of the save bookmark, so the eyebrow needs room for both.
+   --------------------------------------------------------------------------- */
+.shareline {
+  position: absolute; top: 8px; right: 52px; width: 44px; height: 44px;
+  display: grid; place-items: center; color: var(--muted);
+  background: none; border: 0; cursor: pointer; z-index: 1;
+}
+.shareline.only { right: 8px; }
+.shareline svg { width: 18px; height: 18px; }
+.shareline:hover:not(:disabled) { color: var(--fg); }
+.shareline:disabled { opacity: 0.45; cursor: default; }
+.shareline:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 10px; }
+.take:has(.shareline:not(.only)) .eyebrow { padding-right: 84px; }
