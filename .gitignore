@@ -12,5 +12,6 @@ blob-report/
 .vercel
 .DS_Store
 npm-debug.log*
-harness/reports/*.md
+# Harness run output is generated on every run, so it is not tracked.
+harness/reports/*
 !harness/reports/.gitkeep
