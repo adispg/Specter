@@ -8,8 +8,9 @@
 **Build:** READY on Vercel (dpl_G1Gyk27S8o9gQqksWzbyNwmJ6NH6), clean locally
 **QA:** docs/qa/qa-report-02.md, all ten checks PASS
 **Previous verdict:** BLOCKED (release-review-02, P0 deploy failure and P1 auth config)
-**This verdict:** READY FOR INTERNAL TESTING. Still BLOCKED for public sharing, on one
-founder-only item and one unrun quality gate.
+**This verdict:** BLOCKED for public sharing. Ready for your own testing of the first
+reply loop only. One new P0 (an approved screen was never built), one P1 carried over,
+one quality gate never run.
 
 ---
 
@@ -21,9 +22,17 @@ harness, now run and pass. The harness in particular was reporting 0 of 181 befo
 tonight, which meant the release process had a gate that could only ever say no.
 
 The more significant finding is what running the app turned up that reading it did
-not. Three defects shipped to production and survived two source-code reviews, a
-clean build and a clean typecheck. One of them broke two of the six screens for any
-user who had actually used the app. They are fixed on this branch.
+not. Four defects shipped to production and survived two source-code reviews, a clean
+build and a clean typecheck. Three are fixed on this branch, one of which broke two of
+the six screens for any user who had actually used the app.
+
+The fourth is the headline and it is why this review is still BLOCKED. Every
+follow-up action on the result screen is inert: new take, ask another persona, and the
+push back composer all do nothing at all. Not an error, not a slow response. Nothing.
+The screen they are supposed to navigate to, the case thread, was specified in
+screens.md, signed off in design review 02, and never built. That is the entire
+"keep talking to Harvey" loop, which is the product's whole reason to come back a
+second time.
 
 What has not changed: real sign-in is still blocked on Supabase configuration that
 only you can do, and nothing here says anything about whether the advice is any good,
@@ -46,6 +55,61 @@ because every test ran against fixtures.
 | N2, stale `ANTHROPIC_MODEL` | **Open**, yours |
 | N4, `screen` versus `scr` | **Done** on this branch |
 | N5, PWA offline fallback | **Done**, verified live |
+
+---
+
+## P0-B: the case thread was never built, so every follow-up is dead
+
+This is the one to read first.
+
+On the result screen, "New take", "Ask Mike", "Ask Donna" and the composer's push back
+all call `goThread`, which stashes the request with `setPending` and routes to
+`/cases/[id]`, which is the screen the user is already looking at. Nothing in the
+codebase calls `takePending`. The request is discarded.
+
+Verified with a network probe against the running app. After the opening consult, the
+only request the app ever sends to `/api/consult` is that first one:
+
+```
+after initial consult, api calls: [ 'new' ]
+after clicking "New take":  api calls = [ 'new' ]  url changed: false  replies on page: 1
+after sending a push back:  api calls = [ 'new' ]                      replies on page: 1
+after "Ask Mike":           api calls = [ 'new' ]                      replies on page: 1
+```
+
+A user types a follow-up, presses send, and their text disappears with no reply, no
+error and no change on screen.
+
+The cause is not a bug in those handlers. It is a missing screen.
+`docs/design/screens.md` section 12 specifies screen F17, the case thread, as the
+place every follow-up lands: user turns as right-aligned bubbles, persona turns as
+compact tinted line cards, "Asked Mike" dividers, "Take 2" markers, skeleton turns
+while a reply arrives, a failed reply card with Retry. That is design review 01's
+finding B9, which design review 02 recorded as resolved on 2026-10-25. The design is
+approved. The route does not exist. `ResultView`'s own doc comment says as much: "the
+first reply of a case. Everything after it goes to the thread."
+
+Two more rules from the same section are therefore also untrue today: opening a case
+from the cases list should open the thread, not the result; and back from the thread
+should go Home.
+
+The good news is that the server side is finished. Posting `action: "followup"` to
+`/api/consult` creates the consult correctly and the case then holds two replies,
+confirmed directly against the API. The engine, the schema, the thread rebuild in
+`buildThread`, the persona switch and the another-take prompts are all there and all
+working. What is missing is the screen that calls them.
+
+**Not built tonight, deliberately.** F17 is a specified, approved screen with its own
+layout, five states and routing rules, not a defect to patch. Improvising it
+unattended at six in the morning, outside the design to build to review loop your
+process defines, would have produced something that looked finished and was not. The
+four e2e tests for it are written and sitting in `tests/e2e/thread.spec.ts` marked
+`fixme`, so they turn green the day the screen lands rather than needing to be
+rediscovered.
+
+This is the largest single piece of work left before anyone else uses this. I would
+put it ahead of P1-A: a user who cannot sign in still gets the product's core moment;
+a user whose follow-up vanishes concludes the app is broken.
 
 ---
 
@@ -147,7 +211,7 @@ Walked on the preview build at 390 by 844, against `docs/qa/shots-02/`.
 | Guest: see reply | READY | Line, read, play, avoid, billed hours, pause marks rendering as designed |
 | Guest: keep case upsell | READY | Unchanged |
 | Sign in (magic link, Google) | BLOCKED | P1-A. The form works; the callback has nowhere valid to return to |
-| Signed in: case thread | READY | Follow-ups, another take, persona switch |
+| Signed in: case thread | **MISSING** | P0-B. The screen does not exist; follow-ups, another take and persona switch are all inert |
 | Signed in: cases list | FIXED | Was a server error with any content. Now renders |
 | Signed in: saved lines | FIXED | Same |
 | Settings | FIXED | Guest upsell no longer links to a 404 |
@@ -166,7 +230,7 @@ Walked on the preview build at 390 by 844, against `docs/qa/shots-02/`.
 | Typecheck | PASS |
 | Lint | PASS, 8 pre-existing warnings, 0 errors |
 | Unit tests | PASS, 95 of 95 (was 75) |
-| E2e, mock mode | PASS, 18 of 18 (was: no config, gate skipped) |
+| E2e, mock mode | PASS, 20 of 20 run, 4 skipped against P0-B (was: no config, gate skipped) |
 | Persona harness, contract layer | PASS, 181 of 181, safety 24 of 24 (was 0 of 181) |
 | Copy and naming sweep | PASS, zero em or en dashes in code, docs, copy or commit messages |
 | Accessibility hard gates | PASS |
@@ -177,6 +241,12 @@ Walked on the preview build at 390 by 844, against `docs/qa/shots-02/`.
 ---
 
 ## Findings
+
+### P0, blocks everything
+
+**P0-B: the case thread screen (F17) was never built.** Full detail above. Every
+follow-up control on the result screen is inert. Dev work, specified and approved, not
+started.
 
 ### P1, blocks real users, founder only
 
@@ -235,8 +305,12 @@ Carried over from review 02 N1 and N2, all yours, all in the Vercel dashboard.
 
 ## What needs you
 
-Three things, in order of how much they block:
+Four things, in order of how much they block:
 
+0. **A decision on P0-B.** The thread screen is specified and approved and is the
+   next build. It is dev work, not yours, but it is big enough that you should decide
+   whether it goes ahead as specified in screens.md section 12 or whether you want to
+   simplify it first. Nothing else on the roadmap matters as much.
 1. **Supabase Auth redirect URLs** (P1-A). Dashboard, Authentication, URL
    Configuration. Site URL and additional redirect URLs set to the production domain
    plus `/auth/callback`. Until this is done, nobody can sign in, so nobody's cases
@@ -252,18 +326,23 @@ Three things, in order of how much they block:
 
 ## Verdict
 
-**READY FOR INTERNAL TESTING** on `fix/release-review-02-backlog`. The branch is green
-on every gate PROCESS.md defines, including the two that had never run, and it fixes
-three production defects that source review could not have found.
+**BLOCKED** for public sharing, on P0-B (the thread screen does not exist, so every
+follow-up is dead), P1-A (no real sign-in) and P2-G (no evidence about advice
+quality).
 
-**NOT READY FOR PUBLIC SHARING**, on P1-A (no real sign-in) and P2-G (no evidence
-about advice quality).
+**Good for your own testing of the first reply loop** on
+`fix/release-review-02-backlog`. The branch is green on every gate PROCESS.md defines,
+including the two that had never run, and it fixes three production defects that
+source review could not have found. Welcome, consult, result, care, cases, saved,
+settings, offline and 404 all work. Stop at the first reply; anything past it is
+P0-B.
 
 Not merged and not deployed to production, per the standing instruction. The branch is
 pushed with a READY Vercel preview; the merge is yours.
 
 Recommended next: open the preview on your phone, walk welcome to result to cases, and
-confirm D3 reads the way it should now. Then P1-A, then the live harness run.
+confirm D3 reads the way it should now. Then decide on P0-B, which is the next build
+either way. Then P1-A, then the live harness run.
 
 ---
 

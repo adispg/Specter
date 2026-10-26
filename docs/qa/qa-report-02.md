@@ -16,7 +16,7 @@ with no Supabase env vars present, `MOCK_AUTH` provides sessions.
 | 2. Typecheck (`npx tsc --noEmit`) | PASS |
 | 3. Lint (`npx next lint`) | PASS with 8 warnings, 0 errors |
 | 4. Unit tests (`npm test`) | PASS, 95 of 95 |
-| 5. E2e, mock mode (`npx playwright test`) | PASS, 18 of 18 |
+| 5. E2e, mock mode (`npx playwright test`) | PASS, 20 of 20, 4 skipped (see D4) |
 | 6. Persona harness (`npm run harness:mock`) | PASS, 181 of 181, safety 24 of 24 |
 | 7. Copy and naming sweep | PASS |
 | 8. Accessibility | PASS on the four hard gates, 2 advisories |
@@ -25,10 +25,13 @@ with no Supabase env vars present, `MOCK_AUTH` provides sessions.
 
 Overall: **PASS**
 
-Three defects found during this gate were severe enough to fix on the branch rather
-than report: the cases and saved lists threw a server exception as soon as they held
-any data, five CSS tokens used across four screens were never defined, and the
-primary button on the welcome screen had no styling at all. Details in section 11.
+Four defects were found during this gate. Three were fixed on the branch: the cases
+and saved lists threw a server exception as soon as they held any data, five CSS
+tokens used across four screens were never defined, and the primary button on the
+welcome screen had no styling at all. The fourth, D4, is a missing screen rather than
+a bug, so it is reported rather than fixed: every follow-up action on the result
+screen is inert because the case thread it is supposed to navigate to was never
+built. Details in section 11.
 
 ---
 
@@ -100,9 +103,15 @@ Coverage:
 |---|---|
 | `journey.spec.ts` | cold visit redirects to `/welcome`; persona choice; guest onboarding; a consult producing a case; starters filling the composer without sending; the mic conditional from both sides; no stacked bottom nav on the result screen; tab bar to cases and saved; a saved line reaching the saved list; the 404; the offline page; manifest and service worker |
 | `modes.spec.ts` | one test per reply mode: crisis to care with a reachable helpline and no persona language, a capability question answered without a plan, a thin situation asking for the missing facts, an out of bounds request declined with a lawful route |
+| `thread.spec.ts` | the second visit: saving and feedback surviving a reload, deleting a case. Four more tests are written and marked `fixme` against the missing thread screen, see D4 |
 | `audit.spec.ts` | phone width, accessibility and screenshots, see sections 8 to 10 |
 
-Verdict: **PASS**, 18 of 18
+Verdict: **PASS**, 20 of 20 run, 4 skipped.
+
+The four skips are `test.fixme` in `thread.spec.ts`, written against the case thread
+screen that does not exist (D4). They are deliberately left in the suite rather than
+deleted: they are correct tests of specified behaviour, and they should be un-skipped,
+not rewritten, when the screen lands.
 
 ### 6. Persona harness
 
@@ -263,6 +272,37 @@ All three now use `.btn.primary`, which the design system already defines. The s
 one also pointed at `/sign-up`, a route that does not exist in the app router, so any
 guest tapping it got the 404.
 
+### D4 (reported, not fixed): every follow-up on the result screen is inert
+
+Found by writing tests for the second visit, the one nothing had ever exercised.
+
+On the case result screen, "New take", "Ask Mike", "Ask Donna" and the composer's
+push back all call `goThread`, which stores the request with `setPending` and then
+routes to `/cases/[id]`, the screen the user is already on. Nothing anywhere in the
+codebase calls `takePending`. The request is dropped.
+
+Verified with a network probe against the running app: after the opening consult, the
+only request ever sent to `/api/consult` is that first one. Clicking "New take",
+sending a push back and tapping "Ask Mike" each produce zero network calls, zero new
+replies and no visible change. A user who types a follow-up watches their text vanish.
+
+This is not a broken feature, it is an unbuilt screen. `docs/design/screens.md`
+section 12 specifies screen F17, the case thread, as the place every follow-up lands
+(design review 01 finding B9, confirmed resolved in design review 02). There is no
+route for it. `ResultView`'s own comment says so: "the first reply of a case.
+Everything after it goes to the thread."
+
+The server side is complete. Posting `action: "followup"` to `/api/consult` creates
+the consult correctly and the case then holds two, confirmed directly against the API.
+Only the screen is missing.
+
+Also from section 12 and B9, and so also not currently true: opening a case from the
+cases list should open the thread, and back from the thread should go Home.
+
+Out of scope for an unattended overnight run: F17 is an approved, fully specified
+screen, not a defect, and building it belongs in the normal design to build to review
+loop rather than being improvised at six in the morning. Raised to the PM as P0-B.
+
 ---
 
 ## 12. Backlog items from release-review-02
@@ -305,13 +345,14 @@ Stated plainly so nobody reads a PASS as more than it is.
 
 ## Sign-off
 
-All ten checks pass. Three defects were found during the gate, one of which (D1) broke
-two of the app's six screens for any user with data; all three are fixed on the branch
-and covered by tests that fail if they return. The branch is clean on build, typecheck,
-lint, 95 unit tests, 18 e2e tests and 181 harness rows.
+All ten checks pass. Four defects were found during the gate. Three are fixed on the
+branch and covered by tests that fail if they return, including D1, which broke two of
+the app's six screens for any user with data. The fourth, D4, is a missing screen and
+is raised to the PM rather than improvised overnight. The branch is clean on build, typecheck,
+lint, 95 unit tests, 20 e2e tests (4 skipped against D4) and 181 harness rows.
 
 **QA verdict: PASS.** Cleared for PM review on `fix/release-review-02-backlog`. Not
-cleared for public launch: the live model gates in section 13 are still outstanding,
-and P1-A still blocks real sign-in.
+cleared for public launch: D4 leaves the whole post-first-reply loop dead, the live
+model gates in section 13 are still outstanding, and P1-A still blocks real sign-in.
 
 Signed off by: QA agent, 2026-10-26, commit e624565 on `fix/release-review-02-backlog`.
