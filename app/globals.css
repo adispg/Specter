@@ -100,6 +100,15 @@ a { color: inherit; text-decoration: none; }
 .scr, .screen { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-top: var(--safe-top); }
 .body { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 var(--gutter-r) 24px var(--gutter-l); }
 .body::-webkit-scrollbar { display: none; }
+
+/* The list screens (cases, saved, settings) mark their main element
+   .screen-main, which had no rule at all. It went unnoticed while the page
+   itself scrolled; once the shell was pinned to the viewport the element only
+   claimed its content height, leaving the tab bar stranded mid screen with
+   empty space beneath it. Same growing, scrolling box as .body, without .body's
+   horizontal padding, because these rows are edge to edge. */
+.screen-main { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.screen-main::-webkit-scrollbar { display: none; }
 .stack { display: grid; gap: 10px; grid-auto-rows: max-content; align-content: start; }
 
 /* ============ Primitives ============ */
