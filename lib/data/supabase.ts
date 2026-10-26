@@ -158,6 +158,27 @@ export class SupabaseStore implements DataStore {
     ) as unknown as ConsultRow;
   }
 
+  async createCaseWithConsult(
+    input: Parameters<DataStore["createCase"]>[0],
+    consult: Omit<NewConsult, "case_id">,
+  ): Promise<{ caseRow: CaseRow; consult: ConsultRow } | null> {
+    const res = await this.sb.rpc("create_case_with_consult", {
+      p_case: { ...input, title: input.title ?? null, intent: input.intent ?? null, stakes: input.stakes ?? null },
+      p_consult: consult,
+    });
+    if (res.error) {
+      // Absent function: deploy can precede the migration, so fall back to the
+      // two step path rather than failing the consult. Same tolerance as the
+      // guest quota refund. Anything else is a real error and should surface.
+      const missing = res.error.code === "PGRST202" || /could not find the function|does not exist/i.test(res.error.message);
+      if (missing) return null;
+      throw new Error(`create case with consult: ${res.error.message}`);
+    }
+    const data = res.data as { case: CaseRow; consult: ConsultRow } | null;
+    if (!data?.case || !data?.consult) return null;
+    return { caseRow: data.case, consult: data.consult };
+  }
+
   async listConsults(caseId: string): Promise<ConsultRow[]> {
     if (!isUuid(caseId)) return [];
     return check(

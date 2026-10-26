@@ -60,6 +60,16 @@ export interface DataStore {
   deleteCase(id: string): Promise<void>;
 
   addConsult(caseId: string, consult: NewConsult): Promise<ConsultRow>;
+  /**
+   * Create a case and its first consult together, so a failure cannot leave a
+   * case with no consult showing as a dead row in the user's list. Returns null
+   * when the backing database function is not present, and the caller falls
+   * back to the two step path.
+   */
+  createCaseWithConsult(
+    input: Parameters<DataStore["createCase"]>[0],
+    consult: Omit<NewConsult, "case_id">,
+  ): Promise<{ caseRow: CaseRow; consult: ConsultRow } | null>;
   listConsults(caseId: string): Promise<ConsultRow[]>;
   getConsult(id: string): Promise<ConsultRow | null>;
 
