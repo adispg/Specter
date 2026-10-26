@@ -1,6 +1,6 @@
 # Specter: project documentation and handover
 
-Last updated 26 October 2026, 08:30 IST.
+Last updated 26 October 2026, 16:45 IST.
 
 Written so that a new person, or a fresh AI session with no memory of this work,
 can pick the project up cold. It records what the app is, how it is built, what
@@ -144,11 +144,11 @@ Set in Vercel, Settings, Environment Variables. All three targets.
 | `NEXT_PUBLIC_SUPABASE_URL` | set | |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | set | |
 | `GEMINI_API_KEY` | set | from aistudio.google.com/apikey |
+| `DEEPGRAM_API_KEY` | set and working | drives Aura speech out, and voice input |
 | `GUEST_CONSULTS` | 25 | guest consults before sign-in |
 | `GUEST_CONSULTS_PER_DEVICE_PER_DAY` | 25 | defaults to 1, which kills a demo |
 | `GUEST_CONSULTS_PER_IP_PER_DAY` | 200 | defaults to 5, shared office wifi is one IP |
-| `GUEST_HASH_SALT` | **EMPTY, fix this** | falls back to a value published in this repo |
-| `DEEPGRAM_API_KEY` | empty | optional, only for browsers without native speech recognition |
+| `GUEST_HASH_SALT` | set | |
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `ELEVENLABS_*` | unused | left from an earlier design, safe to delete |
 
 Changes need a redeploy to take effect.
@@ -209,6 +209,19 @@ mic existed but was not passed to the home composer. Persona empty-state copy
 was written and never rendered. `SignInForm` had no page. Reading the source
 proves a thing exists, not that it is reachable. Click it.
 
+### Fixed after the first version of this document
+
+Five more things built and never connected, all found by auditing rather than
+reading: Settings was linked from nowhere in the app, so the voice picker was
+reachable only by typing the URL; `.cta` was defined in no stylesheet while
+styling the primary action on three screens; sign out posted to a route that
+does not exist; `VoiceMode` used nineteen class names that matched nothing, so
+the mic dialog opened completely unstyled; and `copyLineText` appended a
+character name to both the share and copy actions, which was a live IP leak.
+
+Also fixed: every consult after the first was written to the database and never
+rendered, so the thread buttons cost a model call and showed nothing.
+
 ---
 
 ## 7. Known traps
@@ -229,10 +242,16 @@ Working and verified on production: guest sign-in, the full consult flow, all
 five reply modes, voice playback, voice input on both screens, the case thread,
 saved lines, the home screen, sign-in, offline.
 
-Known weak: consult latency is about 19 seconds, of which roughly 14 is the
-model. The likely cause is that the installed SDK, `@google/generative-ai`
-0.24.1, is deprecated and offers no way to cap Gemini 3.x hidden reasoning. The
-current SDK, `@google/genai`, does. This is the single biggest available win.
+Latency: a consult takes about 9.2 seconds, measured on production. Migrating
+to `@google/genai` and setting the thinking budget to zero cut model time from
+13.6 seconds to roughly 3.1, so the model is no longer the dominant cost. The
+remaining 6 seconds is everything else: session and profile reads, the writes,
+and cold starts. Per-phase timings are now logged, so measure before guessing.
+
+Speech: Deepgram Aura is live for all three personas, verified on production.
+Repeats are served from `audio_cache` at about a third of the latency and no
+cost. This exists because Android exposes one voice per locale, named by locale
+and female for en_US, so no amount of client-side voice selection could work.
 
 There is no monitoring of any kind. No error tracking, no alerting.
 
@@ -275,13 +294,16 @@ the product.
 
 ## 10. Tracker
 
-See `SPECTER-TRACKER.xlsx` beside this file. 46 items, 30 complete.
+See `SPECTER-TRACKER.xlsx` beside this file. 49 items, 37 complete.
 
 The highest-value remaining work, in order:
 
-1. The share card. Nothing else turns a private tool into something that travels
-   between desks, which is the stated goal.
-2. The vent intent and a light reply path for low-stakes input.
-3. Latency, via the SDK migration.
-4. A sweep of every remaining control for dead wiring.
-5. Monitoring.
+1. The vent intent, the founder's own example: something absurd happened and he
+   wants the line that gets the laugh, not a plan. Pairs with the share card,
+   which has now shipped.
+2. The remaining 6 seconds of non-model consult time, now measurable.
+3. The welcome screen, the last unredesigned surface and the first a colleague
+   sees.
+4. Monitoring, which still does not exist in any form.
+5. Four API routes with no caller, including delete account and data export,
+   which are GDPR affordances that are built and unreachable.
