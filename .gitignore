@@ -18,3 +18,6 @@ harness/reports/*
 
 # Generated tracker workbook (rebuild with python3 scripts/build_tracker.py)
 SPECTER-TRACKER.xlsx
+
+# Agent worktrees and local tooling state, never part of the project.
+.claude/
