@@ -25,7 +25,7 @@
   "dependencies": {
     "@deepgram/sdk": "^5.16.0",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^2.31.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
     "geist": "^1.8.2",
