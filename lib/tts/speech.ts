@@ -44,11 +44,20 @@ export function pauseLengthsFor(persona: PersonaId, pace = 1): PauseLengths {
 }
 
 /** Only stock voices listed in config (or the env default) are ever used. */
+/** The scaffolded env vars still hold REPLACE_WITH_... placeholders, which are
+ *  truthy and would be sent to the provider as a voice id. Ignore them so the
+ *  curated stock voice in config wins until a real id is set. */
+function envVoice(name: string): string | null {
+  const v = process.env[name]?.trim();
+  if (!v || v.startsWith("REPLACE_WITH")) return null;
+  return v;
+}
+
 export function voiceIdFor(persona: PersonaId, chosen?: string | null, care = false): string {
-  if (care) return process.env[CARE_VOICE.envVoiceId] || CARE_VOICE.id;
+  if (care) return envVoice(CARE_VOICE.envVoiceId) ?? CARE_VOICE.id;
   const v = PERSONAS[persona].voice;
   if (chosen && v.options.some((o) => o.id === chosen)) return chosen;
-  return process.env[v.envVoiceId] || v.options[0]!.id;
+  return envVoice(v.envVoiceId) ?? v.options[0]!.id;
 }
 
 /** Build the script and the exact text sent to TTS. Care mode has no marks and plain gaps. */

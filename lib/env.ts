@@ -42,7 +42,18 @@ export const env = {
    */
   elevenLabsKey: () => process.env.ELEVENLABS_API_KEY ?? "",
   elevenLabsModel: () => process.env.ELEVENLABS_MODEL || "eleven_flash_v2_5",
-  ttsConfigured: () => false, // Always use browser speechSynthesis (free). Set to true only when ElevenLabs key is present and paid TTS is desired.
+  /**
+   * Server speech, used when an ElevenLabs key is present; otherwise the
+   * browser's own voice, which is free.
+   *
+   * This was hardcoded false. The browser fallback is fine on Windows and
+   * macOS, which expose many named voices, but Android exposes one voice per
+   * locale, named only by locale ("English United States") and female for
+   * en_US. There is no male voice on the device to pick, so no amount of
+   * selection logic can give those personas the right voice. Server speech is
+   * the only thing that sounds the same everywhere.
+   */
+  ttsConfigured: () => Boolean(process.env.ELEVENLABS_API_KEY),
 
   /** Deepgram (STT). Free tier: 12,000 min/year on Nova-3. */
   deepgramKey: () => process.env.DEEPGRAM_API_KEY ?? "",
