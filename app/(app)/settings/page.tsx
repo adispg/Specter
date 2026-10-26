@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useApp } from "@/components/AppProvider";
 import { TabBar, ErrorBanner } from "@/components/ui";
+import { VoicePicker } from "@/components/VoicePicker";
 import { BRAND } from "@/lib/personas/config";
 
 function Row({ label, value, href, onClick }: { label: string; value?: string; href?: string; onClick?: () => void }) {
@@ -117,6 +118,9 @@ export default function SettingsPage() {
             />
           </>
         )}
+
+        <SectionHeader title="Voice" />
+        <VoicePicker />
 
         <SectionHeader title="App" />
         <Row label="Version" value="1.0" />

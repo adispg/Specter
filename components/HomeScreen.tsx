@@ -17,6 +17,9 @@ export function HomeScreen() {
   const { persona, setPersona, settings, config, toast } = useApp();
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
+  // Set on send and never cleared on success, so the empty state cannot come
+  // back for a frame between the reply arriving and the route changing.
+  const [leaving, setLeaving] = useState(false);
   const consult = useConsult();
   const router = useRouter();
   const dictRef = useRef<DictationSession | null>(null);
@@ -36,7 +39,7 @@ export function HomeScreen() {
   const p = PERSONAS[persona];
   // The desk head and starters are the empty state: they step aside as soon as
   // there is something to send.
-  const idle = !text.trim() && !consult.busy && !listening;
+  const idle = !text.trim() && !consult.busy && !listening && !leaving;
 
   const toggleMic = useCallback(() => {
     if (dictRef.current) {
@@ -84,6 +87,7 @@ export function HomeScreen() {
     // Clear immediately. The model can take ten seconds or more, and leaving the
     // text sitting in the box makes it look like the send never registered.
     setText("");
+    setLeaving(true);
     const res = await consult.run({
       action: "new",
       persona,
@@ -91,8 +95,12 @@ export function HomeScreen() {
       situation,
     });
     if (res) {
+      // Stays true through the navigation. Clearing it here would drop the
+      // screen back to its empty state for a frame before the route changes,
+      // which read as the home page flashing back before the answer.
       router.push(`/cases/${res.caseId}`);
     } else {
+      setLeaving(false);
       // Failed: give the situation back so it is not lost.
       setText((current) => (current ? current : situation));
     }
