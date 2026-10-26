@@ -190,6 +190,13 @@ Advisories, reported rather than failed:
   high, the soft buttons 38 high. The composer mic and send buttons are 40 by 40
   throughout.
 
+- **A3: the composer loses text typed before hydration.** Found while stabilising the
+  e2e suite: text entered into the composer before React hydrates is replaced by the
+  component's own empty state, and the send button stays disabled. The tests work
+  around it by retrying; a real user on a slow phone cannot. The home screen
+  autofocuses the composer, so this is a plausible first interaction. Worth a look
+  before launch, not a blocker.
+
 Not covered by this pass, and worth a human check before launch: colour contrast
 ratios, focus order through the result screen's menus and sheets, and screen reader
 behaviour over the spoken line's pause marks.

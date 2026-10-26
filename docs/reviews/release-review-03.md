@@ -312,6 +312,12 @@ chips at 32 high, soft buttons at 38), four on home, one each on welcome, sign-i
 care. Not a WCAG AA failure, but on a phone first product aimed at people using it one
 handed on a commute it is worth a deliberate design decision rather than an accident.
 
+**N10: the composer can lose text typed before hydration.** Surfaced while making the
+e2e suite stable. Text entered before React hydrates is wiped by the component's empty
+state and the send button stays disabled. The home screen autofocuses the composer, so
+on a slow phone this is a plausible first interaction with the product: they type,
+nothing happens, they try again. Small fix, real impression.
+
 **N8: eight lint warnings** on underscore prefixed unused parameters. The eslint
 config does not exempt the underscore convention the code is using. One config line.
 
