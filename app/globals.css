@@ -433,6 +433,31 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 /* Home screen: who is across the desk, then a way in. The persona block is
    centred because it is identity; the starters are left aligned because they
    are content to read. */
+/* Small square icon control in a top bar. */
+.iconbtn {
+  flex: none; width: 36px; height: 36px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--fg-2); background: none; border: 0; cursor: pointer;
+}
+.iconbtn:hover { color: var(--fg); background: var(--surface); }
+.iconbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.iconbtn svg { width: 20px; height: 20px; }
+
+/* The primary action, used on the welcome screen ("Try it free"), the empty
+   cases screen and settings. It was never defined, so all three rendered as
+   plain unstyled text: the first screen's main button did not look like a
+   button at all. Same shape as .btn.primary, which already existed. */
+.cta {
+  height: 52px; width: 100%; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font: 600 15px/1 var(--sans); border: 0; cursor: pointer;
+  background: var(--accent); color: var(--on-accent);
+  transition: transform var(--dur-instant) var(--ease-standard), opacity var(--dur-instant);
+}
+.cta:disabled { opacity: 0.55; cursor: default; }
+.cta:not(:disabled):active { transform: scale(0.985); }
+.cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
 /* Thread entries: every reply after the first one. */
 .tentry { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid var(--hair); scroll-margin-top: 12px; }
 .tentry .thead { display: flex; align-items: center; gap: 8px; }

@@ -62,7 +62,9 @@ export default function SettingsPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/auth/sign-out", { method: "POST" });
+      // Was "/api/auth/sign-out", which does not exist. The route is
+      // app/auth/signout, so no /api prefix and no hyphen.
+      const res = await fetch("/auth/signout", { method: "POST" });
       if (!res.ok) throw new Error("Sign out failed. Try again.");
       router.push("/welcome");
     } catch (e) {

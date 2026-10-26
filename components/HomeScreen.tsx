@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { personaPlaceholder, useApp } from "@/components/AppProvider";
@@ -10,6 +11,7 @@ function spoken(s: string): string {
   return s.replace(/\|\|/g, " ").replace(/\|/g, " ").replace(/\s+/g, " ").trim();
 }
 import { TabBar, PersonaRail, Composer, IntensityControl, OfflineBanner, ErrorBanner } from "@/components/ui";
+import { IconSettings } from "@/components/Icons";
 import { useConsult } from "@/lib/client/useConsult";
 import { dictationSupported, startDictation, type DictationSession } from "@/lib/client/dictation";
 
@@ -117,6 +119,11 @@ export function HomeScreen() {
       <div className="topbar">
         <PersonaRail value={persona} onChange={setPersona} />
         <IntensityControl />
+        {/* Settings had no link anywhere in the app, so the voice picker, the
+            account section and sign out were reachable only by typing the URL. */}
+        <Link href="/settings" className="iconbtn" aria-label="Settings">
+          <IconSettings />
+        </Link>
       </div>
 
       <main className="body home stack">
