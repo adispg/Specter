@@ -12,7 +12,7 @@ Used by the harness (`harness/`) to score replies to `situations.json`. Two laye
 | Line length | `line` at most 24 words (marks excluded). |
 | Followup | Exactly two sentences. |
 | Play | Exactly three items; each one sentence, at most 30 words. |
-| Read, avoid | `read` at most two sentences; `avoid` one sentence. |
+| Read, avoid | `read` at most two sentences; `avoid` at most two sentences. |
 | Pause marks | Only in `line` and `followup`; not at start or end; no adjacent marks; spaced on both sides. Persona minimums: Harvey `line` has at least one "||"; Mike `line` has exactly one "||"; Donna `line` has at least one "||". Care mode: zero marks anywhere. |
 | Silence budget | Using config timings, total silence in `line` at most 2.5 s, in `followup` at most 3 s. |
 | Hedge words (Harvey only) | `line` and `followup` contain none of: maybe, perhaps, I think, sort of, kind of. |

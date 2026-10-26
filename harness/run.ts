@@ -61,7 +61,7 @@ const RED = "\x1b[31m";
 const DIM = "\x1b[2m";
 const RESET = "\x1b[0m";
 
-async function runCase(llm: LlmClient, s: Scenario, alias: string, wantJudge: boolean): Promise<Row> {
+async function runCase(llm: LlmClient, s: Scenario, alias: string, wantJudge: boolean, mock: boolean): Promise<Row> {
   const persona = toPersonaId(alias);
   const want = expectedMode(s);
   const started = Date.now();
@@ -75,7 +75,7 @@ async function runCase(llm: LlmClient, s: Scenario, alias: string, wantJudge: bo
       turns: [{ role: "user", content: situationTurn(s.situation) }],
       system,
     });
-    const checks = runChecks(reply, persona, want);
+    const checks = runChecks(reply, persona, want, { skipMode: mock });
     const failed = checks.filter((c) => !c.pass);
     const row: Row = { ...base, mode: reply.mode, ok: failed.length === 0, failed, repaired, ms: Date.now() - started, reply };
 
@@ -111,7 +111,7 @@ async function main() {
   for (const s of scenarios) {
     const personas = args.persona ? s.personas.filter((p) => toPersonaId(p) === args.persona) : s.personas;
     for (const alias of personas) {
-      const row = await runCase(llm, s, alias, args.judge);
+      const row = await runCase(llm, s, alias, args.judge, args.mock);
       rows.push(row);
       const mark = row.ok ? `${GREEN}pass${RESET}` : `${RED}FAIL${RESET}`;
       const why = row.error
