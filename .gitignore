@@ -15,3 +15,6 @@ npm-debug.log*
 # Harness run output is generated on every run, so it is not tracked.
 harness/reports/*
 !harness/reports/.gitkeep
+
+# Generated tracker workbook (rebuild with python3 scripts/build_tracker.py)
+SPECTER-TRACKER.xlsx
