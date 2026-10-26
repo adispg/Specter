@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { consult, onboardAsGuest } from "./helpers";
+import { consult, onboardAsGuest, typeSituation } from "./helpers";
 
 /**
  * The second visit. Everything here only happens once a case exists and the
@@ -44,7 +44,7 @@ test.describe("coming back to a case", () => {
     await consult(page, "My manager took credit for my work in front of leadership and I do not know what to say tomorrow.");
     const before = await page.getByTestId("advice-cards").count();
 
-    await page.getByTestId("composer-input").fill("I tried that and he talked over me again in the stand up.");
+    await typeSituation(page, "I tried that and he talked over me again in the stand up.");
     await page.getByTestId("send").click();
     await expect(page.getByTestId("advice-cards")).toHaveCount(before + 1, { timeout: 40_000 });
     await expectNoServerError(page);

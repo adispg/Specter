@@ -25,7 +25,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 3,
+      "ms": 2,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -36,7 +36,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -47,7 +47,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -124,7 +124,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -157,7 +157,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -168,7 +168,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -201,7 +201,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 3,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -212,7 +212,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 7,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -234,7 +234,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -245,7 +245,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -256,7 +256,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -267,7 +267,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -289,7 +289,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -311,7 +311,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 4,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -333,7 +333,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -355,7 +355,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 6,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -388,7 +388,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -399,7 +399,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -443,7 +443,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -454,7 +454,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -476,7 +476,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -487,7 +487,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -509,7 +509,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -520,7 +520,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -531,7 +531,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -564,7 +564,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -586,7 +586,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -608,7 +608,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -652,7 +652,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -663,7 +663,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -674,7 +674,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -696,7 +696,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -707,7 +707,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -718,7 +718,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -762,7 +762,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -773,7 +773,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -817,7 +817,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -861,7 +861,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -872,7 +872,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -883,7 +883,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -894,7 +894,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -916,7 +916,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 6,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -927,7 +927,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -949,7 +949,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 2,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -960,7 +960,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -993,7 +993,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -1059,7 +1059,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -1081,7 +1081,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1092,7 +1092,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -1114,7 +1114,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1125,7 +1125,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -1136,7 +1136,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -1147,7 +1147,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1169,7 +1169,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -1180,7 +1180,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1191,7 +1191,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -1202,7 +1202,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -1268,7 +1268,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 2,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -1279,7 +1279,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1290,7 +1290,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -1312,7 +1312,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1323,7 +1323,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Everyone read the headline. | Nobody read page four. || Read page four."
     },
     {
@@ -1334,7 +1334,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -1345,7 +1345,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1378,7 +1378,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1400,7 +1400,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -1510,7 +1510,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Not that move. || It hands them the win. | Here's the one that holds up."
     },
     {
@@ -1532,7 +1532,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "I know you want them to feel it. || Let them feel it watching you win."
     },
     {
@@ -1543,7 +1543,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Not that move. || It hands them the win. | Here's the one that holds up."
     },
     {
@@ -1554,7 +1554,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "That shortcut is the part that gets you caught. | The paper trail, || that's the window."
     },
     {
@@ -1664,7 +1664,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -1675,7 +1675,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Not that move. || It hands them the win. | Here's the one that holds up."
     },
     {
@@ -1697,7 +1697,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "I know you want them to feel it. || Let them feel it watching you win."
     },
     {
@@ -1708,7 +1708,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
@@ -1763,7 +1763,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You're not annoyed. | You're hurt. || And they can tell the difference, | so let's use it."
     },
     {
@@ -1829,7 +1829,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You tell me what is going on, | and I tell you how to handle the people in it."
     },
     {
@@ -1840,7 +1840,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "I am an AI voice built on an archetype. || The advice still works."
     },
     {
@@ -1862,7 +1862,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "I am an AI, | and I am not going to pretend otherwise. || Still useful, though."
     },
     {
@@ -1873,7 +1873,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "I do situations, not small talk. || Bring me the one that is costing you something."
     },
     {
@@ -1939,7 +1939,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "Something specific happened. || Tell me that, | not the summary."
     },
     {
@@ -1961,7 +1961,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 1,
+      "ms": 0,
       "line": "Something happened, | and you are giving me the headline. || Give me the scene."
     },
     {
@@ -1972,7 +1972,7 @@
       "ok": true,
       "failed": [],
       "repaired": false,
-      "ms": 0,
+      "ms": 1,
       "line": "You think they're holding all the cards. || They're holding a bluff. | Call it."
     },
     {
