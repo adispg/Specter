@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { CRISIS_DIRECTORY_URL, type RegionHelp } from "@/lib/personas/config";
+import { BRAND, CRISIS_DIRECTORY_URL, type RegionHelp } from "@/lib/personas/config";
 import type { ConsultRow } from "@/lib/data/types";
 import { usePerformance } from "@/lib/client/usePerformance";
 import { useApp } from "./AppProvider";
@@ -79,7 +79,7 @@ export function CareView({ consult, help, autoSpeak }: { consult: ConsultRow; he
             </ol>
           </div>
         )}
-        <p className="fine">Specter is not a substitute for professional help. When you&apos;re ready, the personas will be here.</p>
+        <p className="fine">{BRAND.appName} is not a substitute for professional help. When you&apos;re ready, the personas will be here.</p>
       </div>
     </PersonaTheme>
   );

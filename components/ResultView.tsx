@@ -130,7 +130,7 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
   }
 
   async function share() {
-    const t = `${copyLineText(first)} via Specter`;
+    const t = `${copyLineText(first)} via ${BRAND.appName}`;
     if (navigator.share) {
       try {
         await navigator.share({ text: t });

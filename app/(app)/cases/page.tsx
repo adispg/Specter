@@ -86,7 +86,7 @@ export default async function CasesPage() {
           >
             <p style={{ fontSize: 16 }}>No cases yet.</p>
             <p style={{ fontSize: 14 }}>Ask your first question.</p>
-            <Link href="/" className="cta" style={{ marginTop: 8, display: "inline-block", textDecoration: "none" }}>
+            <Link href="/" className="btn primary" style={{ marginTop: 8, maxWidth: 240, textDecoration: "none" }}>
               Start a consult
             </Link>
           </div>

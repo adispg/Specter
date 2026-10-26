@@ -13,9 +13,15 @@ export async function onboardAsGuest(page: Page): Promise<void> {
   await expect(page.getByTestId("composer-input")).toBeVisible();
 }
 
-/** Type a situation, send it, and wait for the case screen to open. */
+/**
+ * Type a situation, send it, and wait for the case screen to finish rendering.
+ * The URL changes before the server component has streamed, so waiting on the
+ * URL alone lands on the loading skeleton: every screen that follows, and every
+ * screenshot, would be of the skeleton rather than the reply.
+ */
 export async function consult(page: Page, situation: string): Promise<void> {
   await page.getByTestId("composer-input").fill(situation);
   await page.getByTestId("send").click();
   await expect(page).toHaveURL(/\/cases\/[^/]+$/, { timeout: 40_000 });
+  await expect(page.locator("[data-testid=matter], [data-testid=care-view]").first()).toBeVisible({ timeout: 40_000 });
 }

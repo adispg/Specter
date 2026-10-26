@@ -8,6 +8,7 @@ import { mockUserId } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SupabaseStore } from "@/lib/data/supabase";
 import { PersonaIdSchema } from "@/lib/consult/schema";
+import { BRAND } from "@/lib/personas/config";
 import type { DataStore } from "@/lib/data/store";
 
 export const runtime = "nodejs";
@@ -25,7 +26,7 @@ const YEAR = 60 * 60 * 24 * 365;
 export async function POST(req: Request) {
   try {
     const parsed = Body.safeParse(await readJson(req));
-    if (!parsed.success) return jsonError("bad_request", "Confirm you're 18 or older and that you understand Specter is an AI.", 400);
+    if (!parsed.success) return jsonError("bad_request", `Confirm you're 18 or older and that you understand ${BRAND.appName} is an AI.`, 400);
     const jar = await cookies();
     let store: DataStore;
     const existing = await getSession();

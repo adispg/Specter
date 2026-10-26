@@ -99,9 +99,9 @@ export default function SettingsPage() {
                 You are using a guest session. Create an account to save your cases across devices.
               </p>
               <a
-                href="/sign-up"
-                className="cta"
-                style={{ display: "block", textAlign: "center", textDecoration: "none", padding: "10px 0" }}
+                href="/sign-in"
+                className="btn primary"
+                style={{ textDecoration: "none" }}
               >
                 Create account
               </a>

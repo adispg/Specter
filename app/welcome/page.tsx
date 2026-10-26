@@ -181,7 +181,7 @@ function WelcomeInner() {
 
         <button
           type="button"
-          className="cta"
+          className="btn primary"
           onClick={handleTry}
           disabled={busy}
           style={{ width: "100%", maxWidth: 320 }}
