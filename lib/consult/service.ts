@@ -91,17 +91,60 @@ async function refundGuestQuota(ctx: ConsultContext, consumed: string[]): Promis
   }
 }
 
+/**
+ * Phase timings for one consult, logged as a single line at the end. Durations
+ * only, never user content. The model turned out to be about a third of the
+ * wall clock once its thinking was capped, so the rest needs to be visible.
+ */
+function timer() {
+  const marks: Array<[string, number]> = [];
+  let last = Date.now();
+  return {
+    mark(name: string) {
+      const t = Date.now();
+      marks.push([name, t - last]);
+      last = t;
+    },
+    log(total: number) {
+      const parts = marks.map(([n, ms]) => `${n}=${ms}`).join(" ");
+      console.info(`[consult] total=${total} ${parts}`);
+    },
+  };
+}
+
 async function runConsultInner(ctx: ConsultContext, consumed: string[]): Promise<ConsultResult> {
   const { store, llm, request, limits } = ctx;
   const now = ctx.now ?? new Date();
+  const started = Date.now();
+  const t = timer();
+
+  // Every read below is independent and scoped to this user by row level
+  // security, so they go out together rather than one after another. The
+  // results are still evaluated in the original order, so the error a caller
+  // sees for a bad request is unchanged.
+  //
+  // Not parallelised: the guest throttle consume, which mutates and must come
+  // after the checks above it decide the request is allowed, and everything in
+  // persist, which depends on the model output.
+  const isNew = request.action === "new";
+  const needGuestCount = ctx.isGuest && isNew && limits.guestConsults >= 0;
+  const needWeekly = ctx.plan === "free" && !ctx.isGuest && limits.freeConsultsPerWeek > 0;
+
+  const [caseRow, historyRows, todayCount, guestCaseCount, weeklyUsed] = await Promise.all([
+    isNew ? Promise.resolve(null) : store.getCase(request.caseId),
+    isNew ? Promise.resolve([] as ConsultRow[]) : store.listConsults(request.caseId),
+    store.countUsage("consult", windowStart(now, "day")),
+    needGuestCount ? store.countCases() : Promise.resolve(0),
+    needWeekly ? store.countUsage("consult", windowStart(now, "week"), { billableOnly: true }) : Promise.resolve(0),
+  ]);
+  t.mark("reads");
 
   let history: ConsultRow[] = [];
   let caseId: string | null = null;
-  if (request.action !== "new") {
-    const c = await store.getCase(request.caseId);
-    if (!c) throw new ConsultError("not_found", "That case doesn't exist, or it isn't yours.", 404);
-    caseId = c.id;
-    history = await store.listConsults(c.id);
+  if (!isNew) {
+    if (!caseRow) throw new ConsultError("not_found", "That case doesn't exist, or it isn't yours.", 404);
+    caseId = caseRow.id;
+    history = historyRows;
   }
 
   const userText = request.action === "new" ? request.situation : request.action === "followup" ? request.text : "";
@@ -114,9 +157,8 @@ async function runConsultInner(ctx: ConsultContext, consumed: string[]): Promise
     return persist(ctx, { caseId, reply, intensity: "measured", downgraded: false, model: "safety-rules", usage: null, latencyMs: 0, billable: false, safety: crisis, now });
   }
 
-  // 2. Daily hard cap (every plan).
-  const today = await store.countUsage("consult", windowStart(now, "day"));
-  const daily = checkQuota(today, limits.consultDailyCap, now, "day");
+  // 2. Daily hard cap (every plan). Count already fetched above.
+  const daily = checkQuota(todayCount, limits.consultDailyCap, now, "day");
   if (!daily.allowed) {
     throw new ConsultError("rate_limited", "Too many requests right now. Give it a minute, or come back tomorrow.", 429, {
       retryAfter: daily.retryAfter,
@@ -131,7 +173,7 @@ async function runConsultInner(ctx: ConsultContext, consumed: string[]): Promise
 
   // 4. Guests: one free case (plus its follow-ups), throttled per device and IP.
   if (ctx.isGuest) {
-    if (request.action === "new" && limits.guestConsults >= 0 && (await store.countCases()) >= limits.guestConsults) {
+    if (needGuestCount && guestCaseCount >= limits.guestConsults) {
       throw new ConsultError("guest_limit", "Sign in to keep going. Your case is saved.", 403);
     }
     if (request.action !== "new" && billable) {
@@ -154,9 +196,8 @@ async function runConsultInner(ctx: ConsultContext, consumed: string[]): Promise
 
   // 5. Weekly free tier. 402 and no model call when it is spent.
   let weekly: ReturnType<typeof checkQuota> | null = null;
-  if (ctx.plan === "free" && !ctx.isGuest && limits.freeConsultsPerWeek > 0) {
-    const used = await store.countUsage("consult", windowStart(now, "week"), { billableOnly: true });
-    weekly = checkQuota(used, limits.freeConsultsPerWeek, now, "week");
+  if (needWeekly) {
+    weekly = checkQuota(weeklyUsed, limits.freeConsultsPerWeek, now, "week");
     if (billable && !weekly.allowed) {
       throw new ConsultError("quota_exceeded", `That's your ${weekly.limit} free consults this week.`, 402, {
         resetAt: weekly.resetAt,
@@ -171,9 +212,11 @@ async function runConsultInner(ctx: ConsultContext, consumed: string[]): Promise
 
   // 7. Generate.
   const turns = buildTurns(request.persona, history, request);
+  t.mark("checks");
   const t0 = Date.now();
   const out = await generateReply(llm, { persona: request.persona, intensity: eff.intensity, turns, country: ctx.country });
   const latencyMs = Date.now() - t0;
+  t.mark("model");
 
   const safety: SafetyCategory | null =
     out.reply.mode === "care" ? "crisis" : out.reply.mode === "decline" ? "illegal_request" : null;
@@ -190,10 +233,12 @@ async function runConsultInner(ctx: ConsultContext, consumed: string[]): Promise
     safety,
     now,
   });
+  t.mark("persist");
   if (weekly && result.quota === null) {
     const remaining = billable && out.reply.mode !== "care" ? weekly.remaining : Math.max(0, weekly.limit - weekly.used);
     result.quota = { remaining, limit: weekly.limit, resetAt: weekly.resetAt };
   }
+  t.log(Date.now() - started);
   return result;
 }
 
@@ -214,23 +259,9 @@ async function persist(
 ): Promise<ConsultResult> {
   const { store, request } = ctx;
   let caseId = p.caseId;
-  if (!caseId) {
-    const c = await store.createCase({
-      persona: request.persona,
-      intensity: p.intensity,
-      situation: (request as Extract<ConsultRequest, { action: "new" }>).situation,
-      title: p.reply.matter,
-      intent: p.reply.intent,
-      stakes: p.reply.stakes,
-    });
-    caseId = c.id;
-  } else {
-    await store.touchCase(caseId);
-  }
 
   const userInput = request.action === "new" ? request.situation : request.action === "followup" ? request.text : null;
-  const consult = await store.addConsult(caseId, {
-    case_id: caseId,
+  const consultFields = {
     persona: request.persona,
     kind: kindForAction(request.action),
     user_input: userInput,
@@ -244,7 +275,34 @@ async function persist(
     tokens_in: p.usage?.inputTokens ?? null,
     tokens_out: p.usage?.outputTokens ?? null,
     cache_read_tokens: p.usage?.cacheReadTokens ?? null,
-  });
+  };
+
+  let consult: ConsultRow;
+  if (!caseId) {
+    const caseFields = {
+      persona: request.persona,
+      intensity: p.intensity,
+      situation: (request as Extract<ConsultRequest, { action: "new" }>).situation,
+      title: p.reply.matter,
+      intent: p.reply.intent,
+      stakes: p.reply.stakes,
+    };
+    // One transaction, so a failure cannot leave a case with no consult. Null
+    // means the database function is not deployed yet; fall back to the two
+    // step path so the app works either side of the migration.
+    const atomic = await store.createCaseWithConsult(caseFields, consultFields);
+    if (atomic) {
+      caseId = atomic.caseRow.id;
+      consult = atomic.consult;
+    } else {
+      const c = await store.createCase(caseFields);
+      caseId = c.id;
+      consult = await store.addConsult(caseId, { ...consultFields, case_id: caseId });
+    }
+  } else {
+    await store.touchCase(caseId);
+    consult = await store.addConsult(caseId, { ...consultFields, case_id: caseId });
+  }
 
   await store.recordUsage("consult", { action: request.action, persona: request.persona, mode: p.reply.mode, model: p.model }, p.billable);
   if (p.safety) {

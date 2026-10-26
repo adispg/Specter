@@ -194,6 +194,16 @@ export class MemoryStore implements DataStore {
     return clone(row);
   }
 
+  /** In process and synchronous, so there is nothing to make atomic. */
+  async createCaseWithConsult(
+    input: Parameters<DataStore["createCase"]>[0],
+    consult: Omit<NewConsult, "case_id">,
+  ): Promise<{ caseRow: CaseRow; consult: ConsultRow } | null> {
+    const caseRow = await this.createCase(input);
+    const row = await this.addConsult(caseRow.id, { ...consult, case_id: caseRow.id } as NewConsult);
+    return { caseRow, consult: row };
+  }
+
   async listConsults(caseId: string): Promise<ConsultRow[]> {
     if (!this.own(caseId)) return [];
     return clone(db().consults.filter((m) => m.case_id === caseId));
