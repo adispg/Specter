@@ -39,7 +39,13 @@ export function HomeScreen() {
   const p = PERSONAS[persona];
   // The desk head and starters are the empty state: they step aside as soon as
   // there is something to send.
-  const idle = !text.trim() && !consult.busy && !listening && !leaving;
+  // The persona header stays while they type: hiding it on the first keystroke
+  // emptied the whole screen to black with only the composer left, which is
+  // worse than the dead space it was meant to avoid. Only the starters step
+  // aside, since they have served their purpose once there is text.
+  const working = consult.busy || leaving;
+  const showHeader = !working;
+  const showStarters = !text.trim() && !working && !listening;
 
   const toggleMic = useCallback(() => {
     if (dictRef.current) {
@@ -118,14 +124,23 @@ export function HomeScreen() {
         {consult.error && (
           <ErrorBanner onRetry={consult.retry}>{consult.error}</ErrorBanner>
         )}
-        {idle && (
+        {showHeader && (
+          <div className="deskhead">
+            <Avatar persona={persona} size="xl" />
+            <h1 className="nm">{p.name}</h1>
+            <p className="rl">{p.role}</p>
+            <p className="sy">{spoken(p.emptyStates.home)}</p>
+          </div>
+        )}
+
+        {working && (
+          <p className="thinking" aria-live="polite">
+            {p.thinking[0] ?? "Working on it."}
+          </p>
+        )}
+
+        {showStarters && (
           <>
-            <div className="deskhead">
-              <Avatar persona={persona} size="xl" />
-              <h1 className="nm">{p.name}</h1>
-              <p className="rl">{p.role}</p>
-              <p className="sy">{spoken(p.emptyStates.home)}</p>
-            </div>
 
             <div className="starters">
               <div className="rule" />

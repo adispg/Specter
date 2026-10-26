@@ -34,7 +34,7 @@ function CaseCard({ c }: { c: CaseSummary }) {
             whiteSpace: "nowrap",
           }}
         >
-          {c.title ?? c.situation.slice(0, 80)}
+          {c.title || c.situation?.slice(0, 80) || "Untitled case"}
         </div>
         {c.latest_line && (
           <div

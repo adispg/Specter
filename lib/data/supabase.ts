@@ -110,7 +110,10 @@ export class SupabaseStore implements DataStore {
     const rows = check(
       await this.sb
         .from("consults")
-        .select("case_id, persona, reply->>line, created_at")
+        // Aliased. Without "line:" the JSON field does not come back under the
+        // key this code reads, so latest_line was always null and every case in
+        // the list lost its preview line.
+        .select("case_id, persona, line:reply->>line, created_at")
         .in(
           "case_id",
           cases.map((c) => c.id),

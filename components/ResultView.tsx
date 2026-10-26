@@ -235,6 +235,44 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
           onToggleSave={toggleSave}
         />
         <AdviceCards persona={persona} reply={first.reply} onPick={(q) => setText(q)} />
+
+        {/* Everything after the first reply. Until now the screen rendered only
+            the initial consult, so New take, Ask Mike, Ask Donna and follow-ups
+            each cost a model call, wrote a row, and showed the user nothing. */}
+        {consults
+          .filter((c) => c.id !== first.id)
+          .map((c) => {
+            const cp = PERSONAS[c.persona];
+            return (
+              <section key={c.id} id={`c-${c.id}`} className="tentry" data-testid="thread-entry">
+                {c.kind === "followup" && c.user_input && (
+                  <p className="you">
+                    <span className="tag">You</span>
+                    <span>{c.user_input}</span>
+                  </p>
+                )}
+                <div className="thead">
+                  <Avatar persona={c.persona} size="sm" />
+                  <span className="nm">{cp.short}</span>
+                  <span className="kd">
+                    {c.kind === "switch" ? "their take" : c.kind === "another" ? "another take" : "follow-up"}
+                  </span>
+                  <button
+                    type="button"
+                    className="textbtn"
+                    onClick={() => void perf.play(speakReq(c))}
+                    aria-label={`Play ${cp.short}'s reply`}
+                  >
+                    Play
+                  </button>
+                </div>
+                <p className="tline">{stripMarks(c.reply.line)}</p>
+                {c.reply.followup && <p className="tfollow">{stripMarks(c.reply.followup)}</p>}
+                <AdviceCards persona={c.persona} reply={c.reply} onPick={(q) => setText(q)} />
+              </section>
+            );
+          })}
+
         <MomentRow caseId={caseRow.id} momentAt={caseRow.moment_at} />
         <div className="row-actions" style={{ display: "grid", gridTemplateColumns: first.mode === "decline" ? "1fr 1fr" : "1fr 1fr 1fr" }}>
           <button type="button" className="soft" onClick={() => void perf.play(speakReq(first))} style={{ justifyContent: "center" }}>

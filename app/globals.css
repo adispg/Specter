@@ -433,6 +433,14 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 /* Home screen: who is across the desk, then a way in. The persona block is
    centred because it is identity; the starters are left aligned because they
    are content to read. */
+/* Thread entries: every reply after the first one. */
+.tentry { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid var(--hair); scroll-margin-top: 12px; }
+.tentry .thead { display: flex; align-items: center; gap: 8px; }
+.tentry .thead .nm { font: 600 14px/1 var(--sans); color: var(--fg); }
+.tentry .thead .kd { font-size: 12px; color: var(--muted); flex: 1; }
+.tentry .tline { margin: 0; font: 650 20px/1.22 var(--display); letter-spacing: -0.015em; color: var(--fg); text-wrap: balance; }
+.tentry .tfollow { margin: 0; font-size: 14px; line-height: 1.5; color: var(--fg-2); }
+
 /* clarify mode: the questions are tappable, they prefill the composer. */
 .askback {
   display: block; width: 100%; text-align: left; padding: 0;
