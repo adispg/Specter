@@ -47,7 +47,13 @@ export function errorResponse(e: unknown): Response {
       return jsonError("overloaded", "Too many requests right now. Give it a minute.", 429, {}, { detail });
     return jsonError("upstream", "The advice engine had a problem. Try again.", 502, {}, { detail });
   }
-  if (e instanceof TtsError) return jsonError("tts_failed", "Voice unavailable. Here it is in writing.", e.status);
+  if (e instanceof TtsError) {
+    // Same mistake as the model errors: the provider's reason was thrown away,
+    // so a bad voice id, a key without TTS scope and a real outage all looked
+    // identical. The message carries provider detail only, never user content.
+    console.error(`[api] tts error (${e.status}): ${e.message}`);
+    return jsonError("tts_failed", "Voice unavailable. Here it is in writing.", e.status, {}, { detail: e.message.slice(0, 300) });
+  }
   // Never log situation text; the error message is enough.
   console.error("[api] unhandled error:", e instanceof Error ? e.message : "unknown");
   return jsonError("internal", "Something interrupted the call. Try again.", 500);
