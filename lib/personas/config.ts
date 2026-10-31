@@ -274,7 +274,8 @@ const VOICE_BASE: Record<PersonaId, Omit<PersonaVoice, "options">> = {
     similarityBoost: 0.75,
     style: 0.25,
     speed: 0.9,
-    gaps: { short: 420, long: 1050 },
+    // Tightened from 420/1050: authority sounds decisive, not ponderous.
+    gaps: { short: 350, long: 860 },
     browser: {
       prefs: [
         // "richard" leads: Microsoft Richard is the voice chosen on the
@@ -287,7 +288,7 @@ const VOICE_BASE: Record<PersonaId, Omit<PersonaVoice, "options">> = {
         "en-us-x-iom", "en-us-x-iob", "en-us-x-tpd", "en-gb-x-gbb", "en-gb-x-gbd",
       ],
       female: false,
-      rate: 0.96,
+      rate: 0.98,
       pitch: 0.78,
     },
   },
@@ -297,14 +298,15 @@ const VOICE_BASE: Record<PersonaId, Omit<PersonaVoice, "options">> = {
     similarityBoost: 0.75,
     style: 0.3,
     speed: 1.03,
-    gaps: { short: 300, long: 700 },
+    // Tightened from 300/700: rapid-fire energy, thinking out loud at speed.
+    gaps: { short: 260, long: 620 },
     browser: {
       prefs: [
         "brian", "eric", "steffan", "christopher", "ryan", "tom", "aaron", "alex", "andrew", "guy", "male",
         "en-us-x-iom", "en-us-x-iob", "en-us-x-tpd", "en-gb-x-gbb", "en-gb-x-gbd",
       ],
       female: false,
-      rate: 1.04,
+      rate: 1.05,
       pitch: 0.96,
     },
   },
@@ -314,14 +316,15 @@ const VOICE_BASE: Record<PersonaId, Omit<PersonaVoice, "options">> = {
     similarityBoost: 0.75,
     style: 0.35,
     speed: 0.98,
-    gaps: { short: 360, long: 900 },
+    // Short beat tightened from 360: snappier rhythm; long pause kept near 900 for the knowing theatrical beat.
+    gaps: { short: 300, long: 840 },
     browser: {
       prefs: [
         "ava", "aria", "jenny", "emma", "michelle", "samantha", "allison", "susan", "us english", "zira", "female",
         "en-us-x-tpf", "en-us-x-sfg", "en-us-x-iog", "en-us-x-tpc", "en-gb-x-gba", "en-gb-x-gbc",
       ],
       female: true,
-      rate: 0.97,
+      rate: 0.99,
       pitch: 1.0,
     },
   },
