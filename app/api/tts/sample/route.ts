@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 import { PERSONAS } from "@/lib/personas/config";
 import { PersonaIdSchema } from "@/lib/consult/schema";
 import { jsonError } from "@/lib/api";
+import { log } from "@/lib/logger";
 import {
   auraModelFor,
   prepareSpeech,
@@ -111,7 +112,7 @@ export async function GET(req: Request) {
     sampleCache.set(hash, { audio: result.audio, mime: result.mime });
     return NextResponse.json({ audio: result.audio, mime: result.mime });
   } catch (e) {
-    console.error("[tts/sample] synthesis failed:", e instanceof Error ? e.message : e);
+    log.error("tts.sample_failed", { message: e instanceof Error ? e.message.slice(0, 300) : String(e).slice(0, 300) });
     return jsonError("tts_failed", "Could not generate sample. Try again.", 502);
   }
 }

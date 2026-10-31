@@ -7,6 +7,7 @@ import { checkQuota, windowStart } from "@/lib/ratelimit";
 import { ConsultError, generateReply } from "./engine";
 import type { LlmClient, Usage } from "./llm";
 import { careReply, detectCrisis, effectiveIntensity, type SafetyCategory } from "./safety";
+import { log } from "@/lib/logger";
 import { ConsultRequestSchema, type ConsultRequest, type Reply } from "./schema";
 
 export type ConsultLimits = {
@@ -92,9 +93,10 @@ async function refundGuestQuota(ctx: ConsultContext, consumed: string[]): Promis
 }
 
 /**
- * Phase timings for one consult, logged as a single line at the end. Durations
- * only, never user content. The model turned out to be about a third of the
- * wall clock once its thinking was capped, so the rest needs to be visible.
+ * Phase timings for one consult, emitted as a structured log line at the end.
+ * Durations only, never user content. The model turned out to be about a third
+ * of the wall clock once its thinking was capped, so the rest needs to be
+ * visible as discrete fields (searchable in Vercel log drain).
  */
 function timer() {
   const marks: Array<[string, number]> = [];
@@ -105,9 +107,14 @@ function timer() {
       marks.push([name, t - last]);
       last = t;
     },
-    log(total: number) {
-      const parts = marks.map(([n, ms]) => `${n}=${ms}`).join(" ");
-      console.info(`[consult] total=${total} ${parts}`);
+    /**
+     * Emit one structured event with all phase durations as top-level fields
+     * plus any extra context fields (persona, action, model, etc.).
+     */
+    log(total: number, extra: Record<string, unknown> = {}) {
+      const phases: Record<string, number> = {};
+      for (const [n, ms] of marks) phases[n] = ms;
+      log.info("consult.complete", { totalMs: total, ...phases, ...extra });
     },
   };
 }
@@ -238,7 +245,17 @@ async function runConsultInner(ctx: ConsultContext, consumed: string[]): Promise
     const remaining = billable && out.reply.mode !== "care" ? weekly.remaining : Math.max(0, weekly.limit - weekly.used);
     result.quota = { remaining, limit: weekly.limit, resetAt: weekly.resetAt };
   }
-  t.log(Date.now() - started);
+  t.log(Date.now() - started, {
+    persona: request.persona,
+    action: request.action,
+    model: llm.model,
+    mode: out.reply.mode,
+    billable,
+    repaired: out.repaired,
+    latencyModel: latencyMs,
+    tokensIn: out.usage?.inputTokens ?? null,
+    tokensOut: out.usage?.outputTokens ?? null,
+  });
   return result;
 }
 

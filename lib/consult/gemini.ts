@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import type { ChatTurn, SystemBlocks } from "@/lib/personas/prompt";
 import { systemText } from "@/lib/personas/prompt";
 import { LlmError, type Completion, type CompletionRequest, type LlmClient } from "./llm";
+import { log } from "@/lib/logger";
 
 /**
  * Gemini client implementing the same LlmClient interface as AnthropicClient.
@@ -85,7 +86,7 @@ export class GeminiClient implements LlmClient {
           if (attempt === 0) await new Promise((r) => setTimeout(r, 600 + Math.random() * 500));
         }
       }
-      console.warn(`[gemini] ${model} unavailable, trying next model in the chain`);
+      log.warn("llm.model_unavailable", { model });
     }
     throw lastErr;
   }

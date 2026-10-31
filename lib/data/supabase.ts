@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CasePatch, DataStore, ExportBundle, GuestThrottle, ProfilePatch } from "./store";
+import { log } from "@/lib/logger";
 import {
   DEFAULT_SETTINGS,
   type AudioCacheEntry,
@@ -298,7 +299,7 @@ export class SupabaseStore implements DataStore {
    */
   purgeStaleData(): void {
     void this.sb.rpc("purge_stale_data").then((res) => {
-      if (res.error) console.warn("[retention] purge_stale_data failed:", res.error.message);
+      if (res.error) log.warn("retention.purge_failed", { message: res.error.message });
     });
   }
 }
@@ -316,6 +317,6 @@ export class SupabaseGuestThrottle implements GuestThrottle {
     // the caller is about to surface the real error. Tolerates the function not
     // existing yet so the refund can ship ahead of the migration.
     const res = await this.sb.rpc("release_guest_quota", { p_key: keyHash });
-    if (res.error) console.warn(`[guest quota] refund failed: ${res.error.message}`);
+    if (res.error) log.warn("guest.refund_failed", { message: res.error.message });
   }
 }

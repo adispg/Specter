@@ -4,6 +4,7 @@ import { getSession, type Session } from "@/lib/auth";
 import { ConsultError } from "@/lib/consult/engine";
 import { LlmError } from "@/lib/consult/llm";
 import { TtsError } from "@/lib/tts/speech";
+import { log } from "@/lib/logger";
 
 export function jsonError(code: string, message: string, status: number, headers: Record<string, string> = {}, extra: Record<string, unknown> = {}) {
   return NextResponse.json({ error: { code, message, ...extra } }, { status, headers });
@@ -37,7 +38,7 @@ export function errorResponse(e: unknown): Response {
     // The model error never carries situation text, only provider detail such as
     // a retired model id or a rejected key. Log it: without this the real cause
     // is invisible and every failure looks like a rate limit.
-    console.error(`[api] llm error (${e.code}${e.status ? ` ${e.status}` : ""}): ${e.message}`);
+    log.error("llm.error", { code: e.code, status: e.status ?? null, message: e.message.slice(0, 300) });
     const detail = e.message.slice(0, 300);
     if (e.code === "not_configured")
       return jsonError("not_configured", "The advice engine is not configured.", 503, {}, { detail });
@@ -51,11 +52,11 @@ export function errorResponse(e: unknown): Response {
     // Same mistake as the model errors: the provider's reason was thrown away,
     // so a bad voice id, a key without TTS scope and a real outage all looked
     // identical. The message carries provider detail only, never user content.
-    console.error(`[api] tts error (${e.status}): ${e.message}`);
+    log.error("tts.error", { status: e.status, message: e.message.slice(0, 300) });
     return jsonError("tts_failed", "Voice unavailable. Here it is in writing.", e.status, {}, { detail: e.message.slice(0, 300) });
   }
   // Never log situation text; the error message is enough.
-  console.error("[api] unhandled error:", e instanceof Error ? e.message : "unknown");
+  log.error("api.unhandled", { message: e instanceof Error ? e.message.slice(0, 300) : "unknown" });
   return jsonError("internal", "Something interrupted the call. Try again.", 500);
 }
 

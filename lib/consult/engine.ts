@@ -2,6 +2,7 @@ import type { Intensity, PersonaId } from "@/lib/personas/config";
 import { buildSystemPrompt, type ChatTurn, type SystemBlocks } from "@/lib/personas/prompt";
 import type { LlmClient, Usage } from "./llm";
 import { parseReply, type Reply } from "./schema";
+import { log } from "@/lib/logger";
 
 export type ConsultErrorCode =
   | "bad_request"
@@ -69,9 +70,11 @@ export async function generateReply(
   if (reparsed.ok) return { reply: reparsed.reply, repaired: true, raw: second.text, usage: addUsage(first.usage, second.usage) };
   // Log the shape of the failure, never the situation text. Without this a
   // truncated response and a genuinely malformed one look identical.
-  console.error(
-    `[consult] invalid output after repair: ${reparsed.error} | first ${first.text.length} chars, second ${second.text.length} chars`,
-  );
+  log.error("consult.invalid_output", {
+    parseError: String(reparsed.error).slice(0, 300),
+    firstLen: first.text.length,
+    secondLen: second.text.length,
+  });
   throw new ConsultError("invalid_output", `The answer came back garbled. Try again.`, 502, {
     detail: reparsed.error,
     parseError: String(reparsed.error).slice(0, 300),
