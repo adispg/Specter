@@ -289,6 +289,18 @@ export class SupabaseStore implements DataStore {
     check(await this.sb.rpc("delete_my_account"), "delete account");
     await this.sb.auth.signOut();
   }
+
+  /**
+   * Fire-and-forget retention sweep. Deletes stale rows from audio_cache,
+   * usage_events, and guest_usage via the purge_stale_data() DB function.
+   * Never throws: any failure is logged and silently swallowed so a cleanup
+   * hiccup never affects the caller.
+   */
+  purgeStaleData(): void {
+    void this.sb.rpc("purge_stale_data").then((res) => {
+      if (res.error) console.warn("[retention] purge_stale_data failed:", res.error.message);
+    });
+  }
 }
 
 export class SupabaseGuestThrottle implements GuestThrottle {

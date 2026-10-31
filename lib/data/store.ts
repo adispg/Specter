@@ -92,6 +92,11 @@ export interface DataStore {
   exportAll(): Promise<ExportBundle>;
   /** Permanently delete the account and every row that belongs to it. */
   deleteAccount(): Promise<void>;
+  /**
+   * Fire-and-forget retention sweep. Must never throw; failures are swallowed
+   * by the implementation. No-op on non-persistent stores.
+   */
+  purgeStaleData(): void;
 }
 
 /** Device/IP throttle for guest consults; not bound to a user (guests are cheap to recreate). */

@@ -303,6 +303,9 @@ export class MemoryStore implements DataStore {
     for (const [k, a] of d.audio) if (a.user_id === this.userId) d.audio.delete(k);
     d.profiles.delete(this.userId);
   }
+
+  // No-op: in-memory store has no persistent rows to purge.
+  purgeStaleData(): void {}
 }
 
 export class MemoryGuestThrottle implements GuestThrottle {

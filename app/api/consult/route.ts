@@ -26,6 +26,9 @@ export const POST = withSession(async (session, req) => {
     session.store.getProfile(),
     session.user.isGuest ? guestKeys() : Promise.resolve(null),
   ]);
+  // Opportunistic retention sweep: runs on ~1 % of consult requests.
+  // Fire-and-forget; never blocks or errors out the consult pipeline.
+  if (Math.random() < 0.01) session.store.purgeStaleData();
   const country = profile.country ?? (await requestCountry());
   const result = await runConsult({
     store: session.store,
