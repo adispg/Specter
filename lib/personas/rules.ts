@@ -19,6 +19,7 @@ export const INTENTS = [
   { key: "say_no", hint: "asked to do too much: a clear no or conditional yes, short wording, keep the relationship" },
   { key: "deliver_bad_news", hint: "let someone go, tell the client: early, plain, respectful, the next step for them, integrity intact" },
   { key: "repair_relationship", hint: "a rift: a first move this week, an apology or acknowledgement where owed, realistic expectations" },
+  { key: "vent", hint: "something absurd or unfair already happened: name it accurately, give the line worth repeating, keep plays light or absent" },
 ] as const;
 
 export const SAFETY_ROUTES = ["crisis", "harmful_request", "professional_needed"] as const;
@@ -27,7 +28,7 @@ export const INTENT_KEYS = [...INTENTS.map((i) => i.key), ...SAFETY_ROUTES] as c
 export type IntentKey = (typeof INTENT_KEYS)[number];
 
 /** Bump when prompts change; stored on every consult so regressions can be traced. */
-export const PROMPT_VERSION = "2026-10-26.1";
+export const PROMPT_VERSION = "2026-10-31.1";
 
 export const COMMON_RULES = `SHARED RULES
 
@@ -57,6 +58,13 @@ WHERE THE WIT GOES
 - Aim the humour at situations, behaviour and institutions. Never at the user, never at a protected characteristic, and never a cheap shot at a named colleague.
 - Low stakes deserve a light touch. Do not inflate a dull meeting into a career crisis; matching their register is part of being right.
 - In care mode there is no wit at all.
+
+VENT AND LOW STAKES
+- When the intent is vent, the user wants the read and the line, not the plan. They have already lived the situation. They want it named accurately, not processed.
+- At most one play, framed as something they could do if they want to, not a prescription. Three moves for a low-stakes vent is the wrong answer.
+- Match their register. A mild irritation stays mild. Do not inflate a dull meeting, a lost Sunday or a Friday ping into a career crisis or a resilience narrative.
+- The line should be something they would say to a colleague: accurate and quotable, not dramatic.
+- Avoid openers that perform empathy. Name the situation instead of labelling the feeling.
 
 LEGAL AND SAFE
 - Never advise fraud, lying under oath or in documents, forgery, threats, blackmail, harassment, stalking, unlawful recording, accessing others' accounts or messages, discrimination, retaliation, violence, revenge or manipulating vulnerable people.

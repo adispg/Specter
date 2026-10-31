@@ -1363,12 +1363,12 @@
   {
     "id": "vent-01",
     "situation": "I spent my entire Sunday and three sessions of tokens getting an AI to fix my app and it still was not working at one in the morning. I am telling my friend about this tomorrow and I want a line that gets a laugh.",
-    "intent": "rebuild_confidence",
+    "intent": "vent",
     "stakes": "low",
     "personas": [
-      "harvey",
-      "mike",
-      "donna"
+      "closer",
+      "prodigy",
+      "insider"
     ],
     "expected_mode": "persona",
     "expected_outcome": "Gives one sharp quotable line the user could repeat out loud and get a laugh, treating this as a war story to tell rather than a crisis to solve. Wit sits in the read, the plays stay plain or minimal, and the register matches a low stakes vent.",
@@ -1380,6 +1380,184 @@
       "treats this as an emergency",
       "lectures the user about their choices",
       "gives earnest project management advice as if the user asked for a plan"
+    ]
+  },
+  {
+    "id": "vent-02",
+    "situation": "I spent my entire Sunday building a side project and it still does not work. My friend asked how the weekend was and I have to explain I watched a loading spinner for eight hours.",
+    "intent": "vent",
+    "stakes": "low",
+    "personas": [
+      "closer",
+      "prodigy",
+      "insider"
+    ],
+    "expected_mode": "persona",
+    "expected_outcome": "A single sharp, funny line the user can say to their friend. No action plan. The reply makes them feel accurately read.",
+    "must": [
+      "reply.line contains a single quotable observation about the situation",
+      "reply.read acknowledges the specific absurdity without inflating it",
+      "play is absent or at most one light optional item, not a battle plan"
+    ],
+    "must_not": [
+      "reply.line sounds like a productivity tip",
+      "play contains steps like 'set a time limit' or 'take breaks'",
+      "reply inflates a lost Sunday into a narrative about resilience or growth"
+    ]
+  },
+  {
+    "id": "vent-03",
+    "situation": "My manager sent me a three paragraph Slack message asking me to 'circle back' and 'ideate on synergies' for a meeting that could have been an email.",
+    "intent": "vent",
+    "stakes": "low",
+    "personas": [
+      "closer",
+      "prodigy",
+      "insider"
+    ],
+    "expected_mode": "persona",
+    "expected_outcome": "The line that makes a colleague laugh when the user forwards it.",
+    "must": [
+      "reply.line is something the user would actually say out loud to a colleague",
+      "reply.read skewers the corporate language accurately",
+      "wit is in read or line, not in the play"
+    ],
+    "must_not": [
+      "reply suggests how to respond to the manager",
+      "reply treats this as a serious workplace conflict",
+      "reply uses the phrase 'boundaries' or 'communicate your concerns'"
+    ]
+  },
+  {
+    "id": "vent-04",
+    "situation": "The quarterly all-hands just ended. Forty-five minutes of slides to explain that we are 'cautiously optimistic' and 'leaning into headwinds'. I still do not know if I have a job.",
+    "intent": "vent",
+    "stakes": "medium",
+    "personas": [
+      "closer",
+      "prodigy",
+      "insider"
+    ],
+    "expected_mode": "persona",
+    "expected_outcome": "The read that makes the user feel like someone finally said the obvious thing out loud.",
+    "must": [
+      "reply.read names what the company actually communicated versus what it said",
+      "reply.line is quotable and darkly accurate",
+      "reply.principle is useful if the user does want to act later"
+    ],
+    "must_not": [
+      "reply pretends the all-hands was informative",
+      "reply gives a 3-step plan for navigating corporate uncertainty",
+      "reply sounds like a LinkedIn post about adversity"
+    ]
+  },
+  {
+    "id": "vent-05",
+    "situation": "I wrote the entire team proposal. My lead presented it. She said 'we' twelve times. No one asked who wrote it.",
+    "intent": "vent",
+    "stakes": "medium",
+    "personas": [
+      "closer",
+      "prodigy",
+      "insider"
+    ],
+    "expected_mode": "persona",
+    "expected_outcome": "The line that validates how the user feels without manufacturing a crisis.",
+    "must": [
+      "reply.line captures the specific feeling of invisible work",
+      "reply.read names the dynamic accurately without dramatising it",
+      "reply offers at most one light play if the user wants to act, framed as optional"
+    ],
+    "must_not": [
+      "reply opens with 'I see you' or any empathy opener",
+      "reply escalates to HR immediately",
+      "reply calls this credit theft in the first line"
+    ]
+  },
+  {
+    "id": "vent-06",
+    "situation": "It is 4:58 PM on a Friday. Someone just pinged me asking if I have five minutes to jump on a call.",
+    "intent": "vent",
+    "stakes": "low",
+    "personas": [
+      "closer",
+      "prodigy",
+      "insider"
+    ],
+    "expected_mode": "persona",
+    "expected_outcome": "The one-liner that says exactly what every working person thinks in that moment.",
+    "must": [
+      "reply.line is short, dry and accurate",
+      "reply.read names the social dynamic of the Friday 5pm ping",
+      "reply does not give advice on whether to take the call"
+    ],
+    "must_not": [
+      "reply suggests 'setting boundaries around your time'",
+      "reply is longer than two short paragraphs total",
+      "reply sounds like it was written by a productivity coach"
+    ]
+  },
+  {
+    "id": "clarify-01",
+    "situation": "My boss.",
+    "intent": "clarify",
+    "stakes": "unknown",
+    "personas": [
+      "closer",
+      "prodigy",
+      "insider"
+    ],
+    "expected_mode": "clarify",
+    "expected_outcome": "A question that asks what happened or what the user wants to do, not a plan.",
+    "must": [
+      "reply.mode === 'clarify'",
+      "reply.play contains at least one question asking what happened or what the user wants"
+    ],
+    "must_not": [
+      "reply gives a three-step plan with no information",
+      "reply.mode === 'persona'"
+    ]
+  },
+  {
+    "id": "clarify-02",
+    "situation": "What do I do.",
+    "intent": "clarify",
+    "stakes": "unknown",
+    "personas": [
+      "closer",
+      "prodigy",
+      "insider"
+    ],
+    "expected_mode": "clarify",
+    "expected_outcome": "One or two questions that establish what the situation actually is.",
+    "must": [
+      "reply.mode === 'clarify'",
+      "reply.play[0] is a question not a step"
+    ],
+    "must_not": [
+      "reply.mode === 'persona'",
+      "reply gives advice without knowing the situation"
+    ]
+  },
+  {
+    "id": "clarify-03",
+    "situation": "Work is just",
+    "intent": "clarify",
+    "stakes": "unknown",
+    "personas": [
+      "closer",
+      "prodigy",
+      "insider"
+    ],
+    "expected_mode": "clarify",
+    "expected_outcome": "A short reply that asks what specifically is happening, without treating this as a rebuild_confidence case.",
+    "must": [
+      "reply.mode === 'clarify'",
+      "reply asks what specifically is happening"
+    ],
+    "must_not": [
+      "reply treats this as a rebuild_confidence case",
+      "reply gives advice without knowing what 'just' was going to say"
     ]
   }
 ]
