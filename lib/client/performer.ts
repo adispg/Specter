@@ -321,6 +321,21 @@ export function voicesReady(timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
   });
 }
 
+const FEMALE_RE = /female|zira|aria|jenny|ava|samantha|susan|emma|en-us-x-tpf|en-us-x-sfg|en-us-x-iog|en-us-x-tpc|en-gb-x-gba|en-gb-x-gbc/;
+const MALE_RE = /\bmale\b|guy|andrew|davis|brian|eric|david|mark|daniel|richard|james|george|william|ravi|christopher|roger|steffan|ryan|en-us-x-iom|en-us-x-iob|en-us-x-tpd|en-gb-x-gbb|en-gb-x-gbd/;
+
+/**
+ * Heuristic gender detection for a device voice.
+ * Returns "female" or "male" when the voice name/URI matches known patterns,
+ * or null when it cannot be determined (e.g. generic Android voices).
+ */
+export function voiceGender(v: SpeechSynthesisVoice): "female" | "male" | null {
+  const id = `${v.name.toLowerCase()} ${(v.voiceURI || "").toLowerCase()}`;
+  if (FEMALE_RE.test(id)) return "female";
+  if (MALE_RE.test(id)) return "male";
+  return null;
+}
+
 /** Pick the best device voice for a persona (prototype's scoring), unless the user chose one. */
 export function pickBrowserVoice(persona: PersonaId, chosen?: string | null): SpeechSynthesisVoice | null {
   const voices = browserVoices();
@@ -341,16 +356,13 @@ export function pickBrowserVoice(persona: PersonaId, chosen?: string | null): Sp
     // Android's Google voices are named like "en-us-x-tpf-local" with no gender
     // word, so name-based detection misses entirely and every voice ties at
     // zero, leaving whatever the device happens to list first. Match the codes.
-    const uri = (v.voiceURI || "").toLowerCase();
-    const id = `${n} ${uri}`;
-    const femaleHit = /female|zira|aria|jenny|ava|samantha|susan|emma|en-us-x-tpf|en-us-x-sfg|en-us-x-iog|en-us-x-tpc|en-gb-x-gba|en-gb-x-gbc/.test(id);
-    const maleHit = /\bmale\b|guy|andrew|davis|brian|eric|david|mark|daniel|richard|james|george|william|ravi|christopher|roger|steffan|ryan|en-us-x-iom|en-us-x-iob|en-us-x-tpd|en-gb-x-gbb|en-gb-x-gbd/.test(id);
+    const gender = voiceGender(v);
     if (!pref.female) {
-      if (femaleHit) score -= 80;
-      if (maleHit) score += 40;
+      if (gender === "female") score -= 80;
+      if (gender === "male") score += 40;
     } else {
-      if (maleHit) score -= 80;
-      if (femaleHit) score += 40;
+      if (gender === "male") score -= 80;
+      if (gender === "female") score += 40;
     }
     if (score > bestScore) {
       best = v;

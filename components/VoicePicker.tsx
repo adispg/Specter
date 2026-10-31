@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { PERSONAS, personaList, type PersonaId } from "@/lib/personas/config";
-import { browserVoices, pickBrowserVoice, voicesReady } from "@/lib/client/performer";
+import { browserVoices, pickBrowserVoice, voiceGender, voicesReady } from "@/lib/client/performer";
 import { useApp } from "./AppProvider";
 import { Avatar } from "./Persona";
 
@@ -78,6 +78,24 @@ export function VoicePicker() {
         const auto = pickBrowserVoice(p.id, null);
         const current = chosenName ? (voices.find((v) => v.name === chosenName) ?? null) : auto;
         const isOpen = open === p.id;
+        const wantsFemale = PERSONAS[p.id].voice.browser.female;
+
+        // Sort voices: gender-matched first, then neutral, then opposite gender.
+        const sortedVoices = [...voices].sort((a, b) => {
+          const ga = voiceGender(a);
+          const gb = voiceGender(b);
+          const scoreGender = (g: "female" | "male" | null) => {
+            if (g === null) return 1;
+            if ((wantsFemale && g === "female") || (!wantsFemale && g === "male")) return 0;
+            return 2;
+          };
+          return scoreGender(ga) - scoreGender(gb);
+        });
+
+        // Does this persona want a male voice but we have none?
+        const hasMale = voices.some((v) => voiceGender(v) === "male");
+        const showMaleHint = !wantsFemale && !hasMale;
+
         return (
           <div key={p.id} style={{ borderBottom: "1px solid var(--hair)" }}>
             <button
@@ -102,6 +120,18 @@ export function VoicePicker() {
 
             {isOpen && (
               <div style={{ padding: "0 16px 14px" }}>
+                {showMaleHint && (
+                  <p className="fine" style={{
+                    margin: "0 0 10px",
+                    padding: "8px 10px",
+                    background: "var(--surface-2, rgba(128,128,128,0.08))",
+                    borderRadius: 6,
+                    lineHeight: 1.5,
+                  }}>
+                    This persona sounds best with a male voice, but your device only has female English voices right now.
+                    You can add more in <strong>Settings &rsaquo; Accessibility &rsaquo; Spoken Content &rsaquo; Voices</strong> (iOS) or <strong>Settings &rsaquo; Text-to-speech</strong> (Android).
+                  </p>
+                )}
                 <button
                   type="button"
                   className="starter"
@@ -113,8 +143,9 @@ export function VoicePicker() {
                 >
                   Choose automatically{auto ? `, currently ${auto.name}` : ""}
                 </button>
-                {voices.map((v) => {
+                {sortedVoices.map((v) => {
                   const selected = chosenName === v.name;
+                  const gender = voiceGender(v);
                   return (
                     <div key={v.name} style={{ display: "flex", gap: 6, marginBottom: 6 }}>
                       <button
@@ -128,6 +159,20 @@ export function VoicePicker() {
                       >
                         {v.name}
                         <span style={{ color: "var(--muted)", fontSize: 12 }}> {v.lang}</span>
+                        {gender && (
+                          <span style={{
+                            marginLeft: 6,
+                            fontSize: 11,
+                            fontWeight: 500,
+                            letterSpacing: "0.03em",
+                            color: gender === "female" ? "var(--accent, #b06a7a)" : "var(--fg-3, #6a8ab0)",
+                            background: gender === "female" ? "rgba(176,106,122,0.10)" : "rgba(106,138,176,0.10)",
+                            padding: "1px 5px",
+                            borderRadius: 4,
+                          }}>
+                            {gender === "female" ? "F" : "M"}
+                          </span>
+                        )}
                       </button>
                       <button
                         type="button"
