@@ -1,29 +1,91 @@
 "use client";
-import { Suspense, useState, type CSSProperties } from "react";
+import { Suspense, useCallback, useRef, useState, type CSSProperties } from "react";
 import { BRAND, PERSONAS, personaList, themeVars, type PersonaId } from "@/lib/personas/config";
 import { Wordmark } from "@/components/Wordmark";
 import { Avatar } from "@/components/Persona";
 import { ErrorBanner } from "@/components/ui";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-function Spinner() {
+function Spinner({ size = 15, marginRight = 8 }: { size?: number; marginRight?: number }) {
   return (
     <span
       aria-hidden="true"
       style={{
         display: "inline-block",
-        width: 15,
-        height: 15,
+        width: size,
+        height: size,
         border: "2px solid currentColor",
         borderTopColor: "transparent",
         borderRadius: "50%",
         animation: "spin 0.7s linear infinite",
         verticalAlign: "middle",
-        marginRight: 8,
+        marginRight,
         opacity: 0.8,
       }}
     />
   );
+}
+
+/** Speaker icon for the voice preview button. */
+function IconSpeaker() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    </svg>
+  );
+}
+
+/** Manages a single shared Audio instance for persona previews. */
+function useVoicePreview() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState<PersonaId | null>(null);
+  const [loading, setLoading] = useState<PersonaId | null>(null);
+  // null = not yet tried, true = works, false = unavailable
+  const [available, setAvailable] = useState<boolean | null>(null);
+
+  const stop = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+    }
+    setPlaying(null);
+  }, []);
+
+  const preview = useCallback(async (persona: PersonaId) => {
+    // Stop whatever is playing
+    stop();
+    // If we already know TTS is unavailable, do nothing
+    if (available === false) return;
+
+    setLoading(persona);
+    try {
+      const res = await fetch(`/api/tts/sample?persona=${encodeURIComponent(persona)}`);
+      if (res.status === 501) {
+        // TTS not configured on this deployment
+        setAvailable(false);
+        return;
+      }
+      if (!res.ok) return;
+      const data = (await res.json()) as { audio?: string; mime?: string };
+      if (!data.audio || !data.mime) return;
+      setAvailable(true);
+      const src = `data:${data.mime};base64,${data.audio}`;
+      const audio = new Audio(src);
+      audioRef.current = audio;
+      audio.onended = () => setPlaying(null);
+      audio.onerror = () => setPlaying(null);
+      setPlaying(persona);
+      void audio.play();
+    } catch {
+      // Network or parse error -- silently fail
+    } finally {
+      setLoading(null);
+    }
+  }, [available, stop]);
+
+  return { playing, loading, available, preview, stop };
 }
 
 function WelcomeInner() {
@@ -31,6 +93,7 @@ function WelcomeInner() {
   const [selected, setSelected] = useState<PersonaId>(personas[0]?.id ?? "closer");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const voice = useVoicePreview();
 
   async function handleTry() {
     if (busy) return;
@@ -85,7 +148,7 @@ function WelcomeInner() {
           transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
           outline: none;
           position: relative;
-          overflow: hidden;
+          box-sizing: border-box;
         }
         .wlc-card:focus-visible {
           outline: 2px solid var(--accent);
@@ -96,7 +159,7 @@ function WelcomeInner() {
           border-color: var(--accent);
           box-shadow: 0 0 0 1px var(--accent), 0 4px 24px -8px color-mix(in srgb, var(--accent) 40%, transparent);
         }
-        .wlc-card[disabled] { cursor: default; opacity: 0.7; }
+        .wlc-card[data-busy="true"] { cursor: default; opacity: 0.7; }
         .wlc-check {
           width: 18px;
           height: 18px;
@@ -193,14 +256,25 @@ function WelcomeInner() {
             {personas.map((p) => {
               const isSelected = selected === p.id;
               const pConfig = PERSONAS[p.id];
+              const isPlaying = voice.playing === p.id;
+              const isLoading = voice.loading === p.id;
               return (
-                <button
+                /* Outer div acts as the radio card. A nested button (speaker)
+                   would be invalid HTML inside a <button>, so the card is a
+                   keyboard-accessible div with role="radio". */
+                <div
                   key={p.id}
-                  type="button"
                   role="radio"
                   aria-checked={isSelected}
-                  onClick={() => setSelected(p.id)}
-                  disabled={busy}
+                  tabIndex={busy ? -1 : 0}
+                  data-busy={busy ? "true" : undefined}
+                  onClick={() => !busy && setSelected(p.id)}
+                  onKeyDown={(e) => {
+                    if (!busy && (e.key === " " || e.key === "Enter")) {
+                      e.preventDefault();
+                      setSelected(p.id);
+                    }
+                  }}
                   className="wlc-card"
                   style={isSelected ? (themeVars(pConfig.theme) as CSSProperties) : undefined}
                 >
@@ -240,10 +314,44 @@ function WelcomeInner() {
                       {pConfig.tagline}
                     </p>
                   </div>
+                  {voice.available !== false && (
+                    <button
+                      type="button"
+                      aria-label={isPlaying ? `Stop ${p.short}'s voice` : `Hear ${p.short}'s voice`}
+                      disabled={busy || isLoading}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isPlaying) {
+                          voice.stop();
+                        } else {
+                          setSelected(p.id);
+                          void voice.preview(p.id);
+                        }
+                      }}
+                      style={{
+                        flexShrink: 0,
+                        display: "grid",
+                        placeItems: "center",
+                        width: 30,
+                        height: 30,
+                        borderRadius: "50%",
+                        border: "1px solid var(--hair, rgba(255,255,255,0.12))",
+                        background: isPlaying ? "var(--accent)" : "transparent",
+                        color: isPlaying ? "var(--bg)" : "var(--fg-3)",
+                        cursor: "pointer",
+                        transition: "background 0.15s, color 0.15s",
+                        marginRight: 6,
+                      }}
+                    >
+                      {isLoading
+                        ? <Spinner size={12} marginRight={0} />
+                        : <IconSpeaker />}
+                    </button>
+                  )}
                   <div className="wlc-check" aria-hidden="true">
                     <span className="wlc-check-dot" />
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -274,7 +382,7 @@ function WelcomeInner() {
           <button
             type="button"
             className="cta"
-            onClick={handleTry}
+            onClick={() => { voice.stop(); void handleTry(); }}
             disabled={busy}
             style={{ width: "100%" }}
           >
