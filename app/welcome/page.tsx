@@ -26,13 +26,19 @@ function Spinner({ size = 15, marginRight = 8 }: { size?: number; marginRight?: 
   );
 }
 
-/** Speaker icon for the voice preview button. */
-function IconSpeaker() {
+function IconSpeaker({ size = 14 }: { size?: number }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
       <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    </svg>
+  );
+}
+
+function IconStop({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="4" y="4" width="16" height="16" rx="2" />
     </svg>
   );
 }
@@ -42,7 +48,6 @@ function useVoicePreview() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState<PersonaId | null>(null);
   const [loading, setLoading] = useState<PersonaId | null>(null);
-  // null = not yet tried, true = works, false = unavailable
   const [available, setAvailable] = useState<boolean | null>(null);
 
   const stop = useCallback(() => {
@@ -54,16 +59,13 @@ function useVoicePreview() {
   }, []);
 
   const preview = useCallback(async (persona: PersonaId) => {
-    // Stop whatever is playing
     stop();
-    // If we already know TTS is unavailable, do nothing
     if (available === false) return;
 
     setLoading(persona);
     try {
       const res = await fetch(`/api/tts/sample?persona=${encodeURIComponent(persona)}`);
       if (res.status === 501) {
-        // TTS not configured on this deployment
         setAvailable(false);
         return;
       }
@@ -79,7 +81,7 @@ function useVoicePreview() {
       setPlaying(persona);
       void audio.play();
     } catch {
-      // Network or parse error -- silently fail
+      // silently fail
     } finally {
       setLoading(null);
     }
@@ -129,119 +131,178 @@ function WelcomeInner() {
   }
 
   const selectedPersona = PERSONAS[selected];
+  const selectedTheme = themeVars(selectedPersona.theme) as CSSProperties;
 
   return (
     <>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .wlc-root {
+          min-height: 100dvh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: env(safe-area-inset-top, 24px) 20px env(safe-area-inset-bottom, 40px);
+          box-sizing: border-box;
+          width: 100%;
+          transition: --glow var(--dur-tint, 600ms) ease;
+        }
+        .wlc-inner {
+          width: 100%;
+          max-width: 400px;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 0;
+          animation: fadeUp 0.4s var(--ease-enter, cubic-bezier(0.16,1,0.3,1)) both;
+        }
+        /* Persona card */
         .wlc-card {
+          position: relative;
           display: flex;
           align-items: center;
-          gap: 14px;
-          padding: 14px 16px;
-          border-radius: var(--radius-xl, 18px);
+          gap: 12px;
+          padding: 13px 14px;
+          border-radius: 18px;
           border: 1.5px solid var(--hair, rgba(255,255,255,0.08));
-          background: var(--surface);
+          background: var(--surface, #121722);
           cursor: pointer;
           text-align: left;
           width: 100%;
-          transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+          transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
           outline: none;
-          position: relative;
           box-sizing: border-box;
+          overflow: hidden;
+        }
+        .wlc-card::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          opacity: 0;
+          background: radial-gradient(80% 80% at 20% 50%, var(--accent, #d3dbe8) 0%, transparent 70%);
+          transition: opacity 0.3s;
+          pointer-events: none;
         }
         .wlc-card:focus-visible {
           outline: 2px solid var(--accent);
           outline-offset: 2px;
         }
         .wlc-card[aria-checked="true"] {
-          background: var(--surface-2, #19202e);
-          border-color: var(--accent);
-          box-shadow: 0 0 0 1px var(--accent), 0 4px 24px -8px color-mix(in srgb, var(--accent) 40%, transparent);
+          border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+          background: color-mix(in srgb, var(--surface-2, #19202e) 85%, var(--accent) 15%);
+          box-shadow:
+            0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent),
+            0 6px 32px -6px color-mix(in srgb, var(--glow) 60%, transparent);
         }
+        .wlc-card[aria-checked="true"]::before { opacity: 0.06; }
         .wlc-card[data-busy="true"] { cursor: default; opacity: 0.7; }
-        .wlc-check {
-          width: 18px;
-          height: 18px;
+        /* Radio dot */
+        .wlc-dot {
+          width: 18px; height: 18px; flex: none;
           border-radius: 50%;
-          border: 1.5px solid var(--hair, rgba(255,255,255,0.12));
+          border: 1.5px solid var(--hair-2, rgba(255,255,255,0.14));
           background: transparent;
-          flex: none;
-          display: grid;
-          place-items: center;
-          transition: background 0.15s, border-color 0.15s;
+          display: grid; place-items: center;
           margin-left: auto;
+          transition: background 0.18s, border-color 0.18s;
         }
-        .wlc-card[aria-checked="true"] .wlc-check {
+        .wlc-card[aria-checked="true"] .wlc-dot {
           background: var(--accent);
           border-color: var(--accent);
         }
-        .wlc-check-dot {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: var(--bg);
+        .wlc-dot-fill {
+          width: 7px; height: 7px; border-radius: 50%;
+          background: var(--bg, #090c12);
           opacity: 0;
-          transition: opacity 0.12s;
+          transition: opacity 0.14s;
         }
-        .wlc-card[aria-checked="true"] .wlc-check-dot { opacity: 1; }
+        .wlc-card[aria-checked="true"] .wlc-dot-fill { opacity: 1; }
+        /* Voice button */
+        .wlc-voice {
+          flex-shrink: 0;
+          display: grid; place-items: center;
+          width: 28px; height: 28px;
+          border-radius: 50%;
+          border: 1px solid var(--hair-2, rgba(255,255,255,0.14));
+          background: transparent;
+          color: var(--fg-3, #8b95a7);
+          transition: background 0.15s, color 0.15s, border-color 0.15s;
+          position: relative; z-index: 1;
+        }
+        .wlc-voice[data-playing="true"] {
+          background: var(--accent);
+          color: var(--on-accent, #0b0f16);
+          border-color: var(--accent);
+        }
+        /* Section label */
+        .wlc-section {
+          font: 600 10.5px/1 var(--sans, system-ui);
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+          color: var(--fg-3, #8b95a7);
+          margin: 0 0 10px 2px;
+          align-self: flex-start;
+        }
       `}</style>
 
       <main
-        style={{
-          ...(themeVars(selectedPersona.theme) as CSSProperties),
-          minHeight: "100dvh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "env(safe-area-inset-top, 24px) 24px env(safe-area-inset-bottom, 40px)",
-          boxSizing: "border-box",
-          width: "100%",
-        }}
+        className="wlc-root"
+        style={selectedTheme}
       >
+        {/* Ambient glow layer */}
         <div
+          aria-hidden="true"
           style={{
-            width: "100%",
-            maxWidth: 400,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 0,
+            position: "fixed",
+            inset: 0,
+            pointerEvents: "none",
+            background: `radial-gradient(55% 40% at 50% -5%, var(--glow) 0%, transparent 70%)`,
+            opacity: 0.7,
+            transition: `opacity 0.6s, background 0.6s`,
+            zIndex: 0,
           }}
-        >
-          {/* Wordmark */}
-          <Wordmark height={22} />
+        />
 
-          {/* Promise */}
-          <p
-            style={{
-              margin: "10px 0 36px",
-              color: "var(--muted)",
-              fontSize: 14,
-              textAlign: "center",
-              lineHeight: 1.5,
-              letterSpacing: "0.01em",
-            }}
-          >
-            {BRAND.promise}
-          </p>
+        <div className="wlc-inner" style={{ position: "relative", zIndex: 1, paddingTop: 20 }}>
+          {/* Wordmark */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
+            <Wordmark height={20} />
+          </div>
+
+          {/* Hero */}
+          <div style={{ textAlign: "center", marginBottom: 44 }}>
+            <h1
+              style={{
+                margin: "0 0 12px",
+                font: `700 32px/1.06 var(--display, system-ui)`,
+                letterSpacing: "-0.03em",
+                color: "var(--fg)",
+                textWrap: "balance",
+              }}
+            >
+              {BRAND.promise}
+            </h1>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 15,
+                lineHeight: 1.55,
+                color: "var(--fg-3, #8b95a7)",
+                maxWidth: 280,
+                marginInline: "auto",
+              }}
+            >
+              Pick an advisor. Describe what you are facing. Get the move.
+            </p>
+          </div>
 
           {/* Persona picker */}
-          <p
-            style={{
-              margin: "0 0 12px 2px",
-              color: "var(--fg-2)",
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              alignSelf: "flex-start",
-            }}
-          >
-            Choose your advisor
-          </p>
-
+          <p className="wlc-section">Your advisor</p>
           <div
             role="radiogroup"
             aria-label="Choose your advisor"
@@ -249,19 +310,16 @@ function WelcomeInner() {
               display: "flex",
               flexDirection: "column",
               gap: 8,
-              width: "100%",
               marginBottom: 28,
             }}
           >
             {personas.map((p) => {
               const isSelected = selected === p.id;
               const pConfig = PERSONAS[p.id];
+              const pTheme = themeVars(pConfig.theme) as CSSProperties;
               const isPlaying = voice.playing === p.id;
               const isLoading = voice.loading === p.id;
               return (
-                /* Outer div acts as the radio card. A nested button (speaker)
-                   would be invalid HTML inside a <button>, so the card is a
-                   keyboard-accessible div with role="radio". */
                 <div
                   key={p.id}
                   role="radio"
@@ -276,28 +334,38 @@ function WelcomeInner() {
                     }
                   }}
                   className="wlc-card"
-                  style={isSelected ? (themeVars(pConfig.theme) as CSSProperties) : undefined}
+                  style={isSelected ? pTheme : undefined}
                 >
-                  <Avatar persona={p.id} size="lg" halo={isSelected ? 1 : 0} />
+                  <Avatar persona={p.id} size="md" halo={isSelected ? 1 : 0} />
+
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
                         display: "flex",
                         alignItems: "baseline",
                         gap: 6,
-                        marginBottom: 2,
+                        marginBottom: 1,
                       }}
                     >
-                      <span style={{ fontWeight: 600, fontSize: 15, color: "var(--fg)", lineHeight: 1.2 }}>
+                      <span
+                        style={{
+                          fontWeight: 650,
+                          fontSize: 14.5,
+                          color: "var(--fg)",
+                          lineHeight: 1.2,
+                          letterSpacing: "-0.01em",
+                        }}
+                      >
                         {p.short}
                       </span>
                       <span
                         style={{
-                          fontSize: 11,
-                          color: isSelected ? "var(--accent)" : "var(--muted)",
-                          fontWeight: 500,
-                          letterSpacing: "0.02em",
-                          transition: "color 0.18s",
+                          fontSize: 10.5,
+                          color: isSelected ? "var(--accent-2-text, var(--accent))" : "var(--fg-3, #8b95a7)",
+                          fontWeight: 600,
+                          letterSpacing: "0.05em",
+                          textTransform: "uppercase",
+                          transition: "color 0.2s",
                         }}
                       >
                         {pConfig.archetype}
@@ -306,19 +374,23 @@ function WelcomeInner() {
                     <p
                       style={{
                         margin: 0,
-                        fontSize: 13,
-                        color: "var(--fg-2)",
-                        lineHeight: 1.45,
+                        fontSize: 12.5,
+                        color: "var(--fg-2, #cfd5df)",
+                        lineHeight: 1.4,
+                        opacity: isSelected ? 1 : 0.75,
+                        transition: "opacity 0.2s",
                       }}
                     >
                       {pConfig.tagline}
                     </p>
                   </div>
+
                   {voice.available !== false && (
                     <button
                       type="button"
-                      aria-label={isPlaying ? `Stop ${p.short}'s voice` : `Hear ${p.short}'s voice`}
+                      aria-label={isPlaying ? `Stop ${p.short}` : `Hear ${p.short}`}
                       disabled={busy || isLoading}
+                      data-playing={isPlaying ? "true" : undefined}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (isPlaying) {
@@ -328,28 +400,18 @@ function WelcomeInner() {
                           void voice.preview(p.id);
                         }
                       }}
-                      style={{
-                        flexShrink: 0,
-                        display: "grid",
-                        placeItems: "center",
-                        width: 30,
-                        height: 30,
-                        borderRadius: "50%",
-                        border: "1px solid var(--hair, rgba(255,255,255,0.12))",
-                        background: isPlaying ? "var(--accent)" : "transparent",
-                        color: isPlaying ? "var(--bg)" : "var(--fg-3)",
-                        cursor: "pointer",
-                        transition: "background 0.15s, color 0.15s",
-                        marginRight: 6,
-                      }}
+                      className="wlc-voice"
                     >
                       {isLoading
-                        ? <Spinner size={12} marginRight={0} />
-                        : <IconSpeaker />}
+                        ? <Spinner size={11} marginRight={0} />
+                        : isPlaying
+                          ? <IconStop size={10} />
+                          : <IconSpeaker size={13} />}
                     </button>
                   )}
-                  <div className="wlc-check" aria-hidden="true">
-                    <span className="wlc-check-dot" />
+
+                  <div className="wlc-dot" aria-hidden="true">
+                    <span className="wlc-dot-fill" />
                   </div>
                 </div>
               );
@@ -358,7 +420,7 @@ function WelcomeInner() {
 
           {/* Error */}
           {error && (
-            <div style={{ width: "100%", marginBottom: 14 }}>
+            <div style={{ marginBottom: 14 }}>
               <ErrorBanner>{error}</ErrorBanner>
             </div>
           )}
@@ -366,12 +428,13 @@ function WelcomeInner() {
           {/* Disclosure */}
           <p
             style={{
-              fontSize: 11,
-              color: "var(--muted)",
+              fontSize: 11.5,
+              color: "var(--fg-3, #8b95a7)",
               textAlign: "center",
               lineHeight: 1.6,
               marginBottom: 14,
-              maxWidth: 340,
+              maxWidth: 320,
+              marginInline: "auto",
             }}
           >
             By continuing you confirm you are 18 or older and understand this app uses AI.
@@ -384,26 +447,34 @@ function WelcomeInner() {
             className="cta"
             onClick={() => { voice.stop(); void handleTry(); }}
             disabled={busy}
-            style={{ width: "100%" }}
+            style={{ width: "100%", fontSize: 15 }}
           >
             {busy && <Spinner />}
             {busy ? "Starting..." : "Get started"}
           </button>
 
           {/* Sign in link */}
-          <a
-            href="/sign-in"
+          <p
             style={{
-              marginTop: 18,
+              margin: "18px 0 0",
               fontSize: 14,
-              color: "var(--muted)",
-              textDecoration: "none",
-              padding: "8px 0",
+              color: "var(--fg-3, #8b95a7)",
+              textAlign: "center",
+              lineHeight: 1.5,
             }}
           >
             Already have an account?{" "}
-            <span style={{ color: "var(--fg-2)", fontWeight: 500 }}>Sign in</span>
-          </a>
+            <a
+              href="/sign-in"
+              style={{
+                color: "var(--fg-2, #cfd5df)",
+                fontWeight: 500,
+                textDecoration: "none",
+              }}
+            >
+              Sign in
+            </a>
+          </p>
         </div>
       </main>
     </>

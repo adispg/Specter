@@ -12,7 +12,7 @@
   --bg: #090c12; --bg-raise: #0d1119;
   --surface: #121722; --surface-2: #19202e; --surface-3: #212a3b;
   --hair: rgba(255,255,255,0.08); --hair-2: rgba(255,255,255,0.14);
-  --fg: #eef1f6; --fg-2: #cfd5df; --muted: #8b95a7; --dim: rgba(238,241,246,0.26);
+  --fg: #eef1f6; --fg-1: #eef1f6; --fg-2: #cfd5df; --fg-3: #8b95a7; --fg-4: rgba(238,241,246,0.38); --muted: #8b95a7; --dim: rgba(238,241,246,0.26);
   --scrim: rgba(0,0,0,0.5); --toast-bg: #f2f4f8; --toast-fg: #0b0f16;
   --danger: #e58a8a; --danger-bg: rgba(229,138,138,0.10);
   --warning: #e8c27a; --warning-bg: rgba(232,194,122,0.10);
@@ -41,7 +41,7 @@
   --color-bg: var(--bg); --color-bg-raise: var(--bg-raise);
   --color-surface: var(--surface); --color-surface-2: var(--surface-2); --color-surface-3: var(--surface-3);
   --color-hair: var(--hair); --color-hair-2: var(--hair-2);
-  --color-fg: var(--fg); --color-fg-2: var(--fg-2); --color-muted: var(--muted); --color-dim: var(--dim);
+  --color-fg: var(--fg); --color-fg-1: var(--fg-1); --color-fg-2: var(--fg-2); --color-fg-3: var(--fg-3); --color-fg-4: var(--fg-4); --color-muted: var(--muted); --color-dim: var(--dim);
   --color-accent: var(--accent); --color-accent-2: var(--accent-2); --color-accent-2-text: var(--accent-2-text);
   --color-glow: var(--glow); --color-on-accent: var(--on-accent);
   --color-danger: var(--danger); --color-danger-bg: var(--danger-bg);
