@@ -34,89 +34,26 @@ function useRecentCases() {
 function RecentCasesStrip({ cases }: { cases: CaseSummary[] }) {
   if (cases.length === 0) return null;
   return (
-    <div style={{ width: "100%", paddingBottom: 4 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 2px 8px",
-        }}
-      >
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: "var(--fg-3)",
-            textTransform: "uppercase",
-            letterSpacing: "0.07em",
-          }}
-        >
-          Recent
-        </span>
-        <Link
-          href="/cases"
-          style={{
-            fontSize: 12,
-            color: "var(--accent)",
-            textDecoration: "none",
-            fontWeight: 500,
-          }}
-        >
-          See all
-        </Link>
+    <div className="recent-strip">
+      <div className="recent-hd">
+        <span className="recent-label">Recent</span>
+        <Link href="/cases" className="recent-all">See all</Link>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      <div className="recent-list">
         {cases.map((c) => {
           const persona = c.latest_persona ?? c.persona;
           return (
-            <Link
-              key={c.id}
-              href={`/cases/${c.id}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
-                background: "var(--surface)",
-                borderRadius: 12,
-                textDecoration: "none",
-                color: "inherit",
-                border: "1px solid var(--border)",
-              }}
-            >
-              <Avatar persona={persona} size="xs" style={{ flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "var(--fg-1)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+            <Link key={c.id} href={`/cases/${c.id}`} className="recent-card">
+              <Avatar persona={persona} size="xs" />
+              <div className="recent-body">
+                <span className="recent-title">
                   {c.title || c.situation?.slice(0, 60) || "Untitled case"}
-                </div>
+                </span>
                 {c.latest_line && (
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "var(--fg-3)",
-                      marginTop: 1,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {c.latest_line}
-                  </div>
+                  <span className="recent-preview">{c.latest_line}</span>
                 )}
               </div>
-              <span style={{ fontSize: 11, color: "var(--fg-3)", flexShrink: 0 }}>
-                {relTime(c.last_activity_at)}
-              </span>
+              <time className="recent-time">{relTime(c.last_activity_at)}</time>
             </Link>
           );
         })}
@@ -260,9 +197,12 @@ export function HomeScreen() {
         )}
 
         {working && (
-          <p className="thinking" aria-live="polite">
-            {p.thinking[0] ?? "Working on it."}
-          </p>
+          <div className="home-thinking" aria-live="polite">
+            <p>{p.thinking[0] ?? "Working on it."}</p>
+            <div className="dots">
+              <i /><i /><i />
+            </div>
+          </div>
         )}
 
         {showStarters && (
