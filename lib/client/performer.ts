@@ -366,3 +366,28 @@ export function performer(): Performer {
   return singleton;
 }
 export type { Performer };
+
+/**
+ * Kick off a TTS fetch immediately after a consult resolves, before the router
+ * navigates to the case page. By the time ResultView mounts and calls
+ * perf.play(), the audio is already in audioCache and plays without waiting
+ * for a second round-trip.
+ *
+ * Fires-and-forgets: failures are silently ignored. The performer falls back to
+ * the browser voice if the cache is cold when it needs to play.
+ */
+export function prefetchTts(consultId: string, opts: { readPlay?: boolean; pace: number }): void {
+  if (typeof window === "undefined") return;
+  const body = { consultId, readPlay: opts.readPlay, pace: opts.pace };
+  const cacheKey = JSON.stringify(body);
+  if (audioCache.has(cacheKey)) return; // already warm
+  void fetch("/api/tts", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+    .then(async (res) => {
+      if (!res.ok) return;
+      const data = (await res.json()) as { audio: string; mime: string; timeline: import("@/lib/timings").Timeline; source: VoiceSource };
+      const bytes = Uint8Array.from(atob(data.audio), (c) => c.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: data.mime }));
+      audioCache.set(cacheKey, { url, timeline: data.timeline, source: data.source });
+    })
+    .catch(() => undefined);
+}

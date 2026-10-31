@@ -304,17 +304,21 @@ async function persist(
     consult = await store.addConsult(caseId, { ...consultFields, case_id: caseId });
   }
 
-  await store.recordUsage("consult", { action: request.action, persona: request.persona, mode: p.reply.mode, model: p.model }, p.billable);
-  if (p.safety) {
-    await store
-      .recordSafetyEvent({
-        category: p.safety,
-        action: p.reply.mode === "decline" ? "decline" : "care_mode",
-        locale: ctx.country ?? null,
-        consult_id: consult.id,
-      })
-      .catch(() => undefined);
-  }
+  // recordUsage and recordSafetyEvent are independent of each other and neither
+  // affects the response the caller needs, so run them concurrently.
+  await Promise.all([
+    store.recordUsage("consult", { action: request.action, persona: request.persona, mode: p.reply.mode, model: p.model }, p.billable),
+    p.safety
+      ? store
+          .recordSafetyEvent({
+            category: p.safety,
+            action: p.reply.mode === "decline" ? "decline" : "care_mode",
+            locale: ctx.country ?? null,
+            consult_id: consult.id,
+          })
+          .catch(() => undefined)
+      : Promise.resolve(),
+  ]);
 
   return { caseId, consult, quota: null, intensityApplied: p.intensity, downgraded: p.downgraded };
 }

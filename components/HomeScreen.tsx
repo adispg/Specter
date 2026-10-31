@@ -14,6 +14,7 @@ function spoken(s: string): string {
 import { TabBar, PersonaRail, Composer, IntensityControl, OfflineBanner, ErrorBanner, relTime } from "@/components/ui";
 import { IconSettings } from "@/components/Icons";
 import { useConsult } from "@/lib/client/useConsult";
+import { prefetchTts } from "@/lib/client/performer";
 import { dictationSupported, startDictation, type DictationSession } from "@/lib/client/dictation";
 
 /** Fetches the 3 most recent cases for the home screen strip. */
@@ -216,6 +217,14 @@ export function HomeScreen() {
       // Stays true through the navigation. Clearing it here would drop the
       // screen back to its empty state for a frame before the route changes,
       // which read as the home page flashing back before the answer.
+
+      // Start the TTS fetch immediately, in parallel with navigation. By the time
+      // the case page hydrates and ResultView calls perf.play(), the audio is
+      // already in the performer's in-memory cache and plays without an extra round-trip.
+      if (config.ttsEnabled && settings.speak) {
+        prefetchTts(res.consult.id, { readPlay: settings.readPlay, pace: settings.pace });
+      }
+
       router.push(`/cases/${res.caseId}`);
     } else {
       setLeaving(false);
