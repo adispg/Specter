@@ -5,18 +5,128 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { personaPlaceholder, useApp } from "@/components/AppProvider";
 import { PERSONAS, PERSONA_STARTERS } from "@/lib/personas/config";
 import { Avatar } from "@/components/Persona";
+import type { CaseSummary } from "@/lib/data/types";
 
 /** Persona copy carries "|" and "||" speech pause markers for the voice engine. */
 function spoken(s: string): string {
   return s.replace(/\|\|/g, " ").replace(/\|/g, " ").replace(/\s+/g, " ").trim();
 }
-import { TabBar, PersonaRail, Composer, IntensityControl, OfflineBanner, ErrorBanner } from "@/components/ui";
+import { TabBar, PersonaRail, Composer, IntensityControl, OfflineBanner, ErrorBanner, relTime } from "@/components/ui";
 import { IconSettings } from "@/components/Icons";
 import { useConsult } from "@/lib/client/useConsult";
 import { dictationSupported, startDictation, type DictationSession } from "@/lib/client/dictation";
 
+/** Fetches the 3 most recent cases for the home screen strip. */
+function useRecentCases() {
+  const [cases, setCases] = useState<CaseSummary[]>([]);
+  useEffect(() => {
+    fetch("/api/cases/all?limit=3")
+      .then((r) => r.json())
+      .then((data: { cases?: CaseSummary[] }) => {
+        setCases(data.cases ?? []);
+      })
+      .catch(() => undefined);
+  }, []);
+  return cases;
+}
+
+function RecentCasesStrip({ cases }: { cases: CaseSummary[] }) {
+  if (cases.length === 0) return null;
+  return (
+    <div style={{ width: "100%", paddingBottom: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 2px 8px",
+        }}
+      >
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--fg-3)",
+            textTransform: "uppercase",
+            letterSpacing: "0.07em",
+          }}
+        >
+          Recent
+        </span>
+        <Link
+          href="/cases"
+          style={{
+            fontSize: 12,
+            color: "var(--accent)",
+            textDecoration: "none",
+            fontWeight: 500,
+          }}
+        >
+          See all
+        </Link>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {cases.map((c) => {
+          const persona = c.latest_persona ?? c.persona;
+          return (
+            <Link
+              key={c.id}
+              href={`/cases/${c.id}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 12px",
+                background: "var(--surface)",
+                borderRadius: 12,
+                textDecoration: "none",
+                color: "inherit",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <Avatar persona={persona} size="xs" style={{ flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "var(--fg-1)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {c.title || c.situation?.slice(0, 60) || "Untitled case"}
+                </div>
+                {c.latest_line && (
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "var(--fg-3)",
+                      marginTop: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {c.latest_line}
+                  </div>
+                )}
+              </div>
+              <span style={{ fontSize: 11, color: "var(--fg-3)", flexShrink: 0 }}>
+                {relTime(c.last_activity_at)}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function HomeScreen() {
   const { persona, setPersona, settings, config, toast } = useApp();
+  const recentCases = useRecentCases();
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   // Set on send and never cleared on success, so the empty state cannot come
@@ -148,6 +258,9 @@ export function HomeScreen() {
 
         {showStarters && (
           <>
+            {recentCases.length > 0 && (
+              <RecentCasesStrip cases={recentCases} />
+            )}
 
             <div className="starters">
               <div className="rule" />
