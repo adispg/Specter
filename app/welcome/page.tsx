@@ -1,16 +1,10 @@
 "use client";
-import { Suspense, useState } from "react";
-import { BRAND, personaList, type PersonaId } from "@/lib/personas/config";
+import { Suspense, useState, type CSSProperties } from "react";
+import { BRAND, PERSONAS, personaList, themeVars, type PersonaId } from "@/lib/personas/config";
 import { Wordmark } from "@/components/Wordmark";
 import { Avatar } from "@/components/Persona";
 import { ErrorBanner } from "@/components/ui";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-
-const PERSONA_PITCHES: Record<PersonaId, string> = {
-  closer: "Reads the room. Moves first. Already three steps ahead.",
-  prodigy: "Finds the angle nobody else sees. Wins on facts, not force.",
-  insider: "Knows who matters and what they actually want.",
-};
 
 function Spinner() {
   return (
@@ -18,14 +12,15 @@ function Spinner() {
       aria-hidden="true"
       style={{
         display: "inline-block",
-        width: 16,
-        height: 16,
+        width: 15,
+        height: 15,
         border: "2px solid currentColor",
         borderTopColor: "transparent",
         borderRadius: "50%",
         animation: "spin 0.7s linear infinite",
         verticalAlign: "middle",
         marginRight: 8,
+        opacity: 0.8,
       }}
     />
   );
@@ -42,10 +37,6 @@ function WelcomeInner() {
     setBusy(true);
     setError(null);
     try {
-      // Sign in anonymously from the browser so the Supabase session cookies are
-      // written by the browser itself. Signing in inside the route handler created
-      // the user server-side but the Set-Cookie never reached the browser, so the
-      // middleware saw no session and bounced straight back here.
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       if (url && anonKey) {
@@ -57,8 +48,6 @@ function WelcomeInner() {
         }
       }
 
-      // Records the 18+ and AI disclosure acknowledgements against the session
-      // the browser just established, so the app layout lets us through.
       const res = await fetch("/api/auth/guest", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -76,132 +65,238 @@ function WelcomeInner() {
     }
   }
 
+  const selectedPersona = PERSONAS[selected];
+
   return (
     <>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .wlc-card {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px 16px;
+          border-radius: var(--radius-xl, 18px);
+          border: 1.5px solid var(--hair, rgba(255,255,255,0.08));
+          background: var(--surface);
+          cursor: pointer;
+          text-align: left;
+          width: 100%;
+          transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+          outline: none;
+          position: relative;
+          overflow: hidden;
+        }
+        .wlc-card:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: 2px;
+        }
+        .wlc-card[aria-checked="true"] {
+          background: var(--surface-2, #19202e);
+          border-color: var(--accent);
+          box-shadow: 0 0 0 1px var(--accent), 0 4px 24px -8px color-mix(in srgb, var(--accent) 40%, transparent);
+        }
+        .wlc-card[disabled] { cursor: default; opacity: 0.7; }
+        .wlc-check {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          border: 1.5px solid var(--hair, rgba(255,255,255,0.12));
+          background: transparent;
+          flex: none;
+          display: grid;
+          place-items: center;
+          transition: background 0.15s, border-color 0.15s;
+          margin-left: auto;
+        }
+        .wlc-card[aria-checked="true"] .wlc-check {
+          background: var(--accent);
+          border-color: var(--accent);
+        }
+        .wlc-check-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: var(--bg);
+          opacity: 0;
+          transition: opacity 0.12s;
+        }
+        .wlc-card[aria-checked="true"] .wlc-check-dot { opacity: 1; }
+      `}</style>
+
       <main
         style={{
+          ...(themeVars(selectedPersona.theme) as CSSProperties),
           minHeight: "100dvh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: "40px 24px 60px",
-          background: "var(--bg)",
+          padding: "env(safe-area-inset-top, 24px) 24px env(safe-area-inset-bottom, 40px)",
           boxSizing: "border-box",
-          maxWidth: 480,
-          margin: "0 auto",
           width: "100%",
         }}
       >
-        <Wordmark />
-
-        <p
-          style={{
-            marginTop: 12,
-            marginBottom: 32,
-            color: "var(--fg-2)",
-            fontSize: 16,
-            textAlign: "center",
-            lineHeight: 1.5,
-          }}
-        >
-          {BRAND.promise}
-        </p>
-
         <div
-          role="radiogroup"
-          aria-label="Choose your advisor"
           style={{
+            width: "100%",
+            maxWidth: 400,
             display: "flex",
             flexDirection: "column",
-            gap: 10,
-            width: "100%",
-            marginBottom: 32,
+            alignItems: "center",
+            gap: 0,
           }}
         >
-          {personas.map((p) => {
-            const isSelected = selected === p.id;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                role="radio"
-                aria-checked={isSelected}
-                onClick={() => setSelected(p.id)}
-                disabled={busy}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 16,
-                  padding: "14px 16px",
-                  borderRadius: 12,
-                  border: isSelected ? "2px solid var(--accent, #6366f1)" : "1px solid var(--border)",
-                  background: isSelected ? "var(--surface-raised, var(--surface))" : "var(--surface)",
-                  cursor: busy ? "default" : "pointer",
-                  textAlign: "left",
-                  width: "100%",
-                  transition: "border-color 0.15s, background 0.15s",
-                  outline: "none",
-                }}
-              >
-                <Avatar persona={p.id} size="lg" />
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 15, color: "var(--fg-1)", marginBottom: 2 }}>
-                    {p.short}
-                  </div>
-                  <div style={{ fontSize: 13, color: "var(--fg-2)", lineHeight: 1.4 }}>
-                    {PERSONA_PITCHES[p.id]}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+          {/* Wordmark */}
+          <Wordmark height={22} />
 
-        {error && (
-          <div style={{ width: "100%", marginBottom: 16 }}>
-            <ErrorBanner>{error}</ErrorBanner>
+          {/* Promise */}
+          <p
+            style={{
+              margin: "10px 0 36px",
+              color: "var(--muted)",
+              fontSize: 14,
+              textAlign: "center",
+              lineHeight: 1.5,
+              letterSpacing: "0.01em",
+            }}
+          >
+            {BRAND.promise}
+          </p>
+
+          {/* Persona picker */}
+          <p
+            style={{
+              margin: "0 0 12px 2px",
+              color: "var(--fg-2)",
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              alignSelf: "flex-start",
+            }}
+          >
+            Choose your advisor
+          </p>
+
+          <div
+            role="radiogroup"
+            aria-label="Choose your advisor"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              width: "100%",
+              marginBottom: 28,
+            }}
+          >
+            {personas.map((p) => {
+              const isSelected = selected === p.id;
+              const pConfig = PERSONAS[p.id];
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => setSelected(p.id)}
+                  disabled={busy}
+                  className="wlc-card"
+                  style={isSelected ? (themeVars(pConfig.theme) as CSSProperties) : undefined}
+                >
+                  <Avatar persona={p.id} size="lg" halo={isSelected ? 1 : 0} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        gap: 6,
+                        marginBottom: 2,
+                      }}
+                    >
+                      <span style={{ fontWeight: 600, fontSize: 15, color: "var(--fg)", lineHeight: 1.2 }}>
+                        {p.short}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: isSelected ? "var(--accent)" : "var(--muted)",
+                          fontWeight: 500,
+                          letterSpacing: "0.02em",
+                          transition: "color 0.18s",
+                        }}
+                      >
+                        {pConfig.archetype}
+                      </span>
+                    </div>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 13,
+                        color: "var(--fg-2)",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {pConfig.tagline}
+                    </p>
+                  </div>
+                  <div className="wlc-check" aria-hidden="true">
+                    <span className="wlc-check-dot" />
+                  </div>
+                </button>
+              );
+            })}
           </div>
-        )}
 
-        <p
-          style={{
-            fontSize: 11,
-            color: "var(--fg-3)",
-            textAlign: "center",
-            lineHeight: 1.5,
-            marginBottom: 16,
-            maxWidth: 320,
-          }}
-        >
-          By continuing you confirm you are 18 or older and understand this app uses AI.
-          Advice is for perspective only, not professional counsel.
-        </p>
+          {/* Error */}
+          {error && (
+            <div style={{ width: "100%", marginBottom: 14 }}>
+              <ErrorBanner>{error}</ErrorBanner>
+            </div>
+          )}
 
-        <button
-          type="button"
-          className="cta"
-          onClick={handleTry}
-          disabled={busy}
-          style={{ width: "100%", maxWidth: 320 }}
-        >
-          {busy && <Spinner />}
-          {busy ? "Starting..." : "Try it free"}
-        </button>
+          {/* Disclosure */}
+          <p
+            style={{
+              fontSize: 11,
+              color: "var(--muted)",
+              textAlign: "center",
+              lineHeight: 1.6,
+              marginBottom: 14,
+              maxWidth: 340,
+            }}
+          >
+            By continuing you confirm you are 18 or older and understand this app uses AI.
+            Advice is for perspective only, not professional counsel.
+          </p>
 
-        <a
-          href="/sign-in"
-          style={{
-            marginTop: 16,
-            fontSize: 14,
-            color: "var(--fg-2)",
-            textDecoration: "none",
-            padding: 8,
-          }}
-        >
-          Already have an account? Sign in
-        </a>
+          {/* CTA */}
+          <button
+            type="button"
+            className="cta"
+            onClick={handleTry}
+            disabled={busy}
+            style={{ width: "100%" }}
+          >
+            {busy && <Spinner />}
+            {busy ? "Starting..." : "Get started"}
+          </button>
+
+          {/* Sign in link */}
+          <a
+            href="/sign-in"
+            style={{
+              marginTop: 18,
+              fontSize: 14,
+              color: "var(--muted)",
+              textDecoration: "none",
+              padding: "8px 0",
+            }}
+          >
+            Already have an account?{" "}
+            <span style={{ color: "var(--fg-2)", fontWeight: 500 }}>Sign in</span>
+          </a>
+        </div>
       </main>
     </>
   );
