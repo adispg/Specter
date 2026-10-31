@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { BRAND, PERSONAS, personaList, themeVars, type PersonaId, type RegionHelp } from "@/lib/personas/config";
 import type { CaseRow, ConsultRow } from "@/lib/data/types";
@@ -18,6 +18,7 @@ import { FeedbackRow, MomentRow } from "./ResultExtras";
 import { AdviceCards, Composer, ErrorBanner, OfflineBanner, Sheet, copyText } from "./ui";
 import { IconBack, IconMore, IconPush, IconRedo, IconReplay } from "./Icons";
 import { VoiceMode } from "./VoiceMode";
+import type { VoiceSource } from "@/lib/client/performer";
 
 export type ResultProps = {
   caseRow: CaseRow;
@@ -27,6 +28,21 @@ export type ResultProps = {
   help: RegionHelp;
   autoSpeak: boolean;
 };
+
+/** Debug-only banner shown when ?debug=tts is in the URL. Shows TTS source and any fallback error. */
+function TtsDebugBanner({ source, ttsFallback, ttsEnabled }: { source: VoiceSource; ttsFallback: { status: number; message: string } | null; ttsEnabled: boolean }) {
+  const bg = ttsFallback ? "#b91c1c" : source === "browser" ? "#b45309" : source === "none" ? "#374151" : "#15803d";
+  const label = ttsFallback
+    ? `TTS FAILED (${ttsFallback.status}): ${ttsFallback.message} -- fell back to BROWSER`
+    : source === "none"
+      ? `TTS: waiting (ttsEnabled=${ttsEnabled})`
+      : `TTS: ${source}`;
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999, background: bg, color: "#fff", fontSize: 11, padding: "6px 12px", wordBreak: "break-all", lineHeight: 1.4 }}>
+      {label}
+    </div>
+  );
+}
 
 export function useSpeakConsult() {
   const { settings, config, browserVoice } = useApp();
@@ -44,7 +60,9 @@ export function useSpeakConsult() {
 /** Consult result (screens.md 8): the first reply of a case. Everything after it goes to the thread. */
 export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSpeak }: ResultProps) {
   const router = useRouter();
-  const { settings, user, toast, openKeepCase, setPersona, persona: activePersona, online } = useApp();
+  const searchParams = useSearchParams();
+  const debugTts = searchParams.get("debug") === "tts";
+  const { settings, user, toast, openKeepCase, setPersona, persona: activePersona, online, config } = useApp();
   const first = consults.find((c) => c.kind === "initial") ?? consults[0]!;
   const persona = first.persona;
   const p = PERSONAS[persona];
@@ -178,6 +196,7 @@ export function ResultView({ caseRow, consults, savedIds, feedback, help, autoSp
   const situation = caseRow.situation;
   return (
     <div className={`scr${perf.state === "speaking" || perf.state === "pausing" ? " speaking" : ""}${perf.state === "pausing" ? " pausing" : ""}`}>
+      {debugTts && <TtsDebugBanner source={perf.source} ttsFallback={perf.ttsFallback} ttsEnabled={config.ttsEnabled} />}
       <div className="topbar" style={{ position: "relative" }}>
         <Link href="/" className="ib" aria-label="Back" onClick={() => perf.stop()}>
           <IconBack />

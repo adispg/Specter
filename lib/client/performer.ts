@@ -14,7 +14,9 @@ import { progressAt, type Timeline } from "@/lib/timings";
 
 export type PerformState = "idle" | "loading" | "speaking" | "pausing";
 export type Progress = { wordsLit: number; activePause: number | null };
-export type VoiceSource = "elevenlabs" | "mock" | "cache" | "browser" | "none";
+export type VoiceSource = "elevenlabs" | "deepgram" | "mock" | "cache" | "browser" | "none";
+/** Last TTS error when server speech failed and the performer fell back to browser. */
+export type TtsFallbackReason = { status: number; message: string } | null;
 
 export type PerformRequest = {
   persona: PersonaId;
@@ -29,7 +31,7 @@ export type PerformRequest = {
 
 export type PerformResult = "done" | "stopped" | "failed";
 
-type Listener = (s: { state: PerformState; progress: Progress; source: VoiceSource; performing: boolean }) => void;
+type Listener = (s: { state: PerformState; progress: Progress; source: VoiceSource; performing: boolean; ttsFallback: TtsFallbackReason }) => void;
 
 const audioCache = new Map<string, { url: string; timeline: Timeline; source: VoiceSource }>();
 
@@ -44,6 +46,8 @@ class Performer {
   performing = false;
   /** Identifies what is playing so only the matching card lights up. */
   currentKey: string | null = null;
+  /** Set when server TTS failed and we fell back to browser speech. Cleared on next play. */
+  ttsFallback: TtsFallbackReason = null;
 
   subscribe(l: Listener): () => void {
     this.listeners.add(l);
@@ -51,7 +55,7 @@ class Performer {
   }
 
   private emit() {
-    for (const l of this.listeners) l({ state: this.state, progress: this.progress, source: this.source, performing: this.performing });
+    for (const l of this.listeners) l({ state: this.state, progress: this.progress, source: this.source, performing: this.performing, ttsFallback: this.ttsFallback });
   }
 
   private set(state: PerformState, progress?: Progress) {
@@ -104,6 +108,7 @@ class Performer {
     const script = req.care ? parseSpoken(req.line.replace(/\|+/g, " "), req.followup.replace(/\|+/g, " ")) : parseSpoken(req.line, req.followup);
     this.performing = true;
     this.source = "none";
+    this.ttsFallback = null;
     this.set("loading", { wordsLit: 0, activePause: null });
 
     if (req.tts) {
@@ -111,9 +116,13 @@ class Performer {
         const clip = await this.fetchClip(req);
         if (tok !== this.token) return "stopped";
         return await this.playClip(tok, clip);
-      } catch {
+      } catch (err) {
         if (tok !== this.token) return "stopped";
-        // Fall through to the browser voice.
+        // Server TTS failed; record why and fall through to the browser voice.
+        const msg = err instanceof Error ? err.message : String(err);
+        const status = /tts (\d+)/.exec(msg)?.[1];
+        this.ttsFallback = { status: status ? Number(status) : 0, message: msg };
+        this.emit();
       }
     }
     if (typeof window !== "undefined" && window.speechSynthesis) {
