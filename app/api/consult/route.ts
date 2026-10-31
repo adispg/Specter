@@ -19,9 +19,14 @@ export const maxDuration = 60;
  */
 export const POST = withSession(async (session, req) => {
   const request = parseConsultRequest(await readJson(req));
-  const profile = await session.store.getProfile();
+  // getProfile and guestKeys are both independent of each other once we have
+  // the session. Run them in parallel to shave one network round-trip off the
+  // non-model wall time before runConsultInner starts.
+  const [profile, keys] = await Promise.all([
+    session.store.getProfile(),
+    session.user.isGuest ? guestKeys() : Promise.resolve(null),
+  ]);
   const country = profile.country ?? (await requestCountry());
-  const keys = session.user.isGuest ? await guestKeys() : null;
   const result = await runConsult({
     store: session.store,
     llm: getLlm(),
